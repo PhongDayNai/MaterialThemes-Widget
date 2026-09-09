@@ -620,13 +620,13 @@ object WidgetCanvasRenderer {
 
         val btmTiltAngle = (angle * 0.08f).coerceIn(-5f, 5f)
         val btmTiltRad = Math.toRadians(abs(btmTiltAngle).toDouble())
-        val btmCardH = if (is4x3) h * 0.33f else h * 0.33f
+        val btmCardH = if (is4x3) h * 0.375f else h * 0.375f
         val btmHalfV = ((w * 0.92f / 2f) * sin(btmTiltRad) + (btmCardH / 2f) * cos(btmTiltRad)).toFloat()
 
         // Reduced vertical gap between top pills and bottom card (tight, cohesive, zero clipping)
         val verticalGap = (h * 0.02f).coerceIn(4f, 8f)
         val totalGroupV = (p1HalfV * 2f) + verticalGap + (btmHalfV * 2f)
-        val startY = ((h - totalGroupV) / 2f).coerceAtLeast(h * 0.025f)
+        val startY = ((h - totalGroupV) / 2f).coerceAtLeast(h * 0.02f)
 
         val p1cy = startY + p1HalfV
         // Stagger Pill 2 slightly so it doesn't float far above the bottom card
@@ -746,22 +746,22 @@ object WidgetCanvasRenderer {
                 canvas,
                 item.timeLabel,
                 itemX,
-                btmCy - btmCardH * 0.24f,
-                maxSizePx = btmCardH * 0.20f,
+                btmCy - btmCardH * 0.29f,
+                maxSizePx = btmCardH * 0.19f,
                 maxWidth = colWidth * 0.90f,
                 textColor = (0xBBFFFFFF.toInt() and palette.textColor),
                 contentAngleDeg = btmContentAngle
             )
 
-            val miniIconSize = (btmCardH * 0.32f).toInt()
+            val miniIconSize = (btmCardH * 0.30f).toInt()
             drawDrawable(context, canvas, item.iconResId, itemX.toInt(), btmCy.toInt(), miniIconSize, miniIconSize, contentAngleDeg = btmContentAngle)
 
             drawFittedSingleLineText(
                 canvas,
                 item.tempLabel,
                 itemX,
-                btmCy + btmCardH * 0.26f,
-                maxSizePx = btmCardH * 0.20f,
+                btmCy + btmCardH * 0.30f,
+                maxSizePx = btmCardH * 0.21f,
                 maxWidth = colWidth * 0.90f,
                 textColor = palette.textColor,
                 isBold = true,
