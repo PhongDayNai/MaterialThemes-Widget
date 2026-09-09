@@ -1,8 +1,13 @@
 package com.iatb.materialthemes
 
+import android.content.Context
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import com.iatb.materialthemes.data.ColorPalette
+import com.iatb.materialthemes.data.WidgetContentMode
+import com.iatb.materialthemes.data.WidgetPreferences
+import com.iatb.materialthemes.widget.DiagonalWidgetProvider
 
 enum class WidgetCategory {
     DIAGONAL,
@@ -24,8 +29,23 @@ class MainViewModel : ViewModel() {
     private val _category = MutableLiveData(WidgetCategory.DIAGONAL)
     val category: LiveData<WidgetCategory> = _category
 
-    private val _size = MutableLiveData(WidgetSize.SIZE_4X2)
+    private val _size = MutableLiveData(WidgetSize.SIZE_2X2)
     val size: LiveData<WidgetSize> = _size
+
+    private val _angle = MutableLiveData(-45f)
+    val angle: LiveData<Float> = _angle
+
+    private val _palette = MutableLiveData(ColorPalette.OLIVE)
+    val palette: LiveData<ColorPalette> = _palette
+
+    private val _contentMode = MutableLiveData(WidgetContentMode.WEATHER)
+    val contentMode: LiveData<WidgetContentMode> = _contentMode
+
+    fun initFromPreferences(context: Context) {
+        _angle.value = WidgetPreferences.getRotationAngle(context)
+        _palette.value = WidgetPreferences.getColorPalette(context)
+        _contentMode.value = WidgetPreferences.getContentMode(context)
+    }
 
     fun setCategory(newCategory: WidgetCategory) {
         if (_category.value != newCategory) {
@@ -39,19 +59,37 @@ class MainViewModel : ViewModel() {
         }
     }
 
+    fun setRotationAngle(newAngle: Float) {
+        if (_angle.value != newAngle) {
+            _angle.value = newAngle
+        }
+    }
+
+    fun setColorPalette(newPalette: ColorPalette) {
+        if (_palette.value != newPalette) {
+            _palette.value = newPalette
+        }
+    }
+
+    fun setContentMode(newMode: WidgetContentMode) {
+        if (_contentMode.value != newMode) {
+            _contentMode.value = newMode
+        }
+    }
+
+    fun saveAndApply(context: Context) {
+        _angle.value?.let { WidgetPreferences.setRotationAngle(context, it) }
+        _palette.value?.let { WidgetPreferences.setColorPalette(context, it) }
+        _contentMode.value?.let { WidgetPreferences.setContentMode(context, it) }
+        DiagonalWidgetProvider.updateAllWidgets(context)
+    }
+
     fun getPreviewLayoutId(): Int {
         val cat = _category.value ?: WidgetCategory.DIAGONAL
-        val sz = _size.value ?: WidgetSize.SIZE_4X2
+        val sz = _size.value ?: WidgetSize.SIZE_2X2
 
         return when (cat) {
-            WidgetCategory.DIAGONAL -> when (sz) {
-                WidgetSize.SIZE_2X2 -> R.layout.widget_diagonal_2x2
-                WidgetSize.SIZE_3X2 -> R.layout.widget_diagonal_3x2
-                WidgetSize.SIZE_4X2 -> R.layout.widget_diagonal_4x2
-                WidgetSize.SIZE_2X3 -> R.layout.widget_diagonal_2x3
-                WidgetSize.SIZE_3X3 -> R.layout.widget_diagonal_3x3
-                WidgetSize.SIZE_2X4 -> R.layout.widget_diagonal_2x4
-            }
+            WidgetCategory.DIAGONAL -> R.layout.widget_canvas_container
             WidgetCategory.ORGANIC -> when (sz) {
                 WidgetSize.SIZE_2X2 -> R.layout.widget_organic_2x2
                 WidgetSize.SIZE_3X2, WidgetSize.SIZE_4X2 -> R.layout.widget_organic_4x2

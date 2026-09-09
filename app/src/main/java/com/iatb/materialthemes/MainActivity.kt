@@ -4,8 +4,10 @@ import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.os.Build
 import android.os.Bundle
+import android.view.Gravity
 import android.view.LayoutInflater
 import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -14,6 +16,9 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.button.MaterialButtonToggleGroup
+import com.iatb.materialthemes.data.ColorPalette
+import com.iatb.materialthemes.data.WidgetContentMode
+import com.iatb.materialthemes.render.WidgetCanvasRenderer
 import com.iatb.materialthemes.widget.DiagonalWidgetProvider
 import com.iatb.materialthemes.widget.OrganicWidgetProvider
 import com.iatb.materialthemes.widget.ScallopWidgetProvider
@@ -23,7 +28,11 @@ class MainActivity : AppCompatActivity() {
     private lateinit var viewModel: MainViewModel
     private lateinit var previewContainer: FrameLayout
     private lateinit var toggleCategory: MaterialButtonToggleGroup
+    private lateinit var toggleAngle: MaterialButtonToggleGroup
+    private lateinit var toggleContent: MaterialButtonToggleGroup
+    private lateinit var togglePalette: MaterialButtonToggleGroup
     private lateinit var toggleSize: MaterialButtonToggleGroup
+    private lateinit var btnApply: MaterialButton
     private lateinit var btnPin: MaterialButton
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -32,6 +41,7 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
 
         viewModel = ViewModelProvider(this)[MainViewModel::class.java]
+        viewModel.initFromPreferences(this)
 
         initViews()
         setupWindowInsets()
@@ -42,7 +52,11 @@ class MainActivity : AppCompatActivity() {
     private fun initViews() {
         previewContainer = findViewById(R.id.preview_container)
         toggleCategory = findViewById(R.id.toggle_category)
+        toggleAngle = findViewById(R.id.toggle_angle)
+        toggleContent = findViewById(R.id.toggle_content)
+        togglePalette = findViewById(R.id.toggle_palette)
         toggleSize = findViewById(R.id.toggle_size)
+        btnApply = findViewById(R.id.btn_apply)
         btnPin = findViewById(R.id.btn_pin)
     }
 
@@ -65,6 +79,47 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        toggleAngle.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (isChecked) {
+                val angle = when (checkedId) {
+                    R.id.btn_angle_minus_45 -> -45f
+                    R.id.btn_angle_minus_30 -> -30f
+                    R.id.btn_angle_0 -> 0f
+                    R.id.btn_angle_30 -> 30f
+                    R.id.btn_angle_45 -> 45f
+                    R.id.btn_angle_60 -> 60f
+                    else -> -45f
+                }
+                viewModel.setRotationAngle(angle)
+            }
+        }
+
+        toggleContent.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (isChecked) {
+                val mode = when (checkedId) {
+                    R.id.btn_content_weather -> WidgetContentMode.WEATHER
+                    R.id.btn_content_clock -> WidgetContentMode.CLOCK
+                    R.id.btn_content_combo -> WidgetContentMode.COMBO
+                    else -> WidgetContentMode.WEATHER
+                }
+                viewModel.setContentMode(mode)
+            }
+        }
+
+        togglePalette.addOnButtonCheckedListener { _, checkedId, isChecked ->
+            if (isChecked) {
+                val palette = when (checkedId) {
+                    R.id.btn_palette_olive -> ColorPalette.OLIVE
+                    R.id.btn_palette_teal -> ColorPalette.TEAL
+                    R.id.btn_palette_slate -> ColorPalette.SLATE
+                    R.id.btn_palette_amber -> ColorPalette.AMBER
+                    R.id.btn_palette_crimson -> ColorPalette.CRIMSON
+                    else -> ColorPalette.OLIVE
+                }
+                viewModel.setColorPalette(palette)
+            }
+        }
+
         toggleSize.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (isChecked) {
                 when (checkedId) {
@@ -78,48 +133,67 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        btnApply.setOnClickListener {
+            viewModel.saveAndApply(this)
+            Toast.makeText(this, getString(R.string.settings_saved_toast), Toast.LENGTH_SHORT).show()
+        }
+
         btnPin.setOnClickListener {
+            viewModel.saveAndApply(this)
             pinCurrentWidget()
         }
     }
 
     private fun observeViewModel() {
-        viewModel.category.observe(this) {
-            updatePreview()
-        }
-
-        viewModel.size.observe(this) {
-            updatePreview()
-        }
+        viewModel.category.observe(this) { updatePreview() }
+        viewModel.size.observe(this) { updatePreview() }
+        viewModel.angle.observe(this) { updatePreview() }
+        viewModel.palette.observe(this) { updatePreview() }
+        viewModel.contentMode.observe(this) { updatePreview() }
     }
 
     private fun updatePreview() {
         previewContainer.removeAllViews()
-        val layoutId = viewModel.getPreviewLayoutId()
-        val view = LayoutInflater.from(this).inflate(layoutId, previewContainer, false)
 
         val density = resources.displayMetrics.density
-        val (widthDp, heightDp) = when (viewModel.size.value) {
-            WidgetSize.SIZE_2X2 -> 180 to 180
-            WidgetSize.SIZE_3X2 -> 260 to 170
-            WidgetSize.SIZE_4X2 -> FrameLayout.LayoutParams.MATCH_PARENT to 170
-            WidgetSize.SIZE_2X3 -> 180 to 260
-            WidgetSize.SIZE_2X4 -> 180 to 330
-            WidgetSize.SIZE_3X3 -> 270 to 270
-            null -> FrameLayout.LayoutParams.MATCH_PARENT to 170
+        val size = viewModel.size.value ?: WidgetSize.SIZE_2X2
+
+        val (wDp, hDp) = when (size) {
+            WidgetSize.SIZE_2X2 -> 190 to 190
+            WidgetSize.SIZE_3X2 -> 270 to 180
+            WidgetSize.SIZE_4X2 -> 340 to 180
+            WidgetSize.SIZE_2X3 -> 190 to 270
+            WidgetSize.SIZE_2X4 -> 190 to 340
+            WidgetSize.SIZE_3X3 -> 280 to 280
         }
 
-        val widthPx = if (widthDp == FrameLayout.LayoutParams.MATCH_PARENT) {
-            FrameLayout.LayoutParams.MATCH_PARENT
+        val widthPx = (wDp * density).toInt()
+        val heightPx = (hDp * density).toInt()
+
+        if (viewModel.category.value == WidgetCategory.DIAGONAL) {
+            val angle = viewModel.angle.value ?: -45f
+            val palette = viewModel.palette.value ?: ColorPalette.OLIVE
+            val mode = viewModel.contentMode.value ?: WidgetContentMode.WEATHER
+
+            val bitmap = WidgetCanvasRenderer.render(this, widthPx, heightPx, angle, palette, mode, size)
+            val imageView = ImageView(this).apply {
+                setImageBitmap(bitmap)
+                scaleType = ImageView.ScaleType.FIT_CENTER
+            }
+
+            val params = FrameLayout.LayoutParams(widthPx, heightPx).apply {
+                gravity = Gravity.CENTER
+            }
+            previewContainer.addView(imageView, params)
         } else {
-            (widthDp * density).toInt()
-        }
-        val heightPx = (heightDp * density).toInt()
+            val layoutId = viewModel.getPreviewLayoutId()
+            val view = LayoutInflater.from(this).inflate(layoutId, previewContainer, false)
 
-        val params = FrameLayout.LayoutParams(widthPx, heightPx).apply {
-            gravity = android.view.Gravity.CENTER
+            val params = FrameLayout.LayoutParams(widthPx, heightPx).apply {
+                gravity = Gravity.CENTER
+            }
+            previewContainer.addView(view, params)
         }
-        previewContainer.addView(view, params)
     }
 
     private fun pinCurrentWidget() {

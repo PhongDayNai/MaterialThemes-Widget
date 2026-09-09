@@ -16,7 +16,7 @@
         android:paddingStart="20dp"
         android:paddingTop="28dp"
         android:paddingEnd="20dp"
-        android:paddingBottom="36dp">
+        android:paddingBottom="40dp">
 
         <!-- Top Header -->
         <TextView
@@ -37,11 +37,41 @@
             android:textColor="?attr/colorOnSurfaceVariant"
             android:textSize="14sp" />
 
+        <!-- Live Preview Section -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/preview_section_title"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <!-- Preview Canvas with Golden Wallpaper Background -->
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/card_preview"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:cardCornerRadius="24dp"
+            app:cardElevation="2dp"
+            app:strokeColor="?attr/colorOutline"
+            app:strokeWidth="1dp">
+
+            <FrameLayout
+                android:id="@+id/preview_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:minHeight="220dp"
+                android:background="@color/preview_wallpaper_bg"
+                android:padding="16dp" />
+        </com.google.android.material.card.MaterialCardView>
+
         <!-- Category Selector Header -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
+            android:layout_marginTop="20dp"
             android:text="@string/shape_section_title"
             android:textColor="?attr/colorOnSurface"
             android:textSize="16sp"
@@ -82,6 +112,179 @@
                 android:text="@string/category_scallop" />
         </com.google.android.material.button.MaterialButtonToggleGroup>
 
+        <!-- Rotation Angle Section -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/angle_section_title"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:scrollbars="none">
+
+            <com.google.android.material.button.MaterialButtonToggleGroup
+                android:id="@+id/toggle_angle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:checkedButton="@id/btn_angle_minus_45"
+                app:selectionRequired="true"
+                app:singleSelection="true">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_angle_minus_45"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/angle_minus_45" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_angle_minus_30"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/angle_minus_30" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_angle_0"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/angle_0" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_angle_30"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/angle_30" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_angle_45"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/angle_45" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_angle_60"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/angle_60" />
+            </com.google.android.material.button.MaterialButtonToggleGroup>
+        </HorizontalScrollView>
+
+        <!-- Content Mode Section -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/content_section_title"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/toggle_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:checkedButton="@id/btn_content_weather"
+            app:selectionRequired="true"
+            app:singleSelection="true">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_content_weather"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/content_weather" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_content_clock"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/content_clock" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_content_combo"
+                style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="@string/content_combo" />
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+
+        <!-- Color Palette Section -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:text="@string/theme_section_title"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:scrollbars="none">
+
+            <com.google.android.material.button.MaterialButtonToggleGroup
+                android:id="@+id/toggle_palette"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:checkedButton="@id/btn_palette_olive"
+                app:selectionRequired="true"
+                app:singleSelection="true">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_palette_olive"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/theme_olive" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_palette_teal"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/theme_teal" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_palette_slate"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/theme_slate" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_palette_amber"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/theme_amber" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_palette_crimson"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/theme_crimson" />
+            </com.google.android.material.button.MaterialButtonToggleGroup>
+        </HorizontalScrollView>
+
         <!-- Size Selector Header -->
         <TextView
             android:layout_width="wrap_content"
@@ -103,7 +306,7 @@
                 android:id="@+id/toggle_size"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:checkedButton="@id/btn_size_4x2"
+                app:checkedButton="@id/btn_size_2x2"
                 app:selectionRequired="true"
                 app:singleSelection="true">
 
@@ -151,41 +354,11 @@
             </com.google.android.material.button.MaterialButtonToggleGroup>
         </HorizontalScrollView>
 
-        <!-- Preview Section Header -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="@string/preview_section_title"
-            android:textColor="?attr/colorOnSurface"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-        <!-- Preview Card Container -->
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/card_preview"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            app:cardCornerRadius="24dp"
-            app:cardElevation="2dp"
-            app:strokeColor="?attr/colorOutline"
-            app:strokeWidth="1dp">
-
-            <FrameLayout
-                android:id="@+id/preview_container"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:minHeight="200dp"
-                android:background="@color/preview_wallpaper_bg"
-                android:padding="16dp" />
-        </com.google.android.material.card.MaterialCardView>
-
         <!-- Tip Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="20dp"
             app:cardBackgroundColor="?attr/colorSecondaryContainer"
             app:cardCornerRadius="16dp"
             app:cardElevation="0dp">
@@ -199,12 +372,23 @@
                 android:textSize="13sp" />
         </com.google.android.material.card.MaterialCardView>
 
+        <!-- Apply / Save Customization Button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_apply"
+            style="?attr/materialButtonTonalStyle"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="16dp"
+            android:text="@string/button_apply_changes"
+            android:textSize="15sp"
+            app:cornerRadius="16dp" />
+
         <!-- Pin Button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_pin"
             android:layout_width="match_parent"
             android:layout_height="56dp"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="10dp"
             android:text="@string/button_pin_widget"
             android:textSize="16sp"
             app:cornerRadius="16dp" />

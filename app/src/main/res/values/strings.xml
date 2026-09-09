@@ -31,6 +31,25 @@
     <string name="preview_section_title">Live Preview</string>
     <string name="shape_section_title">Widget Style</string>
     <string name="size_section_title">Grid Size</string>
+    <string name="angle_section_title">Rotation Angle</string>
+    <string name="angle_minus_45">-45° (Pixel)</string>
+    <string name="angle_minus_30">-30°</string>
+    <string name="angle_0">0° (Flat)</string>
+    <string name="angle_30">30°</string>
+    <string name="angle_45">45°</string>
+    <string name="angle_60">60°</string>
+    <string name="content_section_title">Widget Content</string>
+    <string name="content_weather">Weather</string>
+    <string name="content_clock">Clock</string>
+    <string name="content_combo">Combo</string>
+    <string name="theme_section_title">Color Palette</string>
+    <string name="theme_olive">Pixel Olive</string>
+    <string name="theme_teal">Monet Teal</string>
+    <string name="theme_slate">Dark Slate</string>
+    <string name="theme_amber">Warm Amber</string>
+    <string name="theme_crimson">Berry Crimson</string>
+    <string name="button_apply_changes">Apply Customization</string>
+    <string name="settings_saved_toast">Widget customization saved!</string>
     <string name="resize_tip">Tip: After placing on your launcher, long press and drag edges to resize between 2x2, 4x2, 3x3, 2x4, etc.</string>
 
     <!-- Sample Weather & Date Strings for Widgets -->
