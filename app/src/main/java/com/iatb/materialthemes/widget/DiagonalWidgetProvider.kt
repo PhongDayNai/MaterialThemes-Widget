@@ -13,10 +13,38 @@ import android.widget.RemoteViews
 import com.iatb.materialthemes.MainActivity
 import com.iatb.materialthemes.R
 import com.iatb.materialthemes.WidgetSize
+import com.iatb.materialthemes.data.ColorPalette
+import com.iatb.materialthemes.data.WeatherRepository
+import com.iatb.materialthemes.data.WidgetContentMode
 import com.iatb.materialthemes.data.WidgetPreferences
 import com.iatb.materialthemes.render.WidgetCanvasRenderer
 
 class DiagonalWidgetProvider : AppWidgetProvider() {
+
+    override fun onReceive(context: Context, intent: Intent) {
+        super.onReceive(context, intent)
+        when (intent.action) {
+            WidgetUpdateScheduler.ACTION_WIDGET_TICK,
+            Intent.ACTION_TIME_TICK,
+            Intent.ACTION_TIME_CHANGED,
+            Intent.ACTION_TIMEZONE_CHANGED,
+            Intent.ACTION_USER_PRESENT -> {
+                updateAllWidgets(context)
+                WidgetUpdateScheduler.scheduleNextMinuteTick(context)
+            }
+        }
+    }
+
+    override fun onEnabled(context: Context) {
+        super.onEnabled(context)
+        WidgetUpdateScheduler.scheduleNextMinuteTick(context)
+        WeatherRepository.refreshWeather(context)
+    }
+
+    override fun onDisabled(context: Context) {
+        super.onDisabled(context)
+        WidgetUpdateScheduler.cancelSchedule(context)
+    }
 
     override fun onUpdate(
         context: Context,
@@ -26,6 +54,7 @@ class DiagonalWidgetProvider : AppWidgetProvider() {
         for (appWidgetId in appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId)
         }
+        WidgetUpdateScheduler.scheduleNextMinuteTick(context)
     }
 
     override fun onAppWidgetOptionsChanged(
@@ -38,6 +67,16 @@ class DiagonalWidgetProvider : AppWidgetProvider() {
     }
 
     companion object {
+        fun createPreviewRemoteViews(
+            context: Context,
+            size: WidgetSize,
+            angle: Float,
+            palette: ColorPalette,
+            mode: WidgetContentMode
+        ): RemoteViews {
+            return createRenderedView(context, size, angle, palette, mode)
+        }
+
         fun updateAllWidgets(context: Context) {
             val appWidgetManager = AppWidgetManager.getInstance(context)
             val component = ComponentName(context, DiagonalWidgetProvider::class.java)
@@ -72,7 +111,8 @@ class DiagonalWidgetProvider : AppWidgetProvider() {
                     SizeF(270f, 110f) to createRenderedView(context, WidgetSize.SIZE_4X2, angle, palette, mode),
                     SizeF(110f, 180f) to createRenderedView(context, WidgetSize.SIZE_2X3, angle, palette, mode),
                     SizeF(110f, 260f) to createRenderedView(context, WidgetSize.SIZE_2X4, angle, palette, mode),
-                    SizeF(200f, 200f) to createRenderedView(context, WidgetSize.SIZE_3X3, angle, palette, mode)
+                    SizeF(200f, 200f) to createRenderedView(context, WidgetSize.SIZE_3X3, angle, palette, mode),
+                    SizeF(270f, 180f) to createRenderedView(context, WidgetSize.SIZE_4X3, angle, palette, mode)
                 )
                 RemoteViews(viewMapping)
             } else {
@@ -86,6 +126,7 @@ class DiagonalWidgetProvider : AppWidgetProvider() {
 
         private fun resolveWidgetSize(minWidth: Int, minHeight: Int): WidgetSize {
             return when {
+                minWidth >= 270 && minHeight >= 180 -> WidgetSize.SIZE_4X3
                 minWidth >= 270 && minHeight < 160 -> WidgetSize.SIZE_4X2
                 minWidth >= 180 && minHeight < 160 -> WidgetSize.SIZE_3X2
                 minWidth >= 180 && minHeight >= 180 -> WidgetSize.SIZE_3X3
@@ -99,8 +140,8 @@ class DiagonalWidgetProvider : AppWidgetProvider() {
             context: Context,
             size: WidgetSize,
             angle: Float,
-            palette: com.iatb.materialthemes.data.ColorPalette,
-            mode: com.iatb.materialthemes.data.WidgetContentMode
+            palette: ColorPalette,
+            mode: WidgetContentMode
         ): RemoteViews {
             val views = RemoteViews(context.packageName, R.layout.widget_canvas_container)
 
@@ -111,9 +152,11 @@ class DiagonalWidgetProvider : AppWidgetProvider() {
                 WidgetSize.SIZE_2X3 -> 200 to 300
                 WidgetSize.SIZE_2X4 -> 200 to 400
                 WidgetSize.SIZE_3X3 -> 300 to 300
+                WidgetSize.SIZE_4X3 -> 400 to 300
             }
 
             val density = context.resources.displayMetrics.density
+            val weather = WeatherRepository.getWeatherData(context)
             val bitmap = WidgetCanvasRenderer.render(
                 context,
                 (wDp * density).toInt(),
@@ -121,7 +164,8 @@ class DiagonalWidgetProvider : AppWidgetProvider() {
                 angle,
                 palette,
                 mode,
-                size
+                size,
+                weather
             )
 
             views.setImageViewBitmap(R.id.iv_canvas_render, bitmap)

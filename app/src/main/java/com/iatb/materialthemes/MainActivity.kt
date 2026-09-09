@@ -1,14 +1,21 @@
 package com.iatb.materialthemes
 
 import android.appwidget.AppWidgetManager
+import android.content.BroadcastReceiver
 import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
+import androidx.core.content.ContextCompat
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.Toast
+import android.content.pm.PackageManager
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
@@ -17,11 +24,13 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.iatb.materialthemes.data.ColorPalette
+import com.iatb.materialthemes.data.WeatherRepository
 import com.iatb.materialthemes.data.WidgetContentMode
 import com.iatb.materialthemes.render.WidgetCanvasRenderer
 import com.iatb.materialthemes.widget.DiagonalWidgetProvider
 import com.iatb.materialthemes.widget.OrganicWidgetProvider
 import com.iatb.materialthemes.widget.ScallopWidgetProvider
+import com.iatb.materialthemes.widget.WidgetUpdateScheduler
 
 class MainActivity : AppCompatActivity() {
 
@@ -35,6 +44,22 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnApply: MaterialButton
     private lateinit var btnPin: MaterialButton
 
+    private val locationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { permissions ->
+        val granted = permissions[android.Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+                permissions[android.Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        if (granted) {
+            WeatherRepository.refreshWeather(this)
+        }
+    }
+
+    private val widgetTickReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            updatePreview()
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -44,9 +69,51 @@ class MainActivity : AppCompatActivity() {
         viewModel.initFromPreferences(this)
 
         initViews()
-        setupWindowInsets()
         setupListeners()
         observeViewModel()
+
+        checkLocationPermission()
+        WeatherRepository.refreshWeather(this)
+    }
+
+    private fun checkLocationPermission() {
+        val fineGranted = ContextCompat.checkSelfPermission(
+            this,
+            android.Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+        val coarseGranted = ContextCompat.checkSelfPermission(
+            this,
+            android.Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (!fineGranted && !coarseGranted) {
+            locationPermissionLauncher.launch(
+                arrayOf(
+                    android.Manifest.permission.ACCESS_FINE_LOCATION,
+                    android.Manifest.permission.ACCESS_COARSE_LOCATION
+                )
+            )
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val filter = IntentFilter(WidgetUpdateScheduler.ACTION_WIDGET_TICK)
+        ContextCompat.registerReceiver(
+            this,
+            widgetTickReceiver,
+            filter,
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
+        updatePreview()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        try {
+            unregisterReceiver(widgetTickReceiver)
+        } catch (_: Exception) {
+        }
     }
 
     private fun initViews() {
@@ -58,9 +125,7 @@ class MainActivity : AppCompatActivity() {
         toggleSize = findViewById(R.id.toggle_size)
         btnApply = findViewById(R.id.btn_apply)
         btnPin = findViewById(R.id.btn_pin)
-    }
 
-    private fun setupWindowInsets() {
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main_scroll)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -96,13 +161,11 @@ class MainActivity : AppCompatActivity() {
 
         toggleContent.addOnButtonCheckedListener { _, checkedId, isChecked ->
             if (isChecked) {
-                val mode = when (checkedId) {
-                    R.id.btn_content_weather -> WidgetContentMode.WEATHER
-                    R.id.btn_content_clock -> WidgetContentMode.CLOCK
-                    R.id.btn_content_combo -> WidgetContentMode.COMBO
-                    else -> WidgetContentMode.WEATHER
+                when (checkedId) {
+                    R.id.btn_content_weather -> viewModel.setContentMode(WidgetContentMode.WEATHER)
+                    R.id.btn_content_clock -> viewModel.setContentMode(WidgetContentMode.CLOCK)
+                    R.id.btn_content_combo -> viewModel.setContentMode(WidgetContentMode.COMBO)
                 }
-                viewModel.setContentMode(mode)
             }
         }
 
@@ -129,12 +192,15 @@ class MainActivity : AppCompatActivity() {
                     R.id.btn_size_2x3 -> viewModel.setSize(WidgetSize.SIZE_2X3)
                     R.id.btn_size_3x3 -> viewModel.setSize(WidgetSize.SIZE_3X3)
                     R.id.btn_size_2x4 -> viewModel.setSize(WidgetSize.SIZE_2X4)
+                    R.id.btn_size_4x3 -> viewModel.setSize(WidgetSize.SIZE_4X3)
                 }
             }
         }
 
         btnApply.setOnClickListener {
             viewModel.saveAndApply(this)
+            WeatherRepository.refreshWeather(this)
+            sendBroadcast(Intent(WidgetUpdateScheduler.ACTION_WIDGET_TICK).setPackage(packageName))
             Toast.makeText(this, getString(R.string.settings_saved_toast), Toast.LENGTH_SHORT).show()
         }
 
@@ -159,12 +225,13 @@ class MainActivity : AppCompatActivity() {
         val size = viewModel.size.value ?: WidgetSize.SIZE_2X2
 
         val (wDp, hDp) = when (size) {
-            WidgetSize.SIZE_2X2 -> 190 to 190
-            WidgetSize.SIZE_3X2 -> 270 to 180
-            WidgetSize.SIZE_4X2 -> 340 to 180
-            WidgetSize.SIZE_2X3 -> 190 to 270
-            WidgetSize.SIZE_2X4 -> 190 to 340
-            WidgetSize.SIZE_3X3 -> 280 to 280
+            WidgetSize.SIZE_2X2 -> 160 to 160
+            WidgetSize.SIZE_3X2 -> 240 to 160
+            WidgetSize.SIZE_4X2 -> 290 to 150
+            WidgetSize.SIZE_2X3 -> 130 to 180
+            WidgetSize.SIZE_2X4 -> 120 to 190
+            WidgetSize.SIZE_3X3 -> 190 to 190
+            WidgetSize.SIZE_4X3 -> 250 to 190
         }
 
         val widthPx = (wDp * density).toInt()
@@ -174,8 +241,9 @@ class MainActivity : AppCompatActivity() {
             val angle = viewModel.angle.value ?: -45f
             val palette = viewModel.palette.value ?: ColorPalette.OLIVE
             val mode = viewModel.contentMode.value ?: WidgetContentMode.WEATHER
+            val weather = WeatherRepository.getWeatherData(this)
 
-            val bitmap = WidgetCanvasRenderer.render(this, widthPx, heightPx, angle, palette, mode, size)
+            val bitmap = WidgetCanvasRenderer.render(this, widthPx, heightPx, angle, palette, mode, size, weather)
             val imageView = ImageView(this).apply {
                 setImageBitmap(bitmap)
                 scaleType = ImageView.ScaleType.FIT_CENTER
@@ -200,14 +268,28 @@ class MainActivity : AppCompatActivity() {
         val appWidgetManager = AppWidgetManager.getInstance(this)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (appWidgetManager.isRequestPinAppWidgetSupported) {
-                val providerClass = when (viewModel.category.value) {
+                val category = viewModel.category.value ?: WidgetCategory.DIAGONAL
+                val providerClass = when (category) {
                     WidgetCategory.DIAGONAL -> DiagonalWidgetProvider::class.java
                     WidgetCategory.ORGANIC -> OrganicWidgetProvider::class.java
                     WidgetCategory.SCALLOP -> ScallopWidgetProvider::class.java
-                    null -> DiagonalWidgetProvider::class.java
                 }
                 val provider = ComponentName(this, providerClass)
-                appWidgetManager.requestPinAppWidget(provider, null, null)
+
+                val extras = if (category == WidgetCategory.DIAGONAL) {
+                    val size = viewModel.size.value ?: WidgetSize.SIZE_2X2
+                    val angle = viewModel.angle.value ?: -45f
+                    val palette = viewModel.palette.value ?: ColorPalette.OLIVE
+                    val mode = viewModel.contentMode.value ?: WidgetContentMode.WEATHER
+                    val previewViews = DiagonalWidgetProvider.createPreviewRemoteViews(this, size, angle, palette, mode)
+                    Bundle().apply {
+                        putParcelable(AppWidgetManager.EXTRA_APPWIDGET_PREVIEW, previewViews)
+                    }
+                } else {
+                    null
+                }
+
+                appWidgetManager.requestPinAppWidget(provider, extras, null)
                 Toast.makeText(this, getString(R.string.pin_widget_success), Toast.LENGTH_SHORT).show()
             } else {
                 Toast.makeText(this, getString(R.string.pin_widget_not_supported), Toast.LENGTH_LONG).show()
