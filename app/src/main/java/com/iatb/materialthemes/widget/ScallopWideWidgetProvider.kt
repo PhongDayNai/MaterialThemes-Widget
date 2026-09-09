@@ -62,7 +62,6 @@ class ScallopWideWidgetProvider : AppWidgetProvider() {
                 val viewMapping = mapOf(
                     SizeF(200f, 110f) to createViews(context, R.layout.widget_scallop_4x2),
                     SizeF(200f, 200f) to createViews(context, R.layout.widget_scallop_3x3),
-                    SizeF(110f, 180f) to createViews(context, R.layout.widget_scallop_2x3),
                     SizeF(110f, 110f) to createViews(context, R.layout.widget_scallop_2x2)
                 )
                 RemoteViews(viewMapping)
@@ -79,7 +78,6 @@ class ScallopWideWidgetProvider : AppWidgetProvider() {
             return when {
                 minWidth >= 180 && minHeight >= 160 -> R.layout.widget_scallop_3x3
                 minWidth >= 180 && minHeight < 160 -> R.layout.widget_scallop_4x2
-                minWidth < 160 && minHeight >= 160 -> R.layout.widget_scallop_2x3
                 else -> R.layout.widget_scallop_4x2
             }
         }

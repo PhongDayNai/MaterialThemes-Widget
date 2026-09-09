@@ -11,6 +11,7 @@ import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
+import android.view.View
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
@@ -228,7 +229,10 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun observeViewModel() {
-        viewModel.category.observe(this) { updatePreview() }
+        viewModel.category.observe(this) { cat ->
+            updateCategoryDependentUi(cat)
+            updatePreview()
+        }
         viewModel.size.observe(this) { updatePreview() }
         viewModel.angle.observe(this) { updatePreview() }
         viewModel.palette.observe(this) { updatePreview() }
@@ -299,6 +303,22 @@ class MainActivity : AppCompatActivity() {
         val transparencyVal = (viewModel.transparency.value ?: 100).toFloat()
         sliderTransparency.value = transparencyVal
         tvTransparencyValue.text = getString(R.string.transparency_value_format, transparencyVal.toInt())
+
+        updateCategoryDependentUi(viewModel.category.value)
+    }
+
+    private fun updateCategoryDependentUi(category: WidgetCategory?) {
+        val isDiagonal = category == WidgetCategory.DIAGONAL
+        findViewById<View>(R.id.btn_size_2x3)?.visibility = if (isDiagonal) View.VISIBLE else View.GONE
+        findViewById<View>(R.id.btn_size_2x4)?.visibility = if (isDiagonal) View.VISIBLE else View.GONE
+
+        if (!isDiagonal) {
+            val currentSize = viewModel.size.value
+            if (currentSize == WidgetSize.SIZE_2X3 || currentSize == WidgetSize.SIZE_2X4) {
+                viewModel.setSize(WidgetSize.SIZE_2X2)
+                toggleSize.check(R.id.btn_size_2x2)
+            }
+        }
     }
 
     private fun updatePreview() {

@@ -63,7 +63,6 @@ class OrganicWidgetProvider : AppWidgetProvider() {
                 val viewMapping = mapOf(
                     SizeF(110f, 110f) to createViews(context, R.layout.widget_organic_2x2),
                     SizeF(200f, 110f) to createViews(context, R.layout.widget_organic_4x2),
-                    SizeF(110f, 180f) to createViews(context, R.layout.widget_organic_2x3),
                     SizeF(200f, 200f) to createViews(context, R.layout.widget_organic_3x3)
                 )
                 RemoteViews(viewMapping)
@@ -81,7 +80,6 @@ class OrganicWidgetProvider : AppWidgetProvider() {
             return when {
                 minWidth >= 180 && minHeight < 160 -> R.layout.widget_organic_4x2
                 minWidth >= 180 && minHeight >= 160 -> R.layout.widget_organic_3x3
-                minWidth < 160 && minHeight >= 160 -> R.layout.widget_organic_2x3
                 else -> R.layout.widget_organic_2x2
             }
         }
