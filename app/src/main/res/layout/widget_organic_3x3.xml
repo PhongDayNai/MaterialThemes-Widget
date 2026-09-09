@@ -106,7 +106,7 @@
         android:layout_height="0dp"
         android:layout_weight="0.8"
         android:layout_marginTop="8dp"
-        android:background="@drawable/shape_pill"
+        android:background="@drawable/shape_pill_secondary"
         android:gravity="center"
         android:orientation="horizontal"
         android:padding="6dp">
