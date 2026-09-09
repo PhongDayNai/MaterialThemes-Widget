@@ -48,6 +48,9 @@
     <string name="theme_slate">Dark Slate</string>
     <string name="theme_amber">Warm Amber</string>
     <string name="theme_crimson">Berry Crimson</string>
+    <string name="theme_dynamic">Dynamic Wallpaper</string>
+    <string name="transparency_section_title">Background Opacity</string>
+    <string name="transparency_value_format">%1$d%%</string>
     <string name="button_apply_changes">Apply Customization</string>
     <string name="settings_saved_toast">Widget customization saved!</string>
     <string name="resize_tip">Tip: After placing on your launcher, long press and drag edges to resize between 2x2, 4x2, 3x3, 2x4, etc.</string>

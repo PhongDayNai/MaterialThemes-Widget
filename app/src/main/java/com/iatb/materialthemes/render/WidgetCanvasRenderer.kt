@@ -14,10 +14,14 @@ import android.text.TextUtils
 import androidx.core.content.ContextCompat
 import com.iatb.materialthemes.R
 import com.iatb.materialthemes.WidgetSize
+import android.graphics.Color
 import com.iatb.materialthemes.data.ColorPalette
+import com.iatb.materialthemes.data.DynamicThemeExtractor
+import com.iatb.materialthemes.data.ResolvedPaletteColors
 import com.iatb.materialthemes.data.WeatherData
 import com.iatb.materialthemes.data.WeatherRepository
 import com.iatb.materialthemes.data.WidgetContentMode
+import com.iatb.materialthemes.data.WidgetPreferences
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -36,7 +40,8 @@ object WidgetCanvasRenderer {
         palette: ColorPalette,
         contentMode: WidgetContentMode,
         size: WidgetSize,
-        weather: WeatherData = WeatherRepository.getWeatherData(context)
+        weather: WeatherData = WeatherRepository.getWeatherData(context),
+        transparency: Int = WidgetPreferences.getTransparency(context)
     ): Bitmap {
         val w = if (widthPx <= 0) 400 else widthPx
         val h = if (heightPx <= 0) 400 else heightPx
@@ -44,12 +49,36 @@ object WidgetCanvasRenderer {
         val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
 
+        val rawColors = if (palette == ColorPalette.DYNAMIC) {
+            DynamicThemeExtractor.getDynamicPalette(context)
+        } else {
+            ResolvedPaletteColors(
+                bgColor = palette.bgColor,
+                secondaryBgColor = palette.secondaryBgColor,
+                tertiaryBgColor = palette.tertiaryBgColor,
+                textColor = palette.textColor
+            )
+        }
+
+        // Apply alpha to container backgrounds only (text and icons remain full opacity for high contrast)
+        val alphaInt = ((transparency.coerceIn(0, 100) / 100f) * 255).toInt()
+        fun applyBgAlpha(color: Int): Int {
+            return Color.argb(alphaInt, Color.red(color), Color.green(color), Color.blue(color))
+        }
+
+        val resolvedPalette = ResolvedPaletteColors(
+            bgColor = applyBgAlpha(rawColors.bgColor),
+            secondaryBgColor = applyBgAlpha(rawColors.secondaryBgColor),
+            tertiaryBgColor = applyBgAlpha(rawColors.tertiaryBgColor),
+            textColor = rawColors.textColor
+        )
+
         when (size) {
-            WidgetSize.SIZE_2X2 -> render2x2(context, canvas, w, h, angleDeg, palette, contentMode, weather)
-            WidgetSize.SIZE_3X2, WidgetSize.SIZE_4X2 -> renderWide(context, canvas, w, h, angleDeg, palette, contentMode, size == WidgetSize.SIZE_4X2, weather)
-            WidgetSize.SIZE_2X3 -> renderTall(context, canvas, w, h, angleDeg, palette, contentMode, pillCount = 2, weather = weather)
-            WidgetSize.SIZE_2X4 -> renderTall(context, canvas, w, h, angleDeg, palette, contentMode, pillCount = 3, weather = weather)
-            WidgetSize.SIZE_3X3, WidgetSize.SIZE_4X3 -> render3x3(context, canvas, w, h, angleDeg, palette, contentMode, is4x3 = (size == WidgetSize.SIZE_4X3), weather = weather)
+            WidgetSize.SIZE_2X2 -> render2x2(context, canvas, w, h, angleDeg, resolvedPalette, contentMode, weather)
+            WidgetSize.SIZE_3X2, WidgetSize.SIZE_4X2 -> renderWide(context, canvas, w, h, angleDeg, resolvedPalette, contentMode, size == WidgetSize.SIZE_4X2, weather)
+            WidgetSize.SIZE_2X3 -> renderTall(context, canvas, w, h, angleDeg, resolvedPalette, contentMode, pillCount = 2, weather = weather)
+            WidgetSize.SIZE_2X4 -> renderTall(context, canvas, w, h, angleDeg, resolvedPalette, contentMode, pillCount = 3, weather = weather)
+            WidgetSize.SIZE_3X3, WidgetSize.SIZE_4X3 -> render3x3(context, canvas, w, h, angleDeg, resolvedPalette, contentMode, is4x3 = (size == WidgetSize.SIZE_4X3), weather = weather)
         }
 
         return bitmap
@@ -61,7 +90,7 @@ object WidgetCanvasRenderer {
         w: Int,
         h: Int,
         angle: Float,
-        palette: ColorPalette,
+        palette: ResolvedPaletteColors,
         mode: WidgetContentMode,
         weather: WeatherData
     ) {
@@ -180,7 +209,7 @@ object WidgetCanvasRenderer {
         w: Int,
         h: Int,
         angle: Float,
-        palette: ColorPalette,
+        palette: ResolvedPaletteColors,
         mode: WidgetContentMode,
         isExtraWide: Boolean,
         weather: WeatherData
@@ -425,7 +454,7 @@ object WidgetCanvasRenderer {
         w: Int,
         h: Int,
         angle: Float,
-        palette: ColorPalette,
+        palette: ResolvedPaletteColors,
         mode: WidgetContentMode,
         pillCount: Int,
         weather: WeatherData
@@ -452,7 +481,11 @@ object WidgetCanvasRenderer {
 
         for (i in 0 until pillCount) {
             val cy = if (pillCount <= 1) h / 2f else topCy + (i.toFloat() / (pillCount - 1f)) * verticalSpan
-            val pillBgColor = if (i == 0) palette.bgColor else palette.secondaryBgColor
+            val pillBgColor = when (i) {
+                0 -> palette.bgColor
+                1 -> palette.secondaryBgColor
+                else -> palette.tertiaryBgColor
+            }
 
             when (i) {
                 0 -> {
@@ -557,7 +590,7 @@ object WidgetCanvasRenderer {
         w: Int,
         h: Int,
         angle: Float,
-        palette: ColorPalette,
+        palette: ResolvedPaletteColors,
         mode: WidgetContentMode,
         is4x3: Boolean = false,
         weather: WeatherData
@@ -676,7 +709,7 @@ object WidgetCanvasRenderer {
 
         // Bottom Card: Forecast or stats
         val btmW = w * 0.92f
-        drawRoundedCard(canvas, w / 2f, btmCy, btmW, btmCardH, btmCardH * 0.38f, btmTiltAngle, palette.secondaryBgColor)
+        drawRoundedCard(canvas, w / 2f, btmCy, btmW, btmCardH, btmCardH * 0.38f, btmTiltAngle, palette.tertiaryBgColor)
 
         val btmContentAngle = btmTiltAngle * 0.75f
 
