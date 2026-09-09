@@ -47,24 +47,30 @@
             android:textSize="16sp"
             android:textStyle="bold" />
 
-        <!-- Preview Canvas with Golden Wallpaper Background -->
+        <!-- Preview Canvas with Natural Landscape Wallpaper Background -->
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/card_preview"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="220dp"
             android:layout_marginTop="8dp"
             app:cardCornerRadius="24dp"
             app:cardElevation="2dp"
             app:strokeColor="?attr/colorOutline"
             app:strokeWidth="1dp">
 
+            <ImageView
+                android:id="@+id/iv_preview_wallpaper"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:src="@drawable/bg_preview_wallpaper"
+                android:contentDescription="@null" />
+
             <FrameLayout
                 android:id="@+id/preview_container"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:minHeight="220dp"
-                android:background="@color/preview_wallpaper_bg"
-                android:padding="16dp" />
+                android:layout_height="match_parent"
+                android:padding="12dp" />
         </com.google.android.material.card.MaterialCardView>
 
         <!-- Category Selector Header -->
@@ -351,6 +357,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/size_2x4" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_size_4x3"
+                    style="?attr/materialButtonOutlinedStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/size_4x3" />
             </com.google.android.material.button.MaterialButtonToggleGroup>
         </HorizontalScrollView>
 

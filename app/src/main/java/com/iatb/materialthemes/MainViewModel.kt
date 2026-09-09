@@ -21,7 +21,8 @@ enum class WidgetSize(val labelResId: Int) {
     SIZE_4X2(R.string.size_4x2),
     SIZE_2X3(R.string.size_2x3),
     SIZE_3X3(R.string.size_3x3),
-    SIZE_2X4(R.string.size_2x4)
+    SIZE_2X4(R.string.size_2x4),
+    SIZE_4X3(R.string.size_4x3)
 }
 
 class MainViewModel : ViewModel() {
@@ -94,13 +95,13 @@ class MainViewModel : ViewModel() {
                 WidgetSize.SIZE_2X2 -> R.layout.widget_organic_2x2
                 WidgetSize.SIZE_3X2, WidgetSize.SIZE_4X2 -> R.layout.widget_organic_4x2
                 WidgetSize.SIZE_2X3 -> R.layout.widget_organic_2x3
-                WidgetSize.SIZE_3X3, WidgetSize.SIZE_2X4 -> R.layout.widget_organic_3x3
+                WidgetSize.SIZE_3X3, WidgetSize.SIZE_2X4, WidgetSize.SIZE_4X3 -> R.layout.widget_organic_3x3
             }
             WidgetCategory.SCALLOP -> when (sz) {
                 WidgetSize.SIZE_2X2 -> R.layout.widget_scallop_2x2
                 WidgetSize.SIZE_3X2, WidgetSize.SIZE_4X2 -> R.layout.widget_scallop_4x2
                 WidgetSize.SIZE_2X3 -> R.layout.widget_scallop_2x3
-                WidgetSize.SIZE_3X3, WidgetSize.SIZE_2X4 -> R.layout.widget_scallop_3x3
+                WidgetSize.SIZE_3X3, WidgetSize.SIZE_2X4, WidgetSize.SIZE_4X3 -> R.layout.widget_scallop_3x3
             }
         }
     }
