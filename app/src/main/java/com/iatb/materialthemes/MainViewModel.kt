@@ -98,24 +98,7 @@ class MainViewModel : ViewModel() {
         _contentMode.value?.let { WidgetPreferences.setContentMode(context, it) }
         _transparency.value?.let { WidgetPreferences.setTransparency(context, it) }
         DiagonalWidgetProvider.updateAllWidgets(context)
-    }
-
-    fun getPreviewLayoutId(): Int {
-        val cat = _category.value ?: WidgetCategory.DIAGONAL
-        val sz = _size.value ?: WidgetSize.SIZE_2X2
-
-        return when (cat) {
-            WidgetCategory.DIAGONAL -> R.layout.widget_canvas_container
-            WidgetCategory.ORGANIC -> when (sz) {
-                WidgetSize.SIZE_2X2, WidgetSize.SIZE_2X3 -> R.layout.widget_organic_2x2
-                WidgetSize.SIZE_3X2, WidgetSize.SIZE_4X2 -> R.layout.widget_organic_4x2
-                WidgetSize.SIZE_3X3, WidgetSize.SIZE_2X4, WidgetSize.SIZE_4X3 -> R.layout.widget_organic_3x3
-            }
-            WidgetCategory.SCALLOP -> when (sz) {
-                WidgetSize.SIZE_2X2, WidgetSize.SIZE_2X3 -> R.layout.widget_scallop_2x2
-                WidgetSize.SIZE_3X2, WidgetSize.SIZE_4X2 -> R.layout.widget_scallop_4x2
-                WidgetSize.SIZE_3X3, WidgetSize.SIZE_2X4, WidgetSize.SIZE_4X3 -> R.layout.widget_scallop_3x3
-            }
-        }
+        com.iatb.materialthemes.widget.OrganicWidgetProvider.updateAllWidgets(context)
+        com.iatb.materialthemes.widget.ScallopWidgetProvider.updateAllWidgets(context)
     }
 }

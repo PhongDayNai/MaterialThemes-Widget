@@ -1,5 +1,6 @@
 package com.iatb.materialthemes
 
+import android.animation.ValueAnimator
 import android.app.WallpaperManager
 import android.appwidget.AppWidgetManager
 import android.content.BroadcastReceiver
@@ -14,8 +15,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.view.Gravity
-import android.view.LayoutInflater
 import android.view.View
+import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
@@ -34,12 +35,15 @@ import com.iatb.materialthemes.data.ColorPalette
 import com.iatb.materialthemes.data.DynamicThemeExtractor
 import com.iatb.materialthemes.data.WeatherRepository
 import com.iatb.materialthemes.data.WidgetContentMode
+import com.iatb.materialthemes.data.WidgetPreferences
+import com.iatb.materialthemes.render.ShapeWidgetCanvasRenderer
 import com.iatb.materialthemes.render.WidgetCanvasRenderer
 import com.iatb.materialthemes.widget.DiagonalWidgetProvider
 import com.iatb.materialthemes.widget.Diagonal4x3WidgetProvider
 import com.iatb.materialthemes.widget.OrganicWidgetProvider
 import com.iatb.materialthemes.widget.OrganicWideWidgetProvider
 import com.iatb.materialthemes.widget.ScallopWidgetProvider
+import com.iatb.materialthemes.widget.WidgetAnimationManager
 import com.iatb.materialthemes.widget.ScallopWideWidgetProvider
 import com.iatb.materialthemes.widget.WidgetUpdateScheduler
 
@@ -57,6 +61,7 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnApply: MaterialButton
     private lateinit var btnPin: MaterialButton
 
+    private var previewAnimator: ValueAnimator? = null
     private var wallpaperColorsListener: WallpaperManager.OnColorsChangedListener? = null
 
     private val locationPermissionLauncher = registerForActivityResult(
@@ -65,13 +70,21 @@ class MainActivity : AppCompatActivity() {
         val granted = permissions[android.Manifest.permission.ACCESS_FINE_LOCATION] == true ||
                 permissions[android.Manifest.permission.ACCESS_COARSE_LOCATION] == true
         if (granted) {
-            WeatherRepository.refreshWeather(this)
+            WeatherRepository.refreshWeather(this, force = true) { success ->
+                if (success) {
+                    runOnUiThread {
+                        ShapeWidgetCanvasRenderer.invalidateCache()
+                        updatePreview()
+                    }
+                }
+            }
         }
     }
 
     private val widgetTickReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
             DynamicThemeExtractor.invalidateCache()
+            ShapeWidgetCanvasRenderer.invalidateCache()
             updatePreview()
         }
     }
@@ -89,11 +102,18 @@ class MainActivity : AppCompatActivity() {
         observeViewModel()
         syncUiWithViewModel()
 
-        checkLocationPermission()
-        WeatherRepository.refreshWeather(this)
+        val hasLocation = checkLocationPermission()
+        WeatherRepository.refreshWeather(this, force = hasLocation) { success ->
+            if (success) {
+                runOnUiThread {
+                    ShapeWidgetCanvasRenderer.invalidateCache()
+                    updatePreview()
+                }
+            }
+        }
     }
 
-    private fun checkLocationPermission() {
+    private fun checkLocationPermission(): Boolean {
         val fineGranted = ContextCompat.checkSelfPermission(
             this,
             android.Manifest.permission.ACCESS_FINE_LOCATION
@@ -110,12 +130,15 @@ class MainActivity : AppCompatActivity() {
                     android.Manifest.permission.ACCESS_COARSE_LOCATION
                 )
             )
+            return false
         }
+        return true
     }
 
     override fun onResume() {
         super.onResume()
         DynamicThemeExtractor.invalidateCache()
+        ShapeWidgetCanvasRenderer.invalidateCache()
         val filter = IntentFilter(WidgetUpdateScheduler.ACTION_WIDGET_TICK)
         ContextCompat.registerReceiver(
             this,
@@ -125,6 +148,17 @@ class MainActivity : AppCompatActivity() {
         )
         setupWallpaperListener()
         updatePreview()
+
+        if (WeatherRepository.isDefaultOrStale(this)) {
+            WeatherRepository.refreshWeather(this, force = true) { success ->
+                if (success) {
+                    runOnUiThread {
+                        ShapeWidgetCanvasRenderer.invalidateCache()
+                        updatePreview()
+                    }
+                }
+            }
+        }
     }
 
     override fun onPause() {
@@ -267,31 +301,55 @@ class MainActivity : AppCompatActivity() {
             tvTransparencyValue.text = getString(R.string.transparency_value_format, intVal)
         }
 
+        sliderTransparency.addOnSliderTouchListener(object : Slider.OnSliderTouchListener {
+            override fun onStartTrackingTouch(slider: Slider) {}
+            override fun onStopTrackingTouch(slider: Slider) {
+                updatePreview(animate = true)
+            }
+        })
+
+        previewContainer.setOnClickListener {
+            updatePreview(animate = true)
+        }
+
         btnApply.setOnClickListener {
             viewModel.saveAndApply(this)
             WeatherRepository.refreshWeather(this)
+            WidgetPreferences.setPendingHomeAnimation(this, true)
             sendBroadcast(Intent(WidgetUpdateScheduler.ACTION_WIDGET_TICK).setPackage(packageName))
             Toast.makeText(this, getString(R.string.settings_saved_toast), Toast.LENGTH_SHORT).show()
         }
 
         btnPin.setOnClickListener {
             viewModel.saveAndApply(this)
+            WidgetPreferences.setPendingHomeAnimation(this, true)
             pinCurrentWidget()
+        }
+    }
+
+    override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
+        if (WidgetPreferences.isPendingHomeAnimation(this)) {
+            WidgetPreferences.setPendingHomeAnimation(this, false)
+            val intent = Intent(WidgetAnimationManager.ACTION_RUN_ENTER_ANIMATION).apply {
+                setPackage(packageName)
+            }
+            sendBroadcast(intent)
         }
     }
 
     private fun observeViewModel() {
         viewModel.category.observe(this) { cat ->
             updateCategoryDependentUi(cat)
-            updatePreview()
+            updatePreview(animate = true)
         }
-        viewModel.size.observe(this) { updatePreview() }
-        viewModel.angle.observe(this) { updatePreview() }
-        viewModel.palette.observe(this) { updatePreview() }
-        viewModel.contentMode.observe(this) { updatePreview() }
+        viewModel.size.observe(this) { updatePreview(animate = true) }
+        viewModel.angle.observe(this) { updatePreview(animate = true) }
+        viewModel.palette.observe(this) { updatePreview(animate = true) }
+        viewModel.contentMode.observe(this) { updatePreview(animate = true) }
         viewModel.transparency.observe(this) { transparency ->
             tvTransparencyValue.text = getString(R.string.transparency_value_format, transparency)
-            updatePreview()
+            updatePreview(animate = false)
         }
     }
 
@@ -373,11 +431,13 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun updatePreview() {
-        previewContainer.removeAllViews()
+    private fun updatePreview(animate: Boolean = false) {
+        previewAnimator?.cancel()
+        previewAnimator = null
 
         val density = resources.displayMetrics.density
         val size = viewModel.size.value ?: WidgetSize.SIZE_2X2
+        val category = viewModel.category.value ?: WidgetCategory.DIAGONAL
 
         val (wDp, hDp) = when (size) {
             WidgetSize.SIZE_2X2 -> 160 to 160
@@ -392,42 +452,110 @@ class MainActivity : AppCompatActivity() {
         val widthPx = (wDp * density).toInt()
         val heightPx = (hDp * density).toInt()
 
-        if (viewModel.category.value == WidgetCategory.DIAGONAL) {
+        previewContainer.removeAllViews()
+
+        if (category == WidgetCategory.DIAGONAL) {
             val angle = viewModel.angle.value ?: -45f
             val palette = viewModel.palette.value ?: ColorPalette.OLIVE
             val mode = viewModel.contentMode.value ?: WidgetContentMode.WEATHER
             val transparency = viewModel.transparency.value ?: 100
             val weather = WeatherRepository.getWeatherData(this)
 
-            val bitmap = WidgetCanvasRenderer.render(
-                this,
-                widthPx,
-                heightPx,
-                angle,
-                palette,
-                mode,
-                size,
-                weather,
-                transparency
-            )
             val imageView = ImageView(this).apply {
-                setImageBitmap(bitmap)
                 scaleType = ImageView.ScaleType.FIT_CENTER
             }
-
             val params = FrameLayout.LayoutParams(widthPx, heightPx).apply {
                 gravity = Gravity.CENTER
             }
             previewContainer.addView(imageView, params)
-        } else {
-            val layoutId = viewModel.getPreviewLayoutId()
-            val view = LayoutInflater.from(this).inflate(layoutId, previewContainer, false)
 
+            if (animate) {
+                val animator = ValueAnimator.ofFloat(0.00f, 1.0f).apply {
+                    duration = 340L
+                    interpolator = DecelerateInterpolator(1.2f)
+                    addUpdateListener { va ->
+                        val p = va.animatedValue as Float
+                        val bmp = WidgetCanvasRenderer.render(
+                            this@MainActivity,
+                            widthPx,
+                            heightPx,
+                            angle,
+                            palette,
+                            mode,
+                            size,
+                            weather,
+                            transparency,
+                            animProgress = p
+                        )
+                        imageView.setImageBitmap(bmp)
+                    }
+                }
+                previewAnimator = animator
+                animator.start()
+            } else {
+                val bitmap = WidgetCanvasRenderer.render(
+                    this,
+                    widthPx,
+                    heightPx,
+                    angle,
+                    palette,
+                    mode,
+                    size,
+                    weather,
+                    transparency,
+                    animProgress = 1.0f
+                )
+                imageView.setImageBitmap(bitmap)
+            }
+        } else {
+            val weather = WeatherRepository.getWeatherData(this)
+            val imageView = ImageView(this).apply {
+                scaleType = ImageView.ScaleType.FIT_CENTER
+            }
             val params = FrameLayout.LayoutParams(widthPx, heightPx).apply {
                 gravity = Gravity.CENTER
             }
-            previewContainer.addView(view, params)
+            previewContainer.addView(imageView, params)
+
+            if (animate) {
+                val animator = ValueAnimator.ofFloat(0.00f, 1.0f).apply {
+                    duration = 340L
+                    interpolator = DecelerateInterpolator(1.2f)
+                    addUpdateListener { va ->
+                        val p = va.animatedValue as Float
+                        val bmp = ShapeWidgetCanvasRenderer.render(
+                            context = this@MainActivity,
+                            category = category,
+                            size = size,
+                            widthPx = widthPx,
+                            heightPx = heightPx,
+                            weather = weather,
+                            animProgress = p
+                        )
+                        imageView.setImageBitmap(bmp)
+                    }
+                }
+                previewAnimator = animator
+                animator.start()
+            } else {
+                val bitmap = ShapeWidgetCanvasRenderer.render(
+                    context = this,
+                    category = category,
+                    size = size,
+                    widthPx = widthPx,
+                    heightPx = heightPx,
+                    weather = weather,
+                    animProgress = 1.0f
+                )
+                imageView.setImageBitmap(bitmap)
+            }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        previewAnimator?.cancel()
+        previewAnimator = null
     }
 
     private fun pinCurrentWidget() {

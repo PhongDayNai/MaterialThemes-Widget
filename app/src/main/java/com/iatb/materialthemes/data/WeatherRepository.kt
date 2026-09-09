@@ -2,12 +2,20 @@ package com.iatb.materialthemes.data
 
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.location.Geocoder
 import android.location.Location
+import android.location.LocationListener
 import android.location.LocationManager
+import android.os.Build
+import android.os.Bundle
+import android.os.CancellationSignal
+import android.os.Handler
+import android.os.HandlerThread
 import android.util.Log
 import androidx.core.content.ContextCompat
 import com.iatb.materialthemes.R
+import com.iatb.materialthemes.render.ShapeWidgetCanvasRenderer
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.BufferedReader
@@ -17,8 +25,11 @@ import java.net.InetAddress
 import java.net.Socket
 import java.net.URL
 import java.text.SimpleDateFormat
+import java.util.Collections
 import java.util.Date
 import java.util.Locale
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 import javax.net.ssl.HostnameVerifier
 import javax.net.ssl.HttpsURLConnection
 import javax.net.ssl.SSLSocketFactory
@@ -71,6 +82,20 @@ object WeatherRepository {
 
     @Volatile
     private var isFetching = false
+    @Volatile
+    private var pendingForceFetch = false
+    private val pendingCallbacks = Collections.synchronizedList(mutableListOf<(Boolean) -> Unit>())
+
+    fun isDefaultOrStale(context: Context): Boolean {
+        if (cachedInMemory == null) {
+            val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+            val jsonStr = prefs.getString(KEY_WEATHER_DATA, null)
+            if (jsonStr.isNullOrEmpty()) return true
+        }
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val lastFetch = prefs.getLong(KEY_LAST_FETCH, 0L)
+        return (lastFetch == 0L) || (System.currentTimeMillis() - lastFetch > CACHE_DURATION_MS)
+    }
 
     fun getWeatherData(context: Context): WeatherData {
         val inMem = cachedInMemory
@@ -94,14 +119,26 @@ object WeatherRepository {
         }
 
         // Trigger immediate fetch in background
-        refreshWeather(context, null)
+        refreshWeather(context, force = false, onComplete = null)
         return getDefaultWeatherData(context)
     }
 
-    fun refreshWeather(context: Context, onComplete: ((Boolean) -> Unit)? = null) {
+    fun refreshWeather(
+        context: Context,
+        force: Boolean = false,
+        onComplete: ((Boolean) -> Unit)? = null
+    ) {
+        if (onComplete != null) {
+            pendingCallbacks.add(onComplete)
+        }
+
         if (isFetching) {
-            Log.d(TAG, "Weather fetch already in progress, skipping duplicate request")
-            onComplete?.invoke(false)
+            if (force) {
+                Log.d(TAG, "Weather fetch already in progress, queuing pending force fetch")
+                pendingForceFetch = true
+            } else {
+                Log.d(TAG, "Weather fetch already in progress, registered callback and skipping duplicate request")
+            }
             return
         }
 
@@ -113,14 +150,24 @@ object WeatherRepository {
                 val success = performFetch(appContext)
                 Log.d(TAG, "performFetch completed with result: $success")
                 if (success) {
+                    ShapeWidgetCanvasRenderer.invalidateCache()
                     val updateIntent = Intent("com.iatb.materialthemes.ACTION_WIDGET_TICK").apply {
                         setPackage(appContext.packageName)
                     }
                     appContext.sendBroadcast(updateIntent)
                 }
-                onComplete?.invoke(success)
+                val callbacks = synchronized(pendingCallbacks) {
+                    val list = ArrayList(pendingCallbacks)
+                    pendingCallbacks.clear()
+                    list
+                }
+                callbacks.forEach { it.invoke(success) }
             } finally {
                 isFetching = false
+                if (pendingForceFetch) {
+                    pendingForceFetch = false
+                    refreshWeather(appContext, force = false, onComplete = null)
+                }
             }
         }
     }
@@ -130,7 +177,7 @@ object WeatherRepository {
         val lastFetch = prefs.getLong(KEY_LAST_FETCH, 0L)
         val now = System.currentTimeMillis()
         if (now - lastFetch > CACHE_DURATION_MS) {
-            refreshWeather(context, null)
+            refreshWeather(context, force = false, onComplete = null)
         }
     }
 
@@ -249,7 +296,7 @@ object WeatherRepository {
      * Resilient HTTPS connection wrapper that handles DNS timeouts, Private DNS failures,
      * and ISP filtering via IP routing while maintaining SNI and SSL certificate verification.
      */
-    private fun openResilientHttpsConnection(urlStr: String): HttpsURLConnection {
+    private fun openResilientHttpsConnection(urlStr: String, timeoutMs: Int = 4000): HttpsURLConnection {
         val originalUrl = URL(urlStr)
         val host = originalUrl.host
 
@@ -263,8 +310,8 @@ object WeatherRepository {
         if (systemCanResolve) {
             Log.d(TAG, "System DNS active, connecting directly to $host")
             val conn = originalUrl.openConnection() as HttpsURLConnection
-            conn.connectTimeout = 8000
-            conn.readTimeout = 8000
+            conn.connectTimeout = timeoutMs
+            conn.readTimeout = timeoutMs
             conn.setRequestProperty("User-Agent", "MaterialThemesApp/1.0 (Android)")
             return conn
         }
@@ -278,8 +325,8 @@ object WeatherRepository {
 
         Log.d(TAG, "System DNS failed, opening fallback connection to: $connectionUrl (target host: $host)")
         val conn = connectionUrl.openConnection() as HttpsURLConnection
-        conn.connectTimeout = 8000
-        conn.readTimeout = 8000
+        conn.connectTimeout = timeoutMs
+        conn.readTimeout = timeoutMs
         conn.setRequestProperty("Host", host)
         conn.setRequestProperty("User-Agent", "MaterialThemesApp/1.0 (Android)")
 
@@ -347,8 +394,8 @@ object WeatherRepository {
         try {
             val dohUrl = URL("https://1.1.1.1/dns-query?name=$host&type=A")
             val dohConn = (dohUrl.openConnection() as HttpsURLConnection).apply {
-                connectTimeout = 3000
-                readTimeout = 3000
+                connectTimeout = 2500
+                readTimeout = 2500
                 requestMethod = "GET"
                 setRequestProperty("Accept", "application/dns-json")
                 setRequestProperty("User-Agent", "MaterialThemes/1.0")
@@ -380,9 +427,10 @@ object WeatherRepository {
 
         // 3. Fallback to hardcoded known IPs
         val fallbackIp = when (host) {
-            "api.open-meteo.com" -> "188.40.99.226"
+            "api.open-meteo.com" -> "94.130.142.35"
             "nominatim.openstreetmap.org" -> "184.104.179.137"
             "wttr.in" -> "5.9.243.187"
+            "ipwho.is" -> "104.20.44.133"
             else -> null
         }
 
@@ -403,23 +451,36 @@ object WeatherRepository {
         try {
             val locManager = context.getSystemService(Context.LOCATION_SERVICE) as? LocationManager
             if (locManager != null) {
-                val hasPermission = ContextCompat.checkSelfPermission(
+                val hasCoarse = ContextCompat.checkSelfPermission(
                     context,
                     android.Manifest.permission.ACCESS_COARSE_LOCATION
-                ) == android.content.pm.PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(
+                ) == PackageManager.PERMISSION_GRANTED
+                val hasFine = ContextCompat.checkSelfPermission(
                     context,
                     android.Manifest.permission.ACCESS_FINE_LOCATION
-                ) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                ) == PackageManager.PERMISSION_GRANTED
 
-                if (hasPermission) {
-                    val netLoc = locManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER)
-                    val gpsLoc = locManager.getLastKnownLocation(LocationManager.GPS_PROVIDER)
-                    val best: Location? = when {
-                        netLoc != null && gpsLoc != null -> if (gpsLoc.time > netLoc.time) gpsLoc else netLoc
-                        gpsLoc != null -> gpsLoc
-                        else -> netLoc
+                if (hasCoarse || hasFine) {
+                    val netLoc = try { locManager.getLastKnownLocation(LocationManager.NETWORK_PROVIDER) } catch (_: Exception) { null }
+                    val gpsLoc = try { locManager.getLastKnownLocation(LocationManager.GPS_PROVIDER) } catch (_: Exception) { null }
+                    val passiveLoc = try { locManager.getLastKnownLocation(LocationManager.PASSIVE_PROVIDER) } catch (_: Exception) { null }
+
+                    val candidates = listOfNotNull(netLoc, gpsLoc, passiveLoc)
+                    val best = candidates.maxByOrNull { it.time }
+
+                    // If we have a fairly recent fix (within 3 hours), use it immediately!
+                    if (best != null && (System.currentTimeMillis() - best.time < 3 * 3600 * 1000L)) {
+                        return LocationInfo(best.latitude, best.longitude, null)
                     }
-                    if (best != null && (System.currentTimeMillis() - best.time < 24 * 3600 * 1000L)) {
+
+                    // Actively request a single fresh location with 1.5s timeout
+                    val freshLoc = requestFreshLocation(locManager, hasFine)
+                    if (freshLoc != null) {
+                        return LocationInfo(freshLoc.latitude, freshLoc.longitude, null)
+                    }
+
+                    // If fresh request timed out, but we had an older fix (within 48 hours), use it
+                    if (best != null && (System.currentTimeMillis() - best.time < 48 * 3600 * 1000L)) {
                         return LocationInfo(best.latitude, best.longitude, null)
                     }
                 }
@@ -444,10 +505,82 @@ object WeatherRepository {
         return LocationInfo(DEFAULT_LAT, DEFAULT_LON, DEFAULT_CITY)
     }
 
+    private fun requestFreshLocation(locManager: LocationManager, hasFine: Boolean): Location? {
+        val latch = CountDownLatch(1)
+        var resultLoc: Location? = null
+
+        val provider = when {
+            locManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER) -> LocationManager.NETWORK_PROVIDER
+            hasFine && locManager.isProviderEnabled(LocationManager.GPS_PROVIDER) -> LocationManager.GPS_PROVIDER
+            else -> LocationManager.PASSIVE_PROVIDER
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val cancellationSignal = CancellationSignal()
+            try {
+                locManager.getCurrentLocation(
+                    provider,
+                    cancellationSignal,
+                    { r -> r.run() },
+                    { loc ->
+                        resultLoc = loc
+                        latch.countDown()
+                    }
+                )
+                latch.await(1500, TimeUnit.MILLISECONDS)
+                if (resultLoc == null) {
+                    cancellationSignal.cancel()
+                }
+                if (resultLoc != null) return resultLoc
+            } catch (e: Exception) {
+                Log.w(TAG, "getCurrentLocation failed: ${e.message}")
+            }
+        }
+
+        // Fallback for API < 30 or if getCurrentLocation failed
+        try {
+            val listener = object : LocationListener {
+                override fun onLocationChanged(location: Location) {
+                    resultLoc = location
+                    latch.countDown()
+                }
+                @Deprecated("Deprecated in Java")
+                override fun onStatusChanged(provider: String?, status: Int, extras: Bundle?) {}
+                override fun onProviderEnabled(provider: String) {}
+                override fun onProviderDisabled(provider: String) {}
+            }
+
+            val handlerThread = HandlerThread("LocationRequestThread")
+            handlerThread.start()
+            val handler = Handler(handlerThread.looper)
+
+            handler.post {
+                try {
+                    @Suppress("DEPRECATION")
+                    locManager.requestSingleUpdate(provider, listener, handlerThread.looper)
+                } catch (e: Exception) {
+                    latch.countDown()
+                }
+            }
+
+            latch.await(1500, TimeUnit.MILLISECONDS)
+            handler.post {
+                try {
+                    locManager.removeUpdates(listener)
+                } catch (_: Exception) {}
+                handlerThread.quitSafely()
+            }
+        } catch (e: Exception) {
+            Log.w(TAG, "requestSingleUpdate failed: ${e.message}")
+        }
+
+        return resultLoc
+    }
+
     private fun fetchIpLocation(): LocationInfo? {
         // Try https://ipwho.is/
         try {
-            val conn = openResilientHttpsConnection("https://ipwho.is/")
+            val conn = openResilientHttpsConnection("https://ipwho.is/", timeoutMs = 3000)
             if (conn.responseCode == HttpURLConnection.HTTP_OK) {
                 val text = conn.inputStream.bufferedReader().readText()
                 conn.disconnect()
@@ -470,8 +603,8 @@ object WeatherRepository {
         try {
             val url = URL("http://ip-api.com/json")
             val conn = (url.openConnection() as HttpURLConnection).apply {
-                connectTimeout = 5000
-                readTimeout = 5000
+                connectTimeout = 3000
+                readTimeout = 3000
             }
             if (conn.responseCode == HttpURLConnection.HTTP_OK) {
                 val text = conn.inputStream.bufferedReader().readText()
@@ -521,6 +654,11 @@ object WeatherRepository {
         lon: Double,
         suggestedCity: String?
     ): String {
+        // If we already have a valid suggested city (e.g. from IP or cache), use it immediately!
+        if (!suggestedCity.isNullOrBlank() && suggestedCity != DEFAULT_CITY) {
+            return suggestedCity
+        }
+
         // 1. Try Android Geocoder first (prefer City/Province level adminArea over subAdminArea district)
         try {
             val geocoder = Geocoder(context, Locale.getDefault())
@@ -538,10 +676,9 @@ object WeatherRepository {
         }
 
         // 2. OpenStreetMap Nominatim reverse geocode fallback using resilient connection
-        // Prioritize city -> state (Province) -> town -> county (District)
         try {
             val nomUrl = "https://nominatim.openstreetmap.org/reverse?format=json&lat=$lat&lon=$lon&zoom=10"
-            val conn = openResilientHttpsConnection(nomUrl)
+            val conn = openResilientHttpsConnection(nomUrl, timeoutMs = 2500)
             if (conn.responseCode == HttpURLConnection.HTTP_OK) {
                 val text = conn.inputStream.bufferedReader().readText()
                 conn.disconnect()

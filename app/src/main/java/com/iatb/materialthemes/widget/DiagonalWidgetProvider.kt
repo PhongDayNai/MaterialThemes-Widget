@@ -24,11 +24,17 @@ class DiagonalWidgetProvider : AppWidgetProvider() {
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
         when (intent.action) {
+            WidgetAnimationManager.ACTION_RUN_ENTER_ANIMATION -> {
+                WidgetAnimationManager.triggerEnterAnimation(context, isFull = true)
+            }
+            Intent.ACTION_USER_PRESENT -> {
+                WidgetAnimationManager.handleUserPresent(context)
+                WidgetUpdateScheduler.scheduleNextMinuteTick(context)
+            }
             WidgetUpdateScheduler.ACTION_WIDGET_TICK,
             Intent.ACTION_TIME_TICK,
             Intent.ACTION_TIME_CHANGED,
             Intent.ACTION_TIMEZONE_CHANGED,
-            Intent.ACTION_USER_PRESENT,
             Intent.ACTION_WALLPAPER_CHANGED,
             Intent.ACTION_CONFIGURATION_CHANGED -> {
                 com.iatb.materialthemes.data.DynamicThemeExtractor.invalidateCache()
@@ -76,34 +82,37 @@ class DiagonalWidgetProvider : AppWidgetProvider() {
             angle: Float,
             palette: ColorPalette,
             mode: WidgetContentMode,
-            transparency: Int = WidgetPreferences.getTransparency(context)
+            transparency: Int = WidgetPreferences.getTransparency(context),
+            animProgress: Float = 1.0f
         ): RemoteViews {
-            return createRenderedView(context, size, angle, palette, mode, transparency)
+            return createRenderedView(context, size, angle, palette, mode, transparency, animProgress)
         }
 
-        fun updateAllWidgets(context: Context) {
+        fun updateAllWidgets(context: Context, animProgress: Float = 1.0f) {
             val appWidgetManager = AppWidgetManager.getInstance(context)
             val component = ComponentName(context, DiagonalWidgetProvider::class.java)
             val ids = appWidgetManager.getAppWidgetIds(component)
             for (id in ids) {
-                updateAppWidget(context, appWidgetManager, id)
+                updateAppWidget(context, appWidgetManager, id, animProgress)
             }
-            Diagonal4x3WidgetProvider.updateAllWidgets4x3(context)
+            Diagonal4x3WidgetProvider.updateAllWidgets4x3(context, animProgress)
         }
 
         fun updateAppWidget(
             context: Context,
             appWidgetManager: AppWidgetManager,
-            appWidgetId: Int
+            appWidgetId: Int,
+            animProgress: Float = 1.0f
         ) {
-            val remoteViews = buildRemoteViews(context, appWidgetManager, appWidgetId)
+            val remoteViews = buildRemoteViews(context, appWidgetManager, appWidgetId, animProgress)
             appWidgetManager.updateAppWidget(appWidgetId, remoteViews)
         }
 
         fun buildRemoteViews(
             context: Context,
             appWidgetManager: AppWidgetManager,
-            appWidgetId: Int
+            appWidgetId: Int,
+            animProgress: Float = 1.0f
         ): RemoteViews {
             val angle = WidgetPreferences.getRotationAngle(context)
             val palette = WidgetPreferences.getColorPalette(context)
@@ -112,13 +121,13 @@ class DiagonalWidgetProvider : AppWidgetProvider() {
 
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 val viewMapping = mapOf(
-                    SizeF(110f, 110f) to createRenderedView(context, WidgetSize.SIZE_2X2, angle, palette, mode, transparency),
-                    SizeF(200f, 110f) to createRenderedView(context, WidgetSize.SIZE_3X2, angle, palette, mode, transparency),
-                    SizeF(270f, 110f) to createRenderedView(context, WidgetSize.SIZE_4X2, angle, palette, mode, transparency),
-                    SizeF(110f, 180f) to createRenderedView(context, WidgetSize.SIZE_2X3, angle, palette, mode, transparency),
-                    SizeF(110f, 260f) to createRenderedView(context, WidgetSize.SIZE_2X4, angle, palette, mode, transparency),
-                    SizeF(200f, 200f) to createRenderedView(context, WidgetSize.SIZE_3X3, angle, palette, mode, transparency),
-                    SizeF(270f, 180f) to createRenderedView(context, WidgetSize.SIZE_4X3, angle, palette, mode, transparency)
+                    SizeF(110f, 110f) to createRenderedView(context, WidgetSize.SIZE_2X2, angle, palette, mode, transparency, animProgress),
+                    SizeF(200f, 110f) to createRenderedView(context, WidgetSize.SIZE_3X2, angle, palette, mode, transparency, animProgress),
+                    SizeF(270f, 110f) to createRenderedView(context, WidgetSize.SIZE_4X2, angle, palette, mode, transparency, animProgress),
+                    SizeF(110f, 180f) to createRenderedView(context, WidgetSize.SIZE_2X3, angle, palette, mode, transparency, animProgress),
+                    SizeF(110f, 260f) to createRenderedView(context, WidgetSize.SIZE_2X4, angle, palette, mode, transparency, animProgress),
+                    SizeF(200f, 200f) to createRenderedView(context, WidgetSize.SIZE_3X3, angle, palette, mode, transparency, animProgress),
+                    SizeF(270f, 180f) to createRenderedView(context, WidgetSize.SIZE_4X3, angle, palette, mode, transparency, animProgress)
                 )
                 RemoteViews(viewMapping)
             } else {
@@ -126,7 +135,7 @@ class DiagonalWidgetProvider : AppWidgetProvider() {
                 val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 110)
                 val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 110)
                 val size = resolveWidgetSize(minWidth, minHeight)
-                createRenderedView(context, size, angle, palette, mode, transparency)
+                createRenderedView(context, size, angle, palette, mode, transparency, animProgress)
             }
         }
 
@@ -148,7 +157,8 @@ class DiagonalWidgetProvider : AppWidgetProvider() {
             angle: Float,
             palette: ColorPalette,
             mode: WidgetContentMode,
-            transparency: Int = WidgetPreferences.getTransparency(context)
+            transparency: Int = WidgetPreferences.getTransparency(context),
+            animProgress: Float = 1.0f
         ): RemoteViews {
             val views = RemoteViews(context.packageName, R.layout.widget_canvas_container)
 
@@ -173,7 +183,8 @@ class DiagonalWidgetProvider : AppWidgetProvider() {
                 mode,
                 size,
                 weather,
-                transparency
+                transparency,
+                animProgress = animProgress
             )
 
             views.setImageViewBitmap(R.id.iv_canvas_render, bitmap)

@@ -116,4 +116,27 @@ object WidgetPreferences {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         prefs.edit().putString(KEY_SIZE, size.name).apply()
     }
+
+    private const val KEY_PENDING_HOME_ANIMATION = "pending_home_animation"
+    private const val KEY_LAST_ANIM_TIMESTAMP = "last_anim_timestamp"
+
+    fun isPendingHomeAnimation(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_PENDING_HOME_ANIMATION, false)
+    }
+
+    fun setPendingHomeAnimation(context: Context, pending: Boolean) {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean(KEY_PENDING_HOME_ANIMATION, pending).apply()
+    }
+
+    fun getLastAnimTimestamp(context: Context): Long {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        return prefs.getLong(KEY_LAST_ANIM_TIMESTAMP, 0L)
+    }
+
+    fun setLastAnimTimestamp(context: Context, timestamp: Long) {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putLong(KEY_LAST_ANIM_TIMESTAMP, timestamp).apply()
+    }
 }

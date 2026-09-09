@@ -38,6 +38,7 @@
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
                 <action android:name="com.iatb.materialthemes.ACTION_WIDGET_TICK" />
+                <action android:name="com.iatb.materialthemes.ACTION_RUN_ENTER_ANIMATION" />
                 <action android:name="android.intent.action.USER_PRESENT" />
                 <action android:name="android.intent.action.WALLPAPER_CHANGED" />
                 <action android:name="android.intent.action.CONFIGURATION_CHANGED" />
@@ -56,6 +57,7 @@
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
                 <action android:name="com.iatb.materialthemes.ACTION_WIDGET_TICK" />
+                <action android:name="com.iatb.materialthemes.ACTION_RUN_ENTER_ANIMATION" />
                 <action android:name="android.intent.action.USER_PRESENT" />
                 <action android:name="android.intent.action.WALLPAPER_CHANGED" />
                 <action android:name="android.intent.action.CONFIGURATION_CHANGED" />
@@ -73,6 +75,11 @@
             android:label="@string/widget_organic_name">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.iatb.materialthemes.ACTION_WIDGET_TICK" />
+                <action android:name="com.iatb.materialthemes.ACTION_RUN_ENTER_ANIMATION" />
+                <action android:name="android.intent.action.USER_PRESENT" />
+                <action android:name="android.intent.action.WALLPAPER_CHANGED" />
+                <action android:name="android.intent.action.CONFIGURATION_CHANGED" />
             </intent-filter>
 
             <meta-data
@@ -87,6 +94,11 @@
             android:label="@string/widget_organic_4x2_name">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.iatb.materialthemes.ACTION_WIDGET_TICK" />
+                <action android:name="com.iatb.materialthemes.ACTION_RUN_ENTER_ANIMATION" />
+                <action android:name="android.intent.action.USER_PRESENT" />
+                <action android:name="android.intent.action.WALLPAPER_CHANGED" />
+                <action android:name="android.intent.action.CONFIGURATION_CHANGED" />
             </intent-filter>
 
             <meta-data
@@ -101,6 +113,11 @@
             android:label="@string/widget_scallop_name">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.iatb.materialthemes.ACTION_WIDGET_TICK" />
+                <action android:name="com.iatb.materialthemes.ACTION_RUN_ENTER_ANIMATION" />
+                <action android:name="android.intent.action.USER_PRESENT" />
+                <action android:name="android.intent.action.WALLPAPER_CHANGED" />
+                <action android:name="android.intent.action.CONFIGURATION_CHANGED" />
             </intent-filter>
 
             <meta-data
@@ -115,6 +132,11 @@
             android:label="@string/widget_scallop_4x2_name">
             <intent-filter>
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.iatb.materialthemes.ACTION_WIDGET_TICK" />
+                <action android:name="com.iatb.materialthemes.ACTION_RUN_ENTER_ANIMATION" />
+                <action android:name="android.intent.action.USER_PRESENT" />
+                <action android:name="android.intent.action.WALLPAPER_CHANGED" />
+                <action android:name="android.intent.action.CONFIGURATION_CHANGED" />
             </intent-filter>
 
             <meta-data

@@ -42,7 +42,8 @@ object WidgetCanvasRenderer {
         contentMode: WidgetContentMode,
         size: WidgetSize,
         weather: WeatherData = WeatherRepository.getWeatherData(context),
-        transparency: Int = WidgetPreferences.getTransparency(context)
+        transparency: Int = WidgetPreferences.getTransparency(context),
+        animProgress: Float = 1.0f
     ): Bitmap {
         val w = if (widthPx <= 0) 400 else widthPx
         val h = if (heightPx <= 0) 400 else heightPx
@@ -75,11 +76,11 @@ object WidgetCanvasRenderer {
         )
 
         when (size) {
-            WidgetSize.SIZE_2X2 -> render2x2(context, canvas, w, h, angleDeg, resolvedPalette, contentMode, weather)
-            WidgetSize.SIZE_3X2, WidgetSize.SIZE_4X2 -> renderWide(context, canvas, w, h, angleDeg, resolvedPalette, contentMode, size == WidgetSize.SIZE_4X2, weather)
-            WidgetSize.SIZE_2X3 -> renderTall(context, canvas, w, h, angleDeg, resolvedPalette, contentMode, pillCount = 2, weather = weather)
-            WidgetSize.SIZE_2X4 -> renderTall(context, canvas, w, h, angleDeg, resolvedPalette, contentMode, pillCount = 3, weather = weather)
-            WidgetSize.SIZE_3X3, WidgetSize.SIZE_4X3 -> render3x3(context, canvas, w, h, angleDeg, resolvedPalette, contentMode, is4x3 = (size == WidgetSize.SIZE_4X3), weather = weather)
+            WidgetSize.SIZE_2X2 -> render2x2(context, canvas, w, h, angleDeg, resolvedPalette, contentMode, weather, animProgress)
+            WidgetSize.SIZE_3X2, WidgetSize.SIZE_4X2 -> renderWide(context, canvas, w, h, angleDeg, resolvedPalette, contentMode, size == WidgetSize.SIZE_4X2, weather, animProgress)
+            WidgetSize.SIZE_2X3 -> renderTall(context, canvas, w, h, angleDeg, resolvedPalette, contentMode, pillCount = 2, weather = weather, animProgress = animProgress)
+            WidgetSize.SIZE_2X4 -> renderTall(context, canvas, w, h, angleDeg, resolvedPalette, contentMode, pillCount = 3, weather = weather, animProgress = animProgress)
+            WidgetSize.SIZE_3X3, WidgetSize.SIZE_4X3 -> render3x3(context, canvas, w, h, angleDeg, resolvedPalette, contentMode, is4x3 = (size == WidgetSize.SIZE_4X3), weather = weather, animProgress = animProgress)
         }
 
         return bitmap
@@ -93,7 +94,8 @@ object WidgetCanvasRenderer {
         angle: Float,
         palette: ResolvedPaletteColors,
         mode: WidgetContentMode,
-        weather: WeatherData
+        weather: WeatherData,
+        animProgress: Float = 1.0f
     ) {
         val cx = w / 2f
         val cy = h / 2f
@@ -102,104 +104,106 @@ object WidgetCanvasRenderer {
         val pillLength = minDim * 0.90f
         val pillThickness = minDim * 0.54f
 
-        drawTiltedPill(canvas, cx, cy, pillLength, pillThickness, angle, palette.bgColor)
+        withBlockAnimation(canvas, cx, cy, animProgress, 0.0f, 1.0f) {
+            drawTiltedPill(canvas, cx, cy, pillLength, pillThickness, angle, palette.bgColor)
 
-        val rad = Math.toRadians(angle.toDouble())
-        val lobeDist = (pillLength - pillThickness) / 2f
-        val dist = lobeDist * 0.88f
+            val rad = Math.toRadians(angle.toDouble())
+            val lobeDist = (pillLength - pillThickness) / 2f
+            val dist = lobeDist * 0.88f
 
-        val lobe1X = (cx + dist * cos(rad)).toFloat()
-        val lobe1Y = (cy + dist * sin(rad)).toFloat()
-        val lobe2X = (cx - dist * cos(rad)).toFloat()
-        val lobe2Y = (cy - dist * sin(rad)).toFloat()
+            val lobe1X = (cx + dist * cos(rad)).toFloat()
+            val lobe1Y = (cy + dist * sin(rad)).toFloat()
+            val lobe2X = (cx - dist * cos(rad)).toFloat()
+            val lobe2Y = (cy - dist * sin(rad)).toFloat()
 
-        val (firstX, firstY, secondX, secondY) = if (abs(angle) < 5f) {
-            if (lobe1X <= lobe2X) listOf(lobe1X, lobe1Y, lobe2X, lobe2Y) else listOf(lobe2X, lobe2Y, lobe1X, lobe1Y)
-        } else {
-            if (lobe1Y <= lobe2Y) listOf(lobe1X, lobe1Y, lobe2X, lobe2Y) else listOf(lobe2X, lobe2Y, lobe1X, lobe1Y)
-        }
-
-        val lobeRadius = pillThickness / 2f
-        val contentAngle = (angle * 0.35f).coerceIn(-18f, 18f)
-
-        when (mode) {
-            WidgetContentMode.WEATHER -> {
-                drawFittedSingleLineText(
-                    canvas,
-                    weather.currentTempLabel,
-                    firstX,
-                    firstY,
-                    maxSizePx = pillThickness * 0.48f,
-                    maxWidth = lobeRadius * 1.5f,
-                    textColor = palette.textColor,
-                    isBold = true,
-                    contentAngleDeg = contentAngle
-                )
-                val iconSize = (lobeRadius * 1.15f).toInt()
-                drawDrawable(
-                    context,
-                    canvas,
-                    weather.currentIconResId,
-                    secondX.toInt(),
-                    secondY.toInt(),
-                    iconSize,
-                    iconSize,
-                    contentAngleDeg = contentAngle
-                )
+            val (firstX, firstY, secondX, secondY) = if (abs(angle) < 5f) {
+                if (lobe1X <= lobe2X) listOf(lobe1X, lobe1Y, lobe2X, lobe2Y) else listOf(lobe2X, lobe2Y, lobe1X, lobe1Y)
+            } else {
+                if (lobe1Y <= lobe2Y) listOf(lobe1X, lobe1Y, lobe2X, lobe2Y) else listOf(lobe2X, lobe2Y, lobe1X, lobe1Y)
             }
-            WidgetContentMode.CLOCK -> {
-                val hourStr = SimpleDateFormat("HH", Locale.getDefault()).format(Date())
-                val minStr = SimpleDateFormat("mm", Locale.getDefault()).format(Date())
 
-                drawFittedSingleLineText(
-                    canvas,
-                    hourStr,
-                    firstX,
-                    firstY,
-                    maxSizePx = pillThickness * 0.46f,
-                    maxWidth = lobeRadius * 1.5f,
-                    textColor = palette.textColor,
-                    isBold = true,
-                    contentAngleDeg = contentAngle
-                )
-                drawFittedSingleLineText(
-                    canvas,
-                    minStr,
-                    secondX,
-                    secondY,
-                    maxSizePx = pillThickness * 0.46f,
-                    maxWidth = lobeRadius * 1.5f,
-                    textColor = palette.textColor,
-                    isBold = true,
-                    contentAngleDeg = contentAngle
-                )
-            }
-            WidgetContentMode.COMBO -> {
-                val timeStr = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
-                drawFittedSingleLineText(
-                    canvas,
-                    timeStr,
-                    firstX,
-                    firstY,
-                    maxSizePx = pillThickness * 0.36f,
-                    maxWidth = lobeRadius * 1.6f,
-                    textColor = palette.textColor,
-                    isBold = true,
-                    contentAngleDeg = contentAngle
-                )
-                val iconSize = (lobeRadius * 0.88f).toInt()
-                drawComboWeatherLobe(
-                    context,
-                    canvas,
-                    weather.currentIconResId,
-                    weather.currentTempLabel,
-                    secondX,
-                    secondY,
-                    iconSize,
-                    pillThickness * 0.36f,
-                    palette.textColor,
-                    contentAngle
-                )
+            val lobeRadius = pillThickness / 2f
+            val contentAngle = (angle * 0.35f).coerceIn(-18f, 18f)
+
+            when (mode) {
+                WidgetContentMode.WEATHER -> {
+                    drawFittedSingleLineText(
+                        canvas,
+                        weather.currentTempLabel,
+                        firstX,
+                        firstY,
+                        maxSizePx = pillThickness * 0.48f,
+                        maxWidth = lobeRadius * 1.5f,
+                        textColor = palette.textColor,
+                        isBold = true,
+                        contentAngleDeg = contentAngle
+                    )
+                    val iconSize = (lobeRadius * 1.15f).toInt()
+                    drawDrawable(
+                        context,
+                        canvas,
+                        weather.currentIconResId,
+                        secondX.toInt(),
+                        secondY.toInt(),
+                        iconSize,
+                        iconSize,
+                        contentAngleDeg = contentAngle
+                    )
+                }
+                WidgetContentMode.CLOCK -> {
+                    val hourStr = SimpleDateFormat("HH", Locale.getDefault()).format(Date())
+                    val minStr = SimpleDateFormat("mm", Locale.getDefault()).format(Date())
+
+                    drawFittedSingleLineText(
+                        canvas,
+                        hourStr,
+                        firstX,
+                        firstY,
+                        maxSizePx = pillThickness * 0.46f,
+                        maxWidth = lobeRadius * 1.5f,
+                        textColor = palette.textColor,
+                        isBold = true,
+                        contentAngleDeg = contentAngle
+                    )
+                    drawFittedSingleLineText(
+                        canvas,
+                        minStr,
+                        secondX,
+                        secondY,
+                        maxSizePx = pillThickness * 0.46f,
+                        maxWidth = lobeRadius * 1.5f,
+                        textColor = palette.textColor,
+                        isBold = true,
+                        contentAngleDeg = contentAngle
+                    )
+                }
+                WidgetContentMode.COMBO -> {
+                    val timeStr = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
+                    drawFittedSingleLineText(
+                        canvas,
+                        timeStr,
+                        firstX,
+                        firstY,
+                        maxSizePx = pillThickness * 0.36f,
+                        maxWidth = lobeRadius * 1.6f,
+                        textColor = palette.textColor,
+                        isBold = true,
+                        contentAngleDeg = contentAngle
+                    )
+                    val iconSize = (lobeRadius * 0.88f).toInt()
+                    drawComboWeatherLobe(
+                        context,
+                        canvas,
+                        weather.currentIconResId,
+                        weather.currentTempLabel,
+                        secondX,
+                        secondY,
+                        iconSize,
+                        pillThickness * 0.36f,
+                        palette.textColor,
+                        contentAngle
+                    )
+                }
             }
         }
     }
@@ -213,7 +217,8 @@ object WidgetCanvasRenderer {
         palette: ResolvedPaletteColors,
         mode: WidgetContentMode,
         isExtraWide: Boolean,
-        weather: WeatherData
+        weather: WeatherData,
+        animProgress: Float = 1.0f
     ) {
         val cy = h / 2f
 
@@ -240,57 +245,60 @@ object WidgetCanvasRenderer {
         val leftCx = startX + (leftW / 2f)
         val rightCx = leftCx + leftRightTipX + gap + (rightW / 2f)
 
-        drawTiltedPill(canvas, leftCx, cy, leftW, leftH, angle, palette.bgColor)
+        withBlockAnimation(canvas, leftCx, cy, animProgress, 0.00f, 0.75f) {
+            drawTiltedPill(canvas, leftCx, cy, leftW, leftH, angle, palette.bgColor)
 
-        // Draw content in left tilted pill lobes with subtle tilt
-        val tiltRadLeft = Math.toRadians(angle.toDouble())
-        val lobeDistLeft = (leftW - leftH) / 2f
-        val dist = lobeDistLeft * 0.88f
-        val l1x = (leftCx + dist * cos(tiltRadLeft)).toFloat()
-        val l1y = (cy + dist * sin(tiltRadLeft)).toFloat()
-        val l2x = (leftCx - dist * cos(tiltRadLeft)).toFloat()
-        val l2y = (cy - dist * sin(tiltRadLeft)).toFloat()
+            // Draw content in left tilted pill lobes with subtle tilt
+            val tiltRadLeft = Math.toRadians(angle.toDouble())
+            val lobeDistLeft = (leftW - leftH) / 2f
+            val dist = lobeDistLeft * 0.88f
+            val l1x = (leftCx + dist * cos(tiltRadLeft)).toFloat()
+            val l1y = (cy + dist * sin(tiltRadLeft)).toFloat()
+            val l2x = (leftCx - dist * cos(tiltRadLeft)).toFloat()
+            val l2y = (cy - dist * sin(tiltRadLeft)).toFloat()
 
-        val (firstX, firstY, secondX, secondY) = if (abs(angle) < 5f) {
-            if (l1x <= l2x) listOf(l1x, l1y, l2x, l2y) else listOf(l2x, l2y, l1x, l1y)
-        } else {
-            if (l1y <= l2y) listOf(l1x, l1y, l2x, l2y) else listOf(l2x, l2y, l1x, l1y)
+            val (firstX, firstY, secondX, secondY) = if (abs(angle) < 5f) {
+                if (l1x <= l2x) listOf(l1x, l1y, l2x, l2y) else listOf(l2x, l2y, l1x, l1y)
+            } else {
+                if (l1y <= l2y) listOf(l1x, l1y, l2x, l2y) else listOf(l2x, l2y, l1x, l1y)
+            }
+
+            val leftContentAngle = (angle * 0.35f).coerceIn(-18f, 18f)
+
+            when (mode) {
+                WidgetContentMode.WEATHER -> {
+                    drawFittedSingleLineText(
+                        canvas,
+                        weather.currentTempLabel,
+                        firstX,
+                        firstY,
+                        maxSizePx = leftH * 0.52f,
+                        maxWidth = leftH * 0.78f,
+                        textColor = palette.textColor,
+                        isBold = true,
+                        contentAngleDeg = leftContentAngle
+                    )
+                    val iconSize = (leftH * 0.55f).toInt()
+                    drawDrawable(context, canvas, weather.currentIconResId, secondX.toInt(), secondY.toInt(), iconSize, iconSize, contentAngleDeg = leftContentAngle)
+                }
+                WidgetContentMode.CLOCK -> {
+                    val hourStr = SimpleDateFormat("HH", Locale.getDefault()).format(Date())
+                    val minStr = SimpleDateFormat("mm", Locale.getDefault()).format(Date())
+                    drawFittedSingleLineText(canvas, hourStr, firstX, firstY, maxSizePx = leftH * 0.48f, maxWidth = leftH * 0.75f, textColor = palette.textColor, isBold = true, contentAngleDeg = leftContentAngle)
+                    drawFittedSingleLineText(canvas, minStr, secondX, secondY, maxSizePx = leftH * 0.48f, maxWidth = leftH * 0.75f, textColor = palette.textColor, isBold = true, contentAngleDeg = leftContentAngle)
+                }
+                WidgetContentMode.COMBO -> {
+                    val timeStr = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
+                    drawFittedSingleLineText(canvas, timeStr, firstX, firstY, maxSizePx = leftH * 0.40f, maxWidth = leftH * 0.85f, textColor = palette.textColor, isBold = true, contentAngleDeg = leftContentAngle)
+                    val iconSize = (leftH * 0.40f).toInt()
+                    drawComboWeatherLobe(context, canvas, weather.currentIconResId, weather.currentTempLabel, secondX, secondY, iconSize, leftH * 0.36f, palette.textColor, leftContentAngle)
+                }
+            }
         }
 
-        val leftContentAngle = (angle * 0.35f).coerceIn(-18f, 18f)
-
-        when (mode) {
-            WidgetContentMode.WEATHER -> {
-                drawFittedSingleLineText(
-                    canvas,
-                    weather.currentTempLabel,
-                    firstX,
-                    firstY,
-                    maxSizePx = leftH * 0.52f,
-                    maxWidth = leftH * 0.78f,
-                    textColor = palette.textColor,
-                    isBold = true,
-                    contentAngleDeg = leftContentAngle
-                )
-                val iconSize = (leftH * 0.55f).toInt()
-                drawDrawable(context, canvas, weather.currentIconResId, secondX.toInt(), secondY.toInt(), iconSize, iconSize, contentAngleDeg = leftContentAngle)
-            }
-            WidgetContentMode.CLOCK -> {
-                val hourStr = SimpleDateFormat("HH", Locale.getDefault()).format(Date())
-                val minStr = SimpleDateFormat("mm", Locale.getDefault()).format(Date())
-                drawFittedSingleLineText(canvas, hourStr, firstX, firstY, maxSizePx = leftH * 0.48f, maxWidth = leftH * 0.75f, textColor = palette.textColor, isBold = true, contentAngleDeg = leftContentAngle)
-                drawFittedSingleLineText(canvas, minStr, secondX, secondY, maxSizePx = leftH * 0.48f, maxWidth = leftH * 0.75f, textColor = palette.textColor, isBold = true, contentAngleDeg = leftContentAngle)
-            }
-            WidgetContentMode.COMBO -> {
-                val timeStr = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
-                drawFittedSingleLineText(canvas, timeStr, firstX, firstY, maxSizePx = leftH * 0.40f, maxWidth = leftH * 0.85f, textColor = palette.textColor, isBold = true, contentAngleDeg = leftContentAngle)
-                val iconSize = (leftH * 0.40f).toInt()
-                drawComboWeatherLobe(context, canvas, weather.currentIconResId, weather.currentTempLabel, secondX, secondY, iconSize, leftH * 0.36f, palette.textColor, leftContentAngle)
-            }
-        }
-
-        val cardRadius = rightH * 0.42f
-        drawRoundedCard(canvas, rightCx, cy, rightW, rightH, cardRadius, rightAngle, palette.secondaryBgColor)
+        withBlockAnimation(canvas, rightCx, cy, animProgress, 0.20f, 1.00f) {
+            val cardRadius = rightH * 0.42f
+            drawRoundedCard(canvas, rightCx, cy, rightW, rightH, cardRadius, rightAngle, palette.secondaryBgColor)
 
         // Safe usable area inside right container with generous vertical clearance from curved borders
         val tiltRad = Math.toRadians(abs(rightAngle).toDouble())
@@ -461,6 +469,7 @@ object WidgetCanvasRenderer {
             }
         }
     }
+    }
 
     private fun renderTall(
         context: Context,
@@ -471,7 +480,8 @@ object WidgetCanvasRenderer {
         palette: ResolvedPaletteColors,
         mode: WidgetContentMode,
         pillCount: Int,
-        weather: WeatherData
+        weather: WeatherData,
+        animProgress: Float = 1.0f
     ) {
         val tiltRad = Math.toRadians(abs(angle).toDouble().coerceAtMost(45.0))
 
@@ -501,10 +511,22 @@ object WidgetCanvasRenderer {
                 else -> palette.tertiaryBgColor
             }
 
-            when (i) {
-                0 -> {
-                    // Top pill: Tilted at selected angle
-                    drawTiltedPill(canvas, cx, cy, maxAllowedW, pillHeight, angle, pillBgColor)
+            val startP = when (i) {
+                0 -> 0.00f
+                1 -> 0.20f
+                else -> 0.35f
+            }
+            val endP = when (i) {
+                0 -> 0.70f
+                1 -> 0.85f
+                else -> 1.00f
+            }
+
+            withBlockAnimation(canvas, cx, cy, animProgress, startP, endP) {
+                when (i) {
+                    0 -> {
+                        // Top pill: Tilted at selected angle
+                        drawTiltedPill(canvas, cx, cy, maxAllowedW, pillHeight, angle, pillBgColor)
 
                     val rad = Math.toRadians(angle.toDouble())
                     val lobeDistTall = (maxAllowedW - pillHeight) / 2f
@@ -596,6 +618,7 @@ object WidgetCanvasRenderer {
             }
         }
     }
+    }
 
     private fun render3x3(
         context: Context,
@@ -606,7 +629,8 @@ object WidgetCanvasRenderer {
         palette: ResolvedPaletteColors,
         mode: WidgetContentMode,
         is4x3: Boolean = false,
-        weather: WeatherData
+        weather: WeatherData,
+        animProgress: Float = 1.0f
     ) {
         val p1w = if (is4x3) min(w * 0.42f, h * 0.48f) else min(w * 0.45f, h * 0.48f)
         val pillThickness = p1w * 0.52f
@@ -643,130 +667,184 @@ object WidgetCanvasRenderer {
         val p1cx = topStartX + (p1w / 2f)
         val p2cx = p1cx + p1RightTipX + topGap + p2LeftTipX
 
-        // Pill 1: Left tilted element (Temp & Icon or Clock)
-        drawTiltedPill(canvas, p1cx, p1cy, p1w, pillThickness, angle, palette.bgColor)
+        // Pill 1: Left tilted element (Temp & Icon or Clock) - Staggered 0.00 -> 0.65
+        withBlockAnimation(canvas, p1cx, p1cy, animProgress, 0.00f, 0.65f) {
+            drawTiltedPill(canvas, p1cx, p1cy, p1w, pillThickness, angle, palette.bgColor)
 
-        val rad = Math.toRadians(angle.toDouble())
-        // Moderate lobe distance: 88% of cap center distance, prevents collision between text and icon
-        val lobeDist = (p1w - pillThickness) / 2f
-        val dist = lobeDist * 0.88f
-        val l1x = (p1cx + dist * cos(rad)).toFloat()
-        val l1y = (p1cy + dist * sin(rad)).toFloat()
-        val l2x = (p1cx - dist * cos(rad)).toFloat()
-        val l2y = (p1cy - dist * sin(rad)).toFloat()
+            val rad = Math.toRadians(angle.toDouble())
+            // Moderate lobe distance: 88% of cap center distance, prevents collision between text and icon
+            val lobeDist = (p1w - pillThickness) / 2f
+            val dist = lobeDist * 0.88f
+            val l1x = (p1cx + dist * cos(rad)).toFloat()
+            val l1y = (p1cy + dist * sin(rad)).toFloat()
+            val l2x = (p1cx - dist * cos(rad)).toFloat()
+            val l2y = (p1cy - dist * sin(rad)).toFloat()
 
-        val (firstX, firstY, secondX, secondY) = if (abs(angle) < 5f) {
-            if (l1x <= l2x) listOf(l1x, l1y, l2x, l2y) else listOf(l2x, l2y, l1x, l1y)
-        } else {
-            if (l1y <= l2y) listOf(l1x, l1y, l2x, l2y) else listOf(l2x, l2y, l1x, l1y)
+            val (firstX, firstY, secondX, secondY) = if (abs(angle) < 5f) {
+                if (l1x <= l2x) listOf(l1x, l1y, l2x, l2y) else listOf(l2x, l2y, l1x, l1y)
+            } else {
+                if (l1y <= l2y) listOf(l1x, l1y, l2x, l2y) else listOf(l2x, l2y, l1x, l1y)
+            }
+
+            val p1ContentAngle = (angle * 0.35f).coerceIn(-18f, 18f)
+
+            when (mode) {
+                WidgetContentMode.WEATHER -> {
+                    drawFittedSingleLineText(
+                        canvas,
+                        weather.currentTempLabel,
+                        firstX,
+                        firstY,
+                        maxSizePx = pillThickness * 0.44f,
+                        maxWidth = pillThickness * 0.72f,
+                        textColor = palette.textColor,
+                        isBold = true,
+                        contentAngleDeg = p1ContentAngle
+                    )
+                    val iconSize = (pillThickness * 0.46f).toInt()
+                    drawDrawable(context, canvas, weather.currentIconResId, secondX.toInt(), secondY.toInt(), iconSize, iconSize, contentAngleDeg = p1ContentAngle)
+                }
+                WidgetContentMode.CLOCK -> {
+                    val hourStr = SimpleDateFormat("HH", Locale.getDefault()).format(Date())
+                    val minStr = SimpleDateFormat("mm", Locale.getDefault()).format(Date())
+                    drawFittedSingleLineText(canvas, hourStr, firstX, firstY, maxSizePx = pillThickness * 0.40f, maxWidth = pillThickness * 0.68f, textColor = palette.textColor, isBold = true, contentAngleDeg = p1ContentAngle)
+                    drawFittedSingleLineText(canvas, minStr, secondX, secondY, maxSizePx = pillThickness * 0.40f, maxWidth = pillThickness * 0.68f, textColor = palette.textColor, isBold = true, contentAngleDeg = p1ContentAngle)
+                }
+                WidgetContentMode.COMBO -> {
+                    val timeStr = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
+                    drawFittedSingleLineText(canvas, timeStr, firstX, firstY, maxSizePx = pillThickness * 0.32f, maxWidth = pillThickness * 0.76f, textColor = palette.textColor, isBold = true, contentAngleDeg = p1ContentAngle)
+                    val iconSize = (pillThickness * 0.36f).toInt()
+                    drawComboWeatherLobe(context, canvas, weather.currentIconResId, weather.currentTempLabel, secondX, secondY, iconSize, pillThickness * 0.34f, palette.textColor, p1ContentAngle)
+                }
+            }
         }
 
-        val p1ContentAngle = (angle * 0.35f).coerceIn(-18f, 18f)
+        // Pill 2: Right info pill with auto-wrapping condition text - Staggered 0.15 -> 0.85
+        withBlockAnimation(canvas, p2cx, p2cy, animProgress, 0.15f, 0.85f) {
+            drawTiltedPill(canvas, p2cx, p2cy, p1w, pillThickness, rightSubAngle, palette.secondaryBgColor)
 
-        when (mode) {
-            WidgetContentMode.WEATHER -> {
+            val p2SafeW = p1w * 0.78f
+            val p2ContentAngle = rightSubAngle * 0.75f
+
+            when (mode) {
+                WidgetContentMode.WEATHER -> {
+                    drawFittedSingleLineText(canvas, weather.locationName, p2cx, p2cy - pillThickness * 0.22f, maxSizePx = pillThickness * 0.22f, maxWidth = p2SafeW, textColor = palette.textColor, isBold = true, contentAngleDeg = p2ContentAngle)
+                    drawStaticLayoutText(canvas, weather.conditionLabel, p2cx, p2cy + pillThickness * 0.04f, maxWidth = p2SafeW, maxHeight = pillThickness * 0.36f, maxLines = 2, initialTextSizePx = pillThickness * 0.16f, textColor = (0xCCFFFFFF.toInt() and palette.textColor), contentAngleDeg = p2ContentAngle)
+                    drawMinMaxTempRow(context, canvas, weather, p2cx, p2cy + pillThickness * 0.26f, p2SafeW, pillThickness * 0.22f, palette.textColor, p2ContentAngle)
+                }
+                WidgetContentMode.CLOCK -> {
+                    val dayStr = formatDayOfWeek()
+                    val dateStr = formatLocalizedFullDate()
+                    val alarmStr = context.getString(R.string.sample_next_alarm)
+                    drawFittedSingleLineText(canvas, dayStr, p2cx, p2cy - pillThickness * 0.22f, maxSizePx = pillThickness * 0.20f, maxWidth = p2SafeW, textColor = palette.textColor, isBold = true, contentAngleDeg = p2ContentAngle)
+                    drawFittedSingleLineText(canvas, dateStr, p2cx, p2cy + pillThickness * 0.02f, maxSizePx = pillThickness * 0.16f, maxWidth = p2SafeW, textColor = (0xCCFFFFFF.toInt() and palette.textColor), contentAngleDeg = p2ContentAngle)
+                    drawFittedSingleLineText(canvas, alarmStr, p2cx, p2cy + pillThickness * 0.25f, maxSizePx = pillThickness * 0.14f, maxWidth = p2SafeW, textColor = (0xBBFFFFFF.toInt() and palette.textColor), contentAngleDeg = p2ContentAngle)
+                }
+                WidgetContentMode.COMBO -> {
+                    val dateStr = formatLocalizedDayAndFullDate()
+                    drawFittedSingleLineText(canvas, weather.locationName, p2cx, p2cy - pillThickness * 0.22f, maxSizePx = pillThickness * 0.22f, maxWidth = p2SafeW, textColor = palette.textColor, isBold = true, contentAngleDeg = p2ContentAngle)
+                    drawFittedSingleLineText(canvas, dateStr, p2cx, p2cy + pillThickness * 0.02f, maxSizePx = pillThickness * 0.16f, maxWidth = p2SafeW, textColor = (0xCCFFFFFF.toInt() and palette.textColor), contentAngleDeg = p2ContentAngle)
+                    drawMinMaxTempRow(context, canvas, weather, p2cx, p2cy + pillThickness * 0.26f, p2SafeW, pillThickness * 0.22f, palette.textColor, p2ContentAngle)
+                }
+            }
+        }
+
+        // Bottom Card: Forecast or stats - Staggered 0.30 -> 1.00 with slideUpDistance
+        withBlockAnimation(canvas, w / 2f, btmCy, animProgress, 0.30f, 1.00f, slideUpDistance = h * 0.08f) {
+            val btmW = w * 0.92f
+            drawRoundedCard(canvas, w / 2f, btmCy, btmW, btmCardH, btmCardH * 0.38f, btmTiltAngle, palette.tertiaryBgColor)
+
+            val btmContentAngle = btmTiltAngle * 0.75f
+
+            // Expanded 4x3 has 6 forecast slots, 3x3 has 4 forecast slots
+            val forecastItems = if (is4x3) {
+                weather.hourlyForecasts.take(6)
+            } else {
+                weather.hourlyForecasts.take(4)
+            }
+
+            val count = forecastItems.size
+            val colWidth = if (count > 0) (btmW * 0.88f) / count.toFloat() else btmW * 0.22f
+            val startX = (w / 2f) - (colWidth * (count - 1) / 2f)
+
+            for (k in 0 until count) {
+                val item = forecastItems[k]
+                val itemX = startX + k * colWidth
+
                 drawFittedSingleLineText(
                     canvas,
-                    weather.currentTempLabel,
-                    firstX,
-                    firstY,
-                    maxSizePx = pillThickness * 0.44f,
-                    maxWidth = pillThickness * 0.72f,
+                    item.timeLabel,
+                    itemX,
+                    btmCy - btmCardH * 0.29f,
+                    maxSizePx = btmCardH * 0.19f,
+                    maxWidth = colWidth * 0.90f,
+                    textColor = (0xBBFFFFFF.toInt() and palette.textColor),
+                    contentAngleDeg = btmContentAngle
+                )
+
+                val miniIconSize = (btmCardH * 0.30f).toInt()
+                drawDrawable(context, canvas, item.iconResId, itemX.toInt(), btmCy.toInt(), miniIconSize, miniIconSize, contentAngleDeg = btmContentAngle)
+
+                drawFittedSingleLineText(
+                    canvas,
+                    item.tempLabel,
+                    itemX,
+                    btmCy + btmCardH * 0.30f,
+                    maxSizePx = btmCardH * 0.21f,
+                    maxWidth = colWidth * 0.90f,
                     textColor = palette.textColor,
                     isBold = true,
-                    contentAngleDeg = p1ContentAngle
+                    contentAngleDeg = btmContentAngle
                 )
-                val iconSize = (pillThickness * 0.46f).toInt()
-                drawDrawable(context, canvas, weather.currentIconResId, secondX.toInt(), secondY.toInt(), iconSize, iconSize, contentAngleDeg = p1ContentAngle)
-            }
-            WidgetContentMode.CLOCK -> {
-                val hourStr = SimpleDateFormat("HH", Locale.getDefault()).format(Date())
-                val minStr = SimpleDateFormat("mm", Locale.getDefault()).format(Date())
-                drawFittedSingleLineText(canvas, hourStr, firstX, firstY, maxSizePx = pillThickness * 0.40f, maxWidth = pillThickness * 0.68f, textColor = palette.textColor, isBold = true, contentAngleDeg = p1ContentAngle)
-                drawFittedSingleLineText(canvas, minStr, secondX, secondY, maxSizePx = pillThickness * 0.40f, maxWidth = pillThickness * 0.68f, textColor = palette.textColor, isBold = true, contentAngleDeg = p1ContentAngle)
-            }
-            WidgetContentMode.COMBO -> {
-                val timeStr = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
-                drawFittedSingleLineText(canvas, timeStr, firstX, firstY, maxSizePx = pillThickness * 0.32f, maxWidth = pillThickness * 0.76f, textColor = palette.textColor, isBold = true, contentAngleDeg = p1ContentAngle)
-                val iconSize = (pillThickness * 0.36f).toInt()
-                drawComboWeatherLobe(context, canvas, weather.currentIconResId, weather.currentTempLabel, secondX, secondY, iconSize, pillThickness * 0.34f, palette.textColor, p1ContentAngle)
             }
         }
+    }
 
-        // Pill 2: Right info pill with auto-wrapping condition text and subtle tilt matching container
-        drawTiltedPill(canvas, p2cx, p2cy, p1w, pillThickness, rightSubAngle, palette.secondaryBgColor)
-
-        val p2SafeW = p1w * 0.78f
-        val p2ContentAngle = rightSubAngle * 0.75f
-
-        when (mode) {
-            WidgetContentMode.WEATHER -> {
-                drawFittedSingleLineText(canvas, weather.locationName, p2cx, p2cy - pillThickness * 0.22f, maxSizePx = pillThickness * 0.22f, maxWidth = p2SafeW, textColor = palette.textColor, isBold = true, contentAngleDeg = p2ContentAngle)
-                drawStaticLayoutText(canvas, weather.conditionLabel, p2cx, p2cy + pillThickness * 0.04f, maxWidth = p2SafeW, maxHeight = pillThickness * 0.36f, maxLines = 2, initialTextSizePx = pillThickness * 0.16f, textColor = (0xCCFFFFFF.toInt() and palette.textColor), contentAngleDeg = p2ContentAngle)
-                drawMinMaxTempRow(context, canvas, weather, p2cx, p2cy + pillThickness * 0.26f, p2SafeW, pillThickness * 0.22f, palette.textColor, p2ContentAngle)
-            }
-            WidgetContentMode.CLOCK -> {
-                val dayStr = formatDayOfWeek()
-                val dateStr = formatLocalizedFullDate()
-                val alarmStr = context.getString(R.string.sample_next_alarm)
-                drawFittedSingleLineText(canvas, dayStr, p2cx, p2cy - pillThickness * 0.22f, maxSizePx = pillThickness * 0.20f, maxWidth = p2SafeW, textColor = palette.textColor, isBold = true, contentAngleDeg = p2ContentAngle)
-                drawFittedSingleLineText(canvas, dateStr, p2cx, p2cy + pillThickness * 0.02f, maxSizePx = pillThickness * 0.16f, maxWidth = p2SafeW, textColor = (0xCCFFFFFF.toInt() and palette.textColor), contentAngleDeg = p2ContentAngle)
-                drawFittedSingleLineText(canvas, alarmStr, p2cx, p2cy + pillThickness * 0.25f, maxSizePx = pillThickness * 0.14f, maxWidth = p2SafeW, textColor = (0xBBFFFFFF.toInt() and palette.textColor), contentAngleDeg = p2ContentAngle)
-            }
-            WidgetContentMode.COMBO -> {
-                val dateStr = formatLocalizedDayAndFullDate()
-                drawFittedSingleLineText(canvas, weather.locationName, p2cx, p2cy - pillThickness * 0.22f, maxSizePx = pillThickness * 0.22f, maxWidth = p2SafeW, textColor = palette.textColor, isBold = true, contentAngleDeg = p2ContentAngle)
-                drawFittedSingleLineText(canvas, dateStr, p2cx, p2cy + pillThickness * 0.02f, maxSizePx = pillThickness * 0.16f, maxWidth = p2SafeW, textColor = (0xCCFFFFFF.toInt() and palette.textColor), contentAngleDeg = p2ContentAngle)
-                drawMinMaxTempRow(context, canvas, weather, p2cx, p2cy + pillThickness * 0.26f, p2SafeW, pillThickness * 0.22f, palette.textColor, p2ContentAngle)
-            }
+    private inline fun withBlockAnimation(
+        canvas: Canvas,
+        cx: Float,
+        cy: Float,
+        animProgress: Float,
+        startP: Float = 0f,
+        endP: Float = 1f,
+        slideUpDistance: Float = 0f,
+        block: () -> Unit
+    ) {
+        if (animProgress >= 1f) {
+            block()
+            return
         }
 
-        // Bottom Card: Forecast or stats
-        val btmW = w * 0.92f
-        drawRoundedCard(canvas, w / 2f, btmCy, btmW, btmCardH, btmCardH * 0.38f, btmTiltAngle, palette.tertiaryBgColor)
+        val tau = when {
+            animProgress <= startP -> 0f
+            animProgress >= endP -> 1f
+            else -> (animProgress - startP) / (endP - startP)
+        }
 
-        val btmContentAngle = btmTiltAngle * 0.75f
+        if (tau <= 0.001f) {
+            return
+        }
 
-        // Expanded 4x3 has 6 forecast slots, 3x3 has 4 forecast slots
-        val forecastItems = if (is4x3) {
-            weather.hourlyForecasts.take(6)
+        // Smooth continuous sinusoidal Jelly spring curve
+        val scale = if (tau < 0.72f) {
+            val t = tau / 0.72f
+            0.80f + 0.24f * sin(t * (Math.PI / 2).toFloat())
         } else {
-            weather.hourlyForecasts.take(4)
+            val t = (tau - 0.72f) / 0.28f
+            1.04f - 0.04f * (0.5f - 0.5f * cos(t * Math.PI.toFloat()))
         }
 
-        val count = forecastItems.size
-        val colWidth = if (count > 0) (btmW * 0.88f) / count.toFloat() else btmW * 0.22f
-        val startX = (w / 2f) - (colWidth * (count - 1) / 2f)
+        val alpha = (0.20f + 0.80f * sin(tau * (Math.PI / 2).toFloat())).coerceIn(0f, 1f)
+        val alphaInt = (alpha * 255).toInt().coerceIn(0, 255)
+        val offsetY = (1f - sin(tau * (Math.PI / 2).toFloat())) * slideUpDistance
 
-        for (k in 0 until count) {
-            val item = forecastItems[k]
-            val itemX = startX + k * colWidth
-
-            drawFittedSingleLineText(
-                canvas,
-                item.timeLabel,
-                itemX,
-                btmCy - btmCardH * 0.29f,
-                maxSizePx = btmCardH * 0.19f,
-                maxWidth = colWidth * 0.90f,
-                textColor = (0xBBFFFFFF.toInt() and palette.textColor),
-                contentAngleDeg = btmContentAngle
-            )
-
-            val miniIconSize = (btmCardH * 0.30f).toInt()
-            drawDrawable(context, canvas, item.iconResId, itemX.toInt(), btmCy.toInt(), miniIconSize, miniIconSize, contentAngleDeg = btmContentAngle)
-
-            drawFittedSingleLineText(
-                canvas,
-                item.tempLabel,
-                itemX,
-                btmCy + btmCardH * 0.30f,
-                maxSizePx = btmCardH * 0.21f,
-                maxWidth = colWidth * 0.90f,
-                textColor = palette.textColor,
-                isBold = true,
-                contentAngleDeg = btmContentAngle
-            )
+        val saveCount = canvas.saveLayerAlpha(null, alphaInt)
+        canvas.translate(0f, offsetY)
+        canvas.scale(scale, scale, cx, cy)
+        try {
+            block()
+        } finally {
+            canvas.restoreToCount(saveCount)
         }
     }
 

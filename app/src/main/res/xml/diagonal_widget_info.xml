@@ -10,7 +10,7 @@
     android:maxResizeWidth="500dp"
     android:maxResizeHeight="500dp"
     android:previewImage="@drawable/shape_diagonal_tilted_pill"
-    android:previewLayout="@layout/widget_diagonal_2x2"
+    android:previewLayout="@layout/widget_canvas_container"
     android:resizeMode="horizontal|vertical"
     android:targetCellWidth="2"
     android:targetCellHeight="2"
