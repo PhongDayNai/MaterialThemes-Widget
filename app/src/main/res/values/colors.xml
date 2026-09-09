@@ -26,6 +26,7 @@
     <color name="widget_bg_primary">#343B14</color>
     <color name="widget_bg_secondary">#4D5620</color>
     <color name="widget_bg_tertiary">#E2E5CC</color>
+    <color name="widget_bg_tertiary_dark">#626E2A</color>
     <color name="widget_container_bg">#00000000</color>
     <!-- Texts -->
     <color name="widget_text_primary">#E7E5CE</color>

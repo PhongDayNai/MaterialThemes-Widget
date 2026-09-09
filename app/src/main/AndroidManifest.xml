@@ -29,7 +29,7 @@
             </intent-filter>
         </activity>
 
-        <!-- Diagonal Widget Provider -->
+        <!-- Diagonal Widget Provider (2x2) -->
         <receiver
             android:name=".widget.DiagonalWidgetProvider"
             android:exported="true"
@@ -45,7 +45,23 @@
                 android:resource="@xml/diagonal_widget_info" />
         </receiver>
 
-        <!-- Organic Shapes Widget Provider -->
+        <!-- Diagonal 4x3 Multi-block Forecast Widget Provider -->
+        <receiver
+            android:name=".widget.Diagonal4x3WidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_diagonal_4x3_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.iatb.materialthemes.ACTION_WIDGET_TICK" />
+                <action android:name="android.intent.action.USER_PRESENT" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/diagonal_4x3_widget_info" />
+        </receiver>
+
+        <!-- Organic Shapes Widget Provider (2x2) -->
         <receiver
             android:name=".widget.OrganicWidgetProvider"
             android:exported="true"
@@ -59,7 +75,21 @@
                 android:resource="@xml/organic_widget_info" />
         </receiver>
 
-        <!-- Scallop & Starburst Widget Provider -->
+        <!-- Organic Wide Widget Provider (4x2) -->
+        <receiver
+            android:name=".widget.OrganicWideWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_organic_4x2_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/organic_4x2_widget_info" />
+        </receiver>
+
+        <!-- Scallop & Starburst Widget Provider (2x2) -->
         <receiver
             android:name=".widget.ScallopWidgetProvider"
             android:exported="true"
@@ -71,6 +101,20 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/scallop_widget_info" />
+        </receiver>
+
+        <!-- Scallop Wide Widget Provider (4x2) -->
+        <receiver
+            android:name=".widget.ScallopWideWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_scallop_4x2_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/scallop_4x2_widget_info" />
         </receiver>
     </application>
 

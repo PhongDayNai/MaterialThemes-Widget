@@ -30,8 +30,11 @@ import com.iatb.materialthemes.data.WeatherRepository
 import com.iatb.materialthemes.data.WidgetContentMode
 import com.iatb.materialthemes.render.WidgetCanvasRenderer
 import com.iatb.materialthemes.widget.DiagonalWidgetProvider
+import com.iatb.materialthemes.widget.Diagonal4x3WidgetProvider
 import com.iatb.materialthemes.widget.OrganicWidgetProvider
+import com.iatb.materialthemes.widget.OrganicWideWidgetProvider
 import com.iatb.materialthemes.widget.ScallopWidgetProvider
+import com.iatb.materialthemes.widget.ScallopWideWidgetProvider
 import com.iatb.materialthemes.widget.WidgetUpdateScheduler
 
 class MainActivity : AppCompatActivity() {
@@ -360,15 +363,33 @@ class MainActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (appWidgetManager.isRequestPinAppWidgetSupported) {
                 val category = viewModel.category.value ?: WidgetCategory.DIAGONAL
+                val size = viewModel.size.value ?: WidgetSize.SIZE_2X2
                 val providerClass = when (category) {
-                    WidgetCategory.DIAGONAL -> DiagonalWidgetProvider::class.java
-                    WidgetCategory.ORGANIC -> OrganicWidgetProvider::class.java
-                    WidgetCategory.SCALLOP -> ScallopWidgetProvider::class.java
+                    WidgetCategory.DIAGONAL -> {
+                        if (size == WidgetSize.SIZE_4X3 || size == WidgetSize.SIZE_3X3) {
+                            Diagonal4x3WidgetProvider::class.java
+                        } else {
+                            DiagonalWidgetProvider::class.java
+                        }
+                    }
+                    WidgetCategory.ORGANIC -> {
+                        if (size == WidgetSize.SIZE_4X2 || size == WidgetSize.SIZE_3X2 || size == WidgetSize.SIZE_4X3 || size == WidgetSize.SIZE_3X3) {
+                            OrganicWideWidgetProvider::class.java
+                        } else {
+                            OrganicWidgetProvider::class.java
+                        }
+                    }
+                    WidgetCategory.SCALLOP -> {
+                        if (size == WidgetSize.SIZE_4X2 || size == WidgetSize.SIZE_3X2 || size == WidgetSize.SIZE_4X3 || size == WidgetSize.SIZE_3X3) {
+                            ScallopWideWidgetProvider::class.java
+                        } else {
+                            ScallopWidgetProvider::class.java
+                        }
+                    }
                 }
                 val provider = ComponentName(this, providerClass)
 
                 val extras = if (category == WidgetCategory.DIAGONAL) {
-                    val size = viewModel.size.value ?: WidgetSize.SIZE_2X2
                     val angle = viewModel.angle.value ?: -45f
                     val palette = viewModel.palette.value ?: ColorPalette.OLIVE
                     val mode = viewModel.contentMode.value ?: WidgetContentMode.WEATHER

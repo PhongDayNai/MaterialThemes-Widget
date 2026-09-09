@@ -3,39 +3,56 @@
     android:id="@+id/widget_diagonal_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@android:color/transparent"
-    android:padding="6dp">
+    android:background="@android:color/transparent">
 
-    <!-- Tilted Diagonal Pill Shape (Exact Google Pixel Weather layout) -->
+    <!-- Mathematically Precise Tilted Pill Capsule (-45 degrees, matching Canvas drawTiltedPill) -->
     <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@drawable/shape_diagonal_tilted_pill">
+        android:layout_width="136dp"
+        android:layout_height="76dp"
+        android:layout_gravity="center"
+        android:background="@drawable/shape_pill_primary"
+        android:rotation="-45">
 
-        <!-- Temperature (Upper Right / Center) -->
-        <TextView
-            android:id="@+id/tv_temp"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="top|end"
-            android:layout_marginTop="16dp"
-            android:layout_marginEnd="18dp"
-            android:includeFontPadding="false"
-            android:text="@string/sample_temp_11"
-            android:textColor="@color/widget_text_primary"
-            android:textSize="54sp"
-            android:fontFamily="sans-serif-light"
-            android:textStyle="normal" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
 
-        <!-- Weather Icon (Lower Left) -->
-        <ImageView
-            android:id="@+id/img_weather"
-            android:layout_width="46dp"
-            android:layout_height="46dp"
-            android:layout_gravity="bottom|start"
-            android:layout_marginStart="18dp"
-            android:layout_marginBottom="16dp"
-            android:contentDescription="@string/sample_weather_condition"
-            android:src="@drawable/ic_weather_night_cloudy" />
+            <!-- Left Lobe (Bottom-Left on screen after -45 deg parent rotation) -->
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <ImageView
+                    android:id="@+id/img_weather"
+                    android:layout_width="34dp"
+                    android:layout_height="34dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@string/sample_weather_condition"
+                    android:rotation="30"
+                    android:src="@drawable/ic_weather_sunny" />
+            </FrameLayout>
+
+            <!-- Right Lobe (Top-Right on screen after -45 deg parent rotation) -->
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1">
+
+                <TextView
+                    android:id="@+id/tv_temp"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:fontFamily="sans-serif-medium"
+                    android:includeFontPadding="false"
+                    android:rotation="30"
+                    android:text="@string/sample_temp_large"
+                    android:textColor="@color/widget_text_primary"
+                    android:textSize="32sp"
+                    android:textStyle="bold" />
+            </FrameLayout>
+        </LinearLayout>
     </FrameLayout>
 </FrameLayout>

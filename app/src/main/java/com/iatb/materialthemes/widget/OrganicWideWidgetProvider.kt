@@ -3,6 +3,7 @@ package com.iatb.materialthemes.widget
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -12,7 +13,7 @@ import android.widget.RemoteViews
 import com.iatb.materialthemes.MainActivity
 import com.iatb.materialthemes.R
 
-class OrganicWidgetProvider : AppWidgetProvider() {
+class OrganicWideWidgetProvider : AppWidgetProvider() {
 
     override fun onUpdate(
         context: Context,
@@ -36,12 +37,11 @@ class OrganicWidgetProvider : AppWidgetProvider() {
     companion object {
         fun updateAllWidgets(context: Context) {
             val appWidgetManager = AppWidgetManager.getInstance(context)
-            val component = android.content.ComponentName(context, OrganicWidgetProvider::class.java)
+            val component = ComponentName(context, OrganicWideWidgetProvider::class.java)
             val ids = appWidgetManager.getAppWidgetIds(component)
             for (id in ids) {
                 updateAppWidget(context, appWidgetManager, id)
             }
-            OrganicWideWidgetProvider.updateAllWidgets(context)
         }
 
         fun updateAppWidget(
@@ -59,18 +59,16 @@ class OrganicWidgetProvider : AppWidgetProvider() {
             appWidgetId: Int
         ): RemoteViews {
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                // Multi-size RemoteViews for Android 12+ (API 31+)
                 val viewMapping = mapOf(
-                    SizeF(110f, 110f) to createViews(context, R.layout.widget_organic_2x2),
                     SizeF(200f, 110f) to createViews(context, R.layout.widget_organic_4x2),
+                    SizeF(200f, 200f) to createViews(context, R.layout.widget_organic_3x3),
                     SizeF(110f, 180f) to createViews(context, R.layout.widget_organic_2x3),
-                    SizeF(200f, 200f) to createViews(context, R.layout.widget_organic_3x3)
+                    SizeF(110f, 110f) to createViews(context, R.layout.widget_organic_2x2)
                 )
                 RemoteViews(viewMapping)
             } else {
-                // Fallback for Android < 12
                 val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
-                val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 110)
+                val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 200)
                 val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 110)
                 val layoutId = resolveLayout(minWidth, minHeight)
                 createViews(context, layoutId)
@@ -79,10 +77,10 @@ class OrganicWidgetProvider : AppWidgetProvider() {
 
         private fun resolveLayout(minWidth: Int, minHeight: Int): Int {
             return when {
-                minWidth >= 180 && minHeight < 160 -> R.layout.widget_organic_4x2
                 minWidth >= 180 && minHeight >= 160 -> R.layout.widget_organic_3x3
+                minWidth >= 180 && minHeight < 160 -> R.layout.widget_organic_4x2
                 minWidth < 160 && minHeight >= 160 -> R.layout.widget_organic_2x3
-                else -> R.layout.widget_organic_2x2
+                else -> R.layout.widget_organic_4x2
             }
         }
 

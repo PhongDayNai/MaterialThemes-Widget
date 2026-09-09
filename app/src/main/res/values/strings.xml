@@ -2,12 +2,18 @@
     <string name="app_name">Material Themes</string>
 
     <!-- Widget Info & Titles -->
-    <string name="widget_diagonal_name">Diagonal Clock &amp; Weather</string>
+    <string name="widget_diagonal_name">Diagonal Clock &amp; Weather (2x2)</string>
     <string name="widget_diagonal_description">Material You clock and weather widget featuring modern slanted cuts and dynamic colors.</string>
-    <string name="widget_organic_name">Material You Organic Shapes</string>
-    <string name="widget_organic_description">Pixel style floral clover, pebble, and arch shaped widgets with dynamic colors.</string>
-    <string name="widget_scallop_name">Material You Scallop &amp; Star</string>
-    <string name="widget_scallop_description">Iconic 12-petal flower, 8-point starburst, and diagonal leaf shapes.</string>
+    <string name="widget_diagonal_4x3_name">Diagonal Multi-Block Forecast (4x3)</string>
+    <string name="widget_diagonal_4x3_description">Material You multi-block widget with clock, current weather, and hourly forecast.</string>
+    <string name="widget_organic_name">Organic Shapes Clock (2x2)</string>
+    <string name="widget_organic_description">Pixel style floral clover and pebble clock widget with dynamic colors.</string>
+    <string name="widget_organic_4x2_name">Organic Pill &amp; Clock (4x2)</string>
+    <string name="widget_organic_4x2_description">Material You dual-pill widget with floral clock and pebble weather card.</string>
+    <string name="widget_scallop_name">Scallop &amp; Star Clock (2x2)</string>
+    <string name="widget_scallop_description">Iconic 12-petal flower and 8-point starburst clock widget with dynamic colors.</string>
+    <string name="widget_scallop_4x2_name">Scallop &amp; Leaf Forecast (4x2)</string>
+    <string name="widget_scallop_4x2_description">Material You multi-shape widget with 12-petal clock and leaf forecast card.</string>
 
     <!-- Size Labels -->
     <string name="size_2x2">2 × 2</string>
@@ -88,4 +94,6 @@
     <string name="weather_snow">Snow</string>
     <string name="weather_fog">Fog</string>
     <string name="sample_next_alarm">Alarm: 07:00 AM</string>
+    <string name="sample_date_display">Th 4, 9 thg 9</string>
+    <string name="sample_temp_range_slash">31° / 23°</string>
 </resources>

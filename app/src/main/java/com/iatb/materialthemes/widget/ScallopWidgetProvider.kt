@@ -34,6 +34,16 @@ class ScallopWidgetProvider : AppWidgetProvider() {
     }
 
     companion object {
+        fun updateAllWidgets(context: Context) {
+            val appWidgetManager = AppWidgetManager.getInstance(context)
+            val component = android.content.ComponentName(context, ScallopWidgetProvider::class.java)
+            val ids = appWidgetManager.getAppWidgetIds(component)
+            for (id in ids) {
+                updateAppWidget(context, appWidgetManager, id)
+            }
+            ScallopWideWidgetProvider.updateAllWidgets(context)
+        }
+
         fun updateAppWidget(
             context: Context,
             appWidgetManager: AppWidgetManager,
