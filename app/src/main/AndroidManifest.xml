@@ -21,6 +21,34 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Diagonal Widget Provider -->
+        <receiver
+            android:name=".widget.DiagonalWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_diagonal_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/diagonal_widget_info" />
+        </receiver>
+
+        <!-- Organic Shapes Widget Provider -->
+        <receiver
+            android:name=".widget.OrganicWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_organic_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/organic_widget_info" />
+        </receiver>
     </application>
 
 </manifest>

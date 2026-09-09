@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_organic_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="8dp">
+
+    <!-- 4-Petal Clover / Flower Centerpiece -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/shape_flower_clover"
+        android:padding="16dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:gravity="center"
+            android:orientation="vertical">
+
+            <TextClock
+                android:id="@+id/clock_hour"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:format12Hour="hh"
+                android:format24Hour="HH"
+                android:includeFontPadding="false"
+                android:textColor="@color/widget_text_primary"
+                android:textSize="40sp"
+                android:textStyle="bold" />
+
+            <TextClock
+                android:id="@+id/clock_minute"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:format12Hour="mm"
+                android:format24Hour="mm"
+                android:includeFontPadding="false"
+                android:textColor="@color/widget_text_accent"
+                android:textSize="40sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+    </FrameLayout>
+</FrameLayout>
