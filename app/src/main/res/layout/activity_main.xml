@@ -175,8 +175,9 @@
             <FrameLayout
                 android:id="@+id/preview_container"
                 android:layout_width="match_parent"
-                android:layout_height="220dp"
-                android:background="?attr/colorSurfaceVariant"
+                android:layout_height="wrap_content"
+                android:minHeight="200dp"
+                android:background="@color/preview_wallpaper_bg"
                 android:padding="16dp" />
         </com.google.android.material.card.MaterialCardView>
 

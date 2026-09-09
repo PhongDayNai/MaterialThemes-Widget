@@ -34,6 +34,7 @@
     <string name="resize_tip">Tip: After placing on your launcher, long press and drag edges to resize between 2x2, 4x2, 3x3, 2x4, etc.</string>
 
     <!-- Sample Weather & Date Strings for Widgets -->
+    <string name="sample_temp_11">11°</string>
     <string name="sample_temp_large">28°</string>
     <string name="sample_temp_small">28°C</string>
     <string name="sample_temp_range">H: 31° • L: 23°</string>

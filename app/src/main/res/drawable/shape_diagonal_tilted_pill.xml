@@ -1,0 +1,10 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+    <!-- Tilted Diagonal Pill (Exact Google Pixel Weather shape at 45 degrees) -->
+    <path
+        android:fillColor="@color/widget_bg_primary"
+        android:pathData="M 46,16 L 16,46 A 27,27 0 0,0 54,84 L 84,54 A 27,27 0 0,0 46,16 Z" />
+</vector>

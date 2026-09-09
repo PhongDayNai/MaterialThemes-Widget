@@ -22,23 +22,22 @@
     <color name="md_theme_light_onSurfaceVariant">#3F484A</color>
     <color name="md_theme_light_outline">#6F797A</color>
 
-    <!-- Widget Specific Semantic Colors (Light Mode) -->
-    <!-- Primary diagonal side (Fresh teal/cyan container) -->
-    <color name="widget_bg_primary">#D1F4F9</color>
-    <!-- Secondary diagonal side / contrasting slice (Warm peach/apricot container) -->
-    <color name="widget_bg_secondary">#FFE0D3</color>
-    <!-- Tertiary badge / pill container -->
-    <color name="widget_bg_tertiary">#E2EBED</color>
-    <!-- Card outer container -->
-    <color name="widget_container_bg">#EDF6F8</color>
+    <!-- Widget Specific Semantic Colors (Pixel Olive / Material You) -->
+    <color name="widget_bg_primary">#343B14</color>
+    <color name="widget_bg_secondary">#4D5620</color>
+    <color name="widget_bg_tertiary">#E2E5CC</color>
+    <color name="widget_container_bg">#00000000</color>
     <!-- Texts -->
-    <color name="widget_text_primary">#002022</color>
-    <color name="widget_text_secondary">#3E4E52</color>
-    <color name="widget_text_accent">#006972</color>
-    <color name="widget_text_on_secondary">#3E1B0E</color>
+    <color name="widget_text_primary">#E7E5CE</color>
+    <color name="widget_text_secondary">#C6C8B0</color>
+    <color name="widget_text_accent">#CCD2A3</color>
+    <color name="widget_text_on_secondary">#E7E5CE</color>
     <!-- Accents & Icons -->
-    <color name="widget_accent_sun">#E0783E</color>
-    <color name="widget_accent_rain">#007EA7</color>
-    <color name="widget_accent_pill">#C6E9ED</color>
-    <color name="widget_border_subtle">#1A000000</color>
+    <color name="widget_accent_sun">#F9BA48</color>
+    <color name="widget_accent_rain">#8EBAE5</color>
+    <color name="widget_accent_pill">#474F1C</color>
+    <color name="widget_border_subtle">#00000000</color>
+
+    <!-- Preview Wallpaper Background (from user screenshot) -->
+    <color name="preview_wallpaper_bg">#B6AF62</color>
 </resources>

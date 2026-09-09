@@ -10,6 +10,7 @@
     android:maxResizeWidth="500dp"
     android:maxResizeHeight="500dp"
     android:previewImage="@drawable/shape_scallop_12"
+    android:previewLayout="@layout/widget_scallop_2x2"
     android:resizeMode="horizontal|vertical"
     android:targetCellWidth="2"
     android:targetCellHeight="2"

@@ -19,22 +19,21 @@
     <color name="md_theme_dark_outline">#899294</color>
 
     <!-- Widget Specific Semantic Colors (Dark Mode) -->
-    <!-- Primary diagonal side (Deep teal tone) -->
-    <color name="widget_bg_primary">#16373D</color>
-    <!-- Secondary diagonal side / contrasting slice (Warm deep bronze/amber) -->
-    <color name="widget_bg_secondary">#3F261B</color>
-    <!-- Tertiary badge / pill container -->
-    <color name="widget_bg_tertiary">#222B2D</color>
-    <!-- Card outer container -->
-    <color name="widget_container_bg">#181F21</color>
+    <color name="widget_bg_primary">#272D0F</color>
+    <color name="widget_bg_secondary">#3C441A</color>
+    <color name="widget_bg_tertiary">#1E2209</color>
+    <color name="widget_container_bg">#00000000</color>
     <!-- Texts -->
-    <color name="widget_text_primary">#E1F5F8</color>
-    <color name="widget_text_secondary">#A2B6BA</color>
-    <color name="widget_text_accent">#82D3E0</color>
-    <color name="widget_text_on_secondary">#FFDAC9</color>
+    <color name="widget_text_primary">#E7E5CE</color>
+    <color name="widget_text_secondary">#B9BC9F</color>
+    <color name="widget_text_accent">#CCD2A3</color>
+    <color name="widget_text_on_secondary">#E7E5CE</color>
     <!-- Accents & Icons -->
-    <color name="widget_accent_sun">#FFB68F</color>
-    <color name="widget_accent_rain">#62C6E8</color>
-    <color name="widget_accent_pill">#283D42</color>
-    <color name="widget_border_subtle">#33FFFFFF</color>
+    <color name="widget_accent_sun">#F9BA48</color>
+    <color name="widget_accent_rain">#8EBAE5</color>
+    <color name="widget_accent_pill">#353B15</color>
+    <color name="widget_border_subtle">#00000000</color>
+
+    <!-- Preview Canvas Wallpaper (Dark Mode) -->
+    <color name="preview_wallpaper_bg">#4E4B28</color>
 </resources>

@@ -98,10 +98,27 @@ class MainActivity : AppCompatActivity() {
         val layoutId = viewModel.getPreviewLayoutId()
         val view = LayoutInflater.from(this).inflate(layoutId, previewContainer, false)
 
-        val params = FrameLayout.LayoutParams(
-            FrameLayout.LayoutParams.MATCH_PARENT,
+        val density = resources.displayMetrics.density
+        val (widthDp, heightDp) = when (viewModel.size.value) {
+            WidgetSize.SIZE_2X2 -> 180 to 180
+            WidgetSize.SIZE_3X2 -> 260 to 170
+            WidgetSize.SIZE_4X2 -> FrameLayout.LayoutParams.MATCH_PARENT to 170
+            WidgetSize.SIZE_2X3 -> 180 to 260
+            WidgetSize.SIZE_2X4 -> 180 to 330
+            WidgetSize.SIZE_3X3 -> 270 to 270
+            null -> FrameLayout.LayoutParams.MATCH_PARENT to 170
+        }
+
+        val widthPx = if (widthDp == FrameLayout.LayoutParams.MATCH_PARENT) {
             FrameLayout.LayoutParams.MATCH_PARENT
-        )
+        } else {
+            (widthDp * density).toInt()
+        }
+        val heightPx = (heightDp * density).toInt()
+
+        val params = FrameLayout.LayoutParams(widthPx, heightPx).apply {
+            gravity = android.view.Gravity.CENTER
+        }
         previewContainer.addView(view, params)
     }
 
