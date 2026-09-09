@@ -70,5 +70,19 @@
     <string name="sample_forecast_temp_3">27°</string>
     <string name="sample_forecast_time_4">21:00</string>
     <string name="sample_forecast_temp_4">25°</string>
+    <string name="sample_forecast_time_5">00:00</string>
+    <string name="sample_forecast_temp_5">23°</string>
+    <string name="sample_forecast_time_6">03:00</string>
+    <string name="sample_forecast_temp_6">22°</string>
+    <!-- Dynamic Weather Strings -->
+    <string name="weather_clear">Clear</string>
+    <string name="weather_partly_cloudy">Partly Cloudy</string>
+    <string name="weather_cloudy">Cloudy</string>
+    <string name="weather_overcast">Overcast</string>
+    <string name="weather_rainy">Rainy</string>
+    <string name="weather_drizzle">Drizzle</string>
+    <string name="weather_thunder">Thunderstorm</string>
+    <string name="weather_snow">Snow</string>
+    <string name="weather_fog">Fog</string>
     <string name="sample_next_alarm">Alarm: 07:00 AM</string>
 </resources>
