@@ -72,9 +72,10 @@ class DiagonalWidgetProvider : AppWidgetProvider() {
             size: WidgetSize,
             angle: Float,
             palette: ColorPalette,
-            mode: WidgetContentMode
+            mode: WidgetContentMode,
+            transparency: Int = WidgetPreferences.getTransparency(context)
         ): RemoteViews {
-            return createRenderedView(context, size, angle, palette, mode)
+            return createRenderedView(context, size, angle, palette, mode, transparency)
         }
 
         fun updateAllWidgets(context: Context) {
@@ -103,16 +104,17 @@ class DiagonalWidgetProvider : AppWidgetProvider() {
             val angle = WidgetPreferences.getRotationAngle(context)
             val palette = WidgetPreferences.getColorPalette(context)
             val mode = WidgetPreferences.getContentMode(context)
+            val transparency = WidgetPreferences.getTransparency(context)
 
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 val viewMapping = mapOf(
-                    SizeF(110f, 110f) to createRenderedView(context, WidgetSize.SIZE_2X2, angle, palette, mode),
-                    SizeF(200f, 110f) to createRenderedView(context, WidgetSize.SIZE_3X2, angle, palette, mode),
-                    SizeF(270f, 110f) to createRenderedView(context, WidgetSize.SIZE_4X2, angle, palette, mode),
-                    SizeF(110f, 180f) to createRenderedView(context, WidgetSize.SIZE_2X3, angle, palette, mode),
-                    SizeF(110f, 260f) to createRenderedView(context, WidgetSize.SIZE_2X4, angle, palette, mode),
-                    SizeF(200f, 200f) to createRenderedView(context, WidgetSize.SIZE_3X3, angle, palette, mode),
-                    SizeF(270f, 180f) to createRenderedView(context, WidgetSize.SIZE_4X3, angle, palette, mode)
+                    SizeF(110f, 110f) to createRenderedView(context, WidgetSize.SIZE_2X2, angle, palette, mode, transparency),
+                    SizeF(200f, 110f) to createRenderedView(context, WidgetSize.SIZE_3X2, angle, palette, mode, transparency),
+                    SizeF(270f, 110f) to createRenderedView(context, WidgetSize.SIZE_4X2, angle, palette, mode, transparency),
+                    SizeF(110f, 180f) to createRenderedView(context, WidgetSize.SIZE_2X3, angle, palette, mode, transparency),
+                    SizeF(110f, 260f) to createRenderedView(context, WidgetSize.SIZE_2X4, angle, palette, mode, transparency),
+                    SizeF(200f, 200f) to createRenderedView(context, WidgetSize.SIZE_3X3, angle, palette, mode, transparency),
+                    SizeF(270f, 180f) to createRenderedView(context, WidgetSize.SIZE_4X3, angle, palette, mode, transparency)
                 )
                 RemoteViews(viewMapping)
             } else {
@@ -120,7 +122,7 @@ class DiagonalWidgetProvider : AppWidgetProvider() {
                 val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 110)
                 val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 110)
                 val size = resolveWidgetSize(minWidth, minHeight)
-                createRenderedView(context, size, angle, palette, mode)
+                createRenderedView(context, size, angle, palette, mode, transparency)
             }
         }
 
@@ -141,7 +143,8 @@ class DiagonalWidgetProvider : AppWidgetProvider() {
             size: WidgetSize,
             angle: Float,
             palette: ColorPalette,
-            mode: WidgetContentMode
+            mode: WidgetContentMode,
+            transparency: Int = WidgetPreferences.getTransparency(context)
         ): RemoteViews {
             val views = RemoteViews(context.packageName, R.layout.widget_canvas_container)
 
@@ -165,7 +168,8 @@ class DiagonalWidgetProvider : AppWidgetProvider() {
                 palette,
                 mode,
                 size,
-                weather
+                weather,
+                transparency
             )
 
             views.setImageViewBitmap(R.id.iv_canvas_render, bitmap)

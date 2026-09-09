@@ -6,23 +6,25 @@ import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.view.Gravity
 import android.view.LayoutInflater
-import androidx.core.content.ContextCompat
 import android.widget.FrameLayout
 import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
-import android.content.pm.PackageManager
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.enableEdgeToEdge
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.button.MaterialButtonToggleGroup
+import com.google.android.material.slider.Slider
 import com.iatb.materialthemes.data.ColorPalette
 import com.iatb.materialthemes.data.WeatherRepository
 import com.iatb.materialthemes.data.WidgetContentMode
@@ -41,6 +43,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var toggleContent: MaterialButtonToggleGroup
     private lateinit var togglePalette: MaterialButtonToggleGroup
     private lateinit var toggleSize: MaterialButtonToggleGroup
+    private lateinit var sliderTransparency: Slider
+    private lateinit var tvTransparencyValue: TextView
     private lateinit var btnApply: MaterialButton
     private lateinit var btnPin: MaterialButton
 
@@ -71,6 +75,7 @@ class MainActivity : AppCompatActivity() {
         initViews()
         setupListeners()
         observeViewModel()
+        syncUiWithViewModel()
 
         checkLocationPermission()
         WeatherRepository.refreshWeather(this)
@@ -123,6 +128,8 @@ class MainActivity : AppCompatActivity() {
         toggleContent = findViewById(R.id.toggle_content)
         togglePalette = findViewById(R.id.toggle_palette)
         toggleSize = findViewById(R.id.toggle_size)
+        sliderTransparency = findViewById(R.id.slider_transparency)
+        tvTransparencyValue = findViewById(R.id.tv_transparency_value)
         btnApply = findViewById(R.id.btn_apply)
         btnPin = findViewById(R.id.btn_pin)
 
@@ -177,6 +184,7 @@ class MainActivity : AppCompatActivity() {
                     R.id.btn_palette_slate -> ColorPalette.SLATE
                     R.id.btn_palette_amber -> ColorPalette.AMBER
                     R.id.btn_palette_crimson -> ColorPalette.CRIMSON
+                    R.id.btn_palette_dynamic -> ColorPalette.DYNAMIC
                     else -> ColorPalette.OLIVE
                 }
                 viewModel.setColorPalette(palette)
@@ -195,6 +203,12 @@ class MainActivity : AppCompatActivity() {
                     R.id.btn_size_4x3 -> viewModel.setSize(WidgetSize.SIZE_4X3)
                 }
             }
+        }
+
+        sliderTransparency.addOnChangeListener { _, value, _ ->
+            val intVal = value.toInt()
+            viewModel.setTransparency(intVal)
+            tvTransparencyValue.text = getString(R.string.transparency_value_format, intVal)
         }
 
         btnApply.setOnClickListener {
@@ -216,6 +230,72 @@ class MainActivity : AppCompatActivity() {
         viewModel.angle.observe(this) { updatePreview() }
         viewModel.palette.observe(this) { updatePreview() }
         viewModel.contentMode.observe(this) { updatePreview() }
+        viewModel.transparency.observe(this) { transparency ->
+            tvTransparencyValue.text = getString(R.string.transparency_value_format, transparency)
+            updatePreview()
+        }
+    }
+
+    private fun syncUiWithViewModel() {
+        // 1. Category
+        val catBtnId = when (viewModel.category.value) {
+            WidgetCategory.DIAGONAL -> R.id.btn_category_diagonal
+            WidgetCategory.ORGANIC -> R.id.btn_category_organic
+            WidgetCategory.SCALLOP -> R.id.btn_category_scallop
+            null -> R.id.btn_category_diagonal
+        }
+        toggleCategory.check(catBtnId)
+
+        // 2. Angle
+        val angleBtnId = when (viewModel.angle.value) {
+            -45f -> R.id.btn_angle_minus_45
+            -30f -> R.id.btn_angle_minus_30
+            0f -> R.id.btn_angle_0
+            30f -> R.id.btn_angle_30
+            45f -> R.id.btn_angle_45
+            60f -> R.id.btn_angle_60
+            else -> R.id.btn_angle_minus_45
+        }
+        toggleAngle.check(angleBtnId)
+
+        // 3. Content
+        val contentBtnId = when (viewModel.contentMode.value) {
+            WidgetContentMode.WEATHER -> R.id.btn_content_weather
+            WidgetContentMode.CLOCK -> R.id.btn_content_clock
+            WidgetContentMode.COMBO -> R.id.btn_content_combo
+            null -> R.id.btn_content_weather
+        }
+        toggleContent.check(contentBtnId)
+
+        // 4. Palette
+        val paletteBtnId = when (viewModel.palette.value) {
+            ColorPalette.OLIVE -> R.id.btn_palette_olive
+            ColorPalette.TEAL -> R.id.btn_palette_teal
+            ColorPalette.SLATE -> R.id.btn_palette_slate
+            ColorPalette.AMBER -> R.id.btn_palette_amber
+            ColorPalette.CRIMSON -> R.id.btn_palette_crimson
+            ColorPalette.DYNAMIC -> R.id.btn_palette_dynamic
+            null -> R.id.btn_palette_olive
+        }
+        togglePalette.check(paletteBtnId)
+
+        // 5. Size
+        val sizeBtnId = when (viewModel.size.value) {
+            WidgetSize.SIZE_2X2 -> R.id.btn_size_2x2
+            WidgetSize.SIZE_3X2 -> R.id.btn_size_3x2
+            WidgetSize.SIZE_4X2 -> R.id.btn_size_4x2
+            WidgetSize.SIZE_2X3 -> R.id.btn_size_2x3
+            WidgetSize.SIZE_3X3 -> R.id.btn_size_3x3
+            WidgetSize.SIZE_2X4 -> R.id.btn_size_2x4
+            WidgetSize.SIZE_4X3 -> R.id.btn_size_4x3
+            null -> R.id.btn_size_2x2
+        }
+        toggleSize.check(sizeBtnId)
+
+        // 6. Transparency
+        val transparencyVal = (viewModel.transparency.value ?: 100).toFloat()
+        sliderTransparency.value = transparencyVal
+        tvTransparencyValue.text = getString(R.string.transparency_value_format, transparencyVal.toInt())
     }
 
     private fun updatePreview() {
@@ -241,9 +321,20 @@ class MainActivity : AppCompatActivity() {
             val angle = viewModel.angle.value ?: -45f
             val palette = viewModel.palette.value ?: ColorPalette.OLIVE
             val mode = viewModel.contentMode.value ?: WidgetContentMode.WEATHER
+            val transparency = viewModel.transparency.value ?: 100
             val weather = WeatherRepository.getWeatherData(this)
 
-            val bitmap = WidgetCanvasRenderer.render(this, widthPx, heightPx, angle, palette, mode, size, weather)
+            val bitmap = WidgetCanvasRenderer.render(
+                this,
+                widthPx,
+                heightPx,
+                angle,
+                palette,
+                mode,
+                size,
+                weather,
+                transparency
+            )
             val imageView = ImageView(this).apply {
                 setImageBitmap(bitmap)
                 scaleType = ImageView.ScaleType.FIT_CENTER
@@ -281,7 +372,15 @@ class MainActivity : AppCompatActivity() {
                     val angle = viewModel.angle.value ?: -45f
                     val palette = viewModel.palette.value ?: ColorPalette.OLIVE
                     val mode = viewModel.contentMode.value ?: WidgetContentMode.WEATHER
-                    val previewViews = DiagonalWidgetProvider.createPreviewRemoteViews(this, size, angle, palette, mode)
+                    val transparency = viewModel.transparency.value ?: 100
+                    val previewViews = DiagonalWidgetProvider.createPreviewRemoteViews(
+                        this,
+                        size,
+                        angle,
+                        palette,
+                        mode,
+                        transparency
+                    )
                     Bundle().apply {
                         putParcelable(AppWidgetManager.EXTRA_APPWIDGET_PREVIEW, previewViews)
                     }

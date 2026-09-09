@@ -42,10 +42,16 @@ class MainViewModel : ViewModel() {
     private val _contentMode = MutableLiveData(WidgetContentMode.WEATHER)
     val contentMode: LiveData<WidgetContentMode> = _contentMode
 
+    private val _transparency = MutableLiveData(100)
+    val transparency: LiveData<Int> = _transparency
+
     fun initFromPreferences(context: Context) {
+        _category.value = WidgetPreferences.getCategory(context)
+        _size.value = WidgetPreferences.getSize(context)
         _angle.value = WidgetPreferences.getRotationAngle(context)
         _palette.value = WidgetPreferences.getColorPalette(context)
         _contentMode.value = WidgetPreferences.getContentMode(context)
+        _transparency.value = WidgetPreferences.getTransparency(context)
     }
 
     fun setCategory(newCategory: WidgetCategory) {
@@ -78,10 +84,19 @@ class MainViewModel : ViewModel() {
         }
     }
 
+    fun setTransparency(newTransparency: Int) {
+        if (_transparency.value != newTransparency) {
+            _transparency.value = newTransparency.coerceIn(0, 100)
+        }
+    }
+
     fun saveAndApply(context: Context) {
+        _category.value?.let { WidgetPreferences.setCategory(context, it) }
+        _size.value?.let { WidgetPreferences.setSize(context, it) }
         _angle.value?.let { WidgetPreferences.setRotationAngle(context, it) }
         _palette.value?.let { WidgetPreferences.setColorPalette(context, it) }
         _contentMode.value?.let { WidgetPreferences.setContentMode(context, it) }
+        _transparency.value?.let { WidgetPreferences.setTransparency(context, it) }
         DiagonalWidgetProvider.updateAllWidgets(context)
     }
 
