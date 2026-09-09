@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="format_clock_date_short">EEE, d \'thg\' M</string>
+    <string name="format_clock_date_full">EEEE, d \'tháng\' M</string>
+    <string name="sample_date_display">Th 4, 9 thg 9</string>
+</resources>

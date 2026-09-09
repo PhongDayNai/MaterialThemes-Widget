@@ -96,4 +96,6 @@
     <string name="sample_next_alarm">Alarm: 07:00 AM</string>
     <string name="sample_date_display">Th 4, 9 thg 9</string>
     <string name="sample_temp_range_slash">31° / 23°</string>
+    <string name="format_clock_date_short">EEE, d MMM</string>
+    <string name="format_clock_date_full">EEEE, d MMMM</string>
 </resources>
