@@ -6,6 +6,8 @@
     <string name="widget_diagonal_description">Material You clock and weather widget featuring modern slanted cuts and dynamic colors.</string>
     <string name="widget_organic_name">Material You Organic Shapes</string>
     <string name="widget_organic_description">Pixel style floral clover, pebble, and arch shaped widgets with dynamic colors.</string>
+    <string name="widget_scallop_name">Material You Scallop &amp; Star</string>
+    <string name="widget_scallop_description">Iconic 12-petal flower, 8-point starburst, and diagonal leaf shapes.</string>
 
     <!-- Size Labels -->
     <string name="size_2x2">2 × 2</string>
@@ -21,6 +23,7 @@
     <string name="dashboard_subtitle">Customize and pin responsive Material widgets to your home screen</string>
     <string name="category_diagonal">Diagonal Cut</string>
     <string name="category_organic">Organic Shapes</string>
+    <string name="category_scallop">Scallop &amp; Star</string>
     <string name="button_pin_widget">Pin to Home Screen</string>
     <string name="pin_widget_dialog_title">Add Widget to Launcher</string>
     <string name="pin_widget_success">Widget pin request sent to launcher</string>

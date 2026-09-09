@@ -49,6 +49,20 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/organic_widget_info" />
         </receiver>
+
+        <!-- Scallop & Starburst Widget Provider -->
+        <receiver
+            android:name=".widget.ScallopWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_scallop_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/scallop_widget_info" />
+        </receiver>
     </application>
 
 </manifest>
