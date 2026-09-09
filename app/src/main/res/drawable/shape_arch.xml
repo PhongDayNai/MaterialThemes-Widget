@@ -4,6 +4,6 @@
     android:viewportWidth="100"
     android:viewportHeight="120">
     <path
-        android:fillColor="@color/widget_bg_tertiary"
+        android:fillColor="@color/widget_bg_secondary"
         android:pathData="M 0,50 A 50,50 0 0,1 100,50 L 100,102 A 18,18 0 0,1 82,120 L 18,120 A 18,18 0 0,1 0,102 Z" />
 </vector>
