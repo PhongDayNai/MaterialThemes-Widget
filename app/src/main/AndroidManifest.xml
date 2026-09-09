@@ -10,6 +10,7 @@
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
 
     <application
+        android:name=".MaterialThemesApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -38,6 +39,8 @@
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
                 <action android:name="com.iatb.materialthemes.ACTION_WIDGET_TICK" />
                 <action android:name="android.intent.action.USER_PRESENT" />
+                <action android:name="android.intent.action.WALLPAPER_CHANGED" />
+                <action android:name="android.intent.action.CONFIGURATION_CHANGED" />
             </intent-filter>
 
             <meta-data
@@ -54,6 +57,8 @@
                 <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
                 <action android:name="com.iatb.materialthemes.ACTION_WIDGET_TICK" />
                 <action android:name="android.intent.action.USER_PRESENT" />
+                <action android:name="android.intent.action.WALLPAPER_CHANGED" />
+                <action android:name="android.intent.action.CONFIGURATION_CHANGED" />
             </intent-filter>
 
             <meta-data

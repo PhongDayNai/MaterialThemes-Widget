@@ -1,5 +1,6 @@
 package com.iatb.materialthemes
 
+import android.app.WallpaperManager
 import android.appwidget.AppWidgetManager
 import android.content.BroadcastReceiver
 import android.content.ComponentName
@@ -7,8 +8,11 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -27,6 +31,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.slider.Slider
 import com.iatb.materialthemes.data.ColorPalette
+import com.iatb.materialthemes.data.DynamicThemeExtractor
 import com.iatb.materialthemes.data.WeatherRepository
 import com.iatb.materialthemes.data.WidgetContentMode
 import com.iatb.materialthemes.render.WidgetCanvasRenderer
@@ -52,6 +57,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var btnApply: MaterialButton
     private lateinit var btnPin: MaterialButton
 
+    private var wallpaperColorsListener: WallpaperManager.OnColorsChangedListener? = null
+
     private val locationPermissionLauncher = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { permissions ->
@@ -64,6 +71,7 @@ class MainActivity : AppCompatActivity() {
 
     private val widgetTickReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context?, intent: Intent?) {
+            DynamicThemeExtractor.invalidateCache()
             updatePreview()
         }
     }
@@ -107,6 +115,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        DynamicThemeExtractor.invalidateCache()
         val filter = IntentFilter(WidgetUpdateScheduler.ACTION_WIDGET_TICK)
         ContextCompat.registerReceiver(
             this,
@@ -114,14 +123,57 @@ class MainActivity : AppCompatActivity() {
             filter,
             ContextCompat.RECEIVER_NOT_EXPORTED
         )
+        setupWallpaperListener()
         updatePreview()
     }
 
     override fun onPause() {
         super.onPause()
+        removeWallpaperListener()
         try {
             unregisterReceiver(widgetTickReceiver)
         } catch (_: Exception) {
+        }
+    }
+
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
+        DynamicThemeExtractor.invalidateCache()
+        updatePreview()
+        DiagonalWidgetProvider.updateAllWidgets(this)
+        OrganicWidgetProvider.updateAllWidgets(this)
+        ScallopWidgetProvider.updateAllWidgets(this)
+    }
+
+    private fun setupWallpaperListener() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            val wm = getSystemService(WallpaperManager::class.java)
+                ?: WallpaperManager.getInstance(this)
+            wallpaperColorsListener = WallpaperManager.OnColorsChangedListener { colors, _ ->
+                DynamicThemeExtractor.onWallpaperColorsChanged(colors)
+                updatePreview()
+                DiagonalWidgetProvider.updateAllWidgets(this)
+                OrganicWidgetProvider.updateAllWidgets(this)
+                ScallopWidgetProvider.updateAllWidgets(this)
+            }
+            try {
+                wallpaperColorsListener?.let {
+                    wm?.addOnColorsChangedListener(it, Handler(Looper.getMainLooper()))
+                }
+            } catch (_: Exception) {
+            }
+        }
+    }
+
+    private fun removeWallpaperListener() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            try {
+                val wm = getSystemService(WallpaperManager::class.java)
+                    ?: WallpaperManager.getInstance(this)
+                wallpaperColorsListener?.let { wm?.removeOnColorsChangedListener(it) }
+            } catch (_: Exception) {
+            }
+            wallpaperColorsListener = null
         }
     }
 

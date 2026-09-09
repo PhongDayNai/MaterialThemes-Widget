@@ -24,7 +24,10 @@ class Diagonal4x3WidgetProvider : AppWidgetProvider() {
             Intent.ACTION_TIME_TICK,
             Intent.ACTION_TIME_CHANGED,
             Intent.ACTION_TIMEZONE_CHANGED,
-            Intent.ACTION_USER_PRESENT -> {
+            Intent.ACTION_USER_PRESENT,
+            Intent.ACTION_WALLPAPER_CHANGED,
+            Intent.ACTION_CONFIGURATION_CHANGED -> {
+                com.iatb.materialthemes.data.DynamicThemeExtractor.invalidateCache()
                 updateAllWidgets4x3(context)
                 WidgetUpdateScheduler.scheduleNextMinuteTick(context)
             }

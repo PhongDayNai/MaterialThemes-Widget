@@ -1,5 +1,6 @@
 package com.iatb.materialthemes.data
 
+import android.app.WallpaperColors
 import android.app.WallpaperManager
 import android.content.Context
 import android.graphics.Color
@@ -16,8 +17,49 @@ data class ResolvedPaletteColors(
 
 object DynamicThemeExtractor {
 
+    @Volatile
+    private var cachedPalette: ResolvedPaletteColors? = null
+
+    fun onWallpaperColorsChanged(colors: WallpaperColors?) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1 && colors != null) {
+            val primaryArgb = colors.primaryColor.toArgb()
+            val secondaryArgb = colors.secondaryColor?.toArgb()
+            val tertiaryArgb = colors.tertiaryColor?.toArgb()
+            cachedPalette = createHarmoniousTones(primaryArgb, secondaryArgb, tertiaryArgb)
+        } else {
+            cachedPalette = null
+        }
+    }
+
+    fun invalidateCache() {
+        cachedPalette = null
+    }
+
     fun getDynamicPalette(context: Context): ResolvedPaletteColors {
-        // 1. Try Android 12+ (API 31+) native Monet system dynamic colors
+        // Return active cached palette if available
+        cachedPalette?.let { return it }
+
+        // 1. Query WallpaperManager real-time wallpaper colors (API 27+)
+        // Directly reflects wallpaper changes instantly without waiting for system Monet overlay compilation
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+            try {
+                val wm = context.getSystemService(WallpaperManager::class.java)
+                    ?: WallpaperManager.getInstance(context)
+                val wpColors = wm.getWallpaperColors(WallpaperManager.FLAG_SYSTEM)
+                if (wpColors != null) {
+                    val primaryArgb = wpColors.primaryColor.toArgb()
+                    val secondaryArgb = wpColors.secondaryColor?.toArgb()
+                    val tertiaryArgb = wpColors.tertiaryColor?.toArgb()
+
+                    val palette = createHarmoniousTones(primaryArgb, secondaryArgb, tertiaryArgb)
+                    cachedPalette = palette
+                    return palette
+                }
+            } catch (_: Exception) {
+            }
+        }
+
+        // 2. Fallback to Android 12+ (API 31+) Monet system dynamic colors
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             try {
                 val a1 = ContextCompat.getColor(context, android.R.color.system_accent1_800)
@@ -27,28 +69,14 @@ object DynamicThemeExtractor {
 
                 // Verify that colors are valid and distinct
                 if (a1 != 0 && a2 != 0 && a3 != 0) {
-                    return ResolvedPaletteColors(
+                    val palette = ResolvedPaletteColors(
                         bgColor = a1,
                         secondaryBgColor = a2,
                         tertiaryBgColor = a3,
                         textColor = text
                     )
-                }
-            } catch (_: Exception) {
-            }
-        }
-
-        // 2. Try WallpaperManager wallpaper colors (API 27+)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-            try {
-                val wm = WallpaperManager.getInstance(context)
-                val wpColors = wm.getWallpaperColors(WallpaperManager.FLAG_SYSTEM)
-                if (wpColors != null) {
-                    val primaryArgb = wpColors.primaryColor.toArgb()
-                    val secondaryArgb = wpColors.secondaryColor?.toArgb()
-                    val tertiaryArgb = wpColors.tertiaryColor?.toArgb()
-
-                    return createHarmoniousTones(primaryArgb, secondaryArgb, tertiaryArgb)
+                    cachedPalette = palette
+                    return palette
                 }
             } catch (_: Exception) {
             }
