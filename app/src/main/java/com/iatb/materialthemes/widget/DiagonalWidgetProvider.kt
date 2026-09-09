@@ -3,6 +3,7 @@ package com.iatb.materialthemes.widget
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
+import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Build
@@ -11,6 +12,9 @@ import android.util.SizeF
 import android.widget.RemoteViews
 import com.iatb.materialthemes.MainActivity
 import com.iatb.materialthemes.R
+import com.iatb.materialthemes.WidgetSize
+import com.iatb.materialthemes.data.WidgetPreferences
+import com.iatb.materialthemes.render.WidgetCanvasRenderer
 
 class DiagonalWidgetProvider : AppWidgetProvider() {
 
@@ -34,6 +38,15 @@ class DiagonalWidgetProvider : AppWidgetProvider() {
     }
 
     companion object {
+        fun updateAllWidgets(context: Context) {
+            val appWidgetManager = AppWidgetManager.getInstance(context)
+            val component = ComponentName(context, DiagonalWidgetProvider::class.java)
+            val ids = appWidgetManager.getAppWidgetIds(component)
+            for (id in ids) {
+                updateAppWidget(context, appWidgetManager, id)
+            }
+        }
+
         fun updateAppWidget(
             context: Context,
             appWidgetManager: AppWidgetManager,
@@ -48,42 +61,71 @@ class DiagonalWidgetProvider : AppWidgetProvider() {
             appWidgetManager: AppWidgetManager,
             appWidgetId: Int
         ): RemoteViews {
+            val angle = WidgetPreferences.getRotationAngle(context)
+            val palette = WidgetPreferences.getColorPalette(context)
+            val mode = WidgetPreferences.getContentMode(context)
+
             return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                // Multi-size RemoteViews for Android 12+ (API 31+)
                 val viewMapping = mapOf(
-                    SizeF(110f, 110f) to createViews(context, R.layout.widget_diagonal_2x2),
-                    SizeF(200f, 110f) to createViews(context, R.layout.widget_diagonal_3x2),
-                    SizeF(270f, 110f) to createViews(context, R.layout.widget_diagonal_4x2),
-                    SizeF(110f, 180f) to createViews(context, R.layout.widget_diagonal_2x3),
-                    SizeF(110f, 260f) to createViews(context, R.layout.widget_diagonal_2x4),
-                    SizeF(200f, 200f) to createViews(context, R.layout.widget_diagonal_3x3)
+                    SizeF(110f, 110f) to createRenderedView(context, WidgetSize.SIZE_2X2, angle, palette, mode),
+                    SizeF(200f, 110f) to createRenderedView(context, WidgetSize.SIZE_3X2, angle, palette, mode),
+                    SizeF(270f, 110f) to createRenderedView(context, WidgetSize.SIZE_4X2, angle, palette, mode),
+                    SizeF(110f, 180f) to createRenderedView(context, WidgetSize.SIZE_2X3, angle, palette, mode),
+                    SizeF(110f, 260f) to createRenderedView(context, WidgetSize.SIZE_2X4, angle, palette, mode),
+                    SizeF(200f, 200f) to createRenderedView(context, WidgetSize.SIZE_3X3, angle, palette, mode)
                 )
                 RemoteViews(viewMapping)
             } else {
-                // Fallback for Android < 12 based on widget options
                 val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
                 val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 110)
                 val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 110)
-                val layoutId = resolveLayout(minWidth, minHeight)
-                createViews(context, layoutId)
+                val size = resolveWidgetSize(minWidth, minHeight)
+                createRenderedView(context, size, angle, palette, mode)
             }
         }
 
-        private fun resolveLayout(minWidth: Int, minHeight: Int): Int {
+        private fun resolveWidgetSize(minWidth: Int, minHeight: Int): WidgetSize {
             return when {
-                minWidth >= 270 && minHeight < 160 -> R.layout.widget_diagonal_4x2
-                minWidth >= 180 && minHeight < 160 -> R.layout.widget_diagonal_3x2
-                minWidth >= 180 && minHeight >= 180 -> R.layout.widget_diagonal_3x3
-                minWidth < 160 && minHeight >= 250 -> R.layout.widget_diagonal_2x4
-                minWidth < 160 && minHeight >= 160 -> R.layout.widget_diagonal_2x3
-                else -> R.layout.widget_diagonal_2x2
+                minWidth >= 270 && minHeight < 160 -> WidgetSize.SIZE_4X2
+                minWidth >= 180 && minHeight < 160 -> WidgetSize.SIZE_3X2
+                minWidth >= 180 && minHeight >= 180 -> WidgetSize.SIZE_3X3
+                minWidth < 160 && minHeight >= 250 -> WidgetSize.SIZE_2X4
+                minWidth < 160 && minHeight >= 160 -> WidgetSize.SIZE_2X3
+                else -> WidgetSize.SIZE_2X2
             }
         }
 
-        private fun createViews(context: Context, layoutId: Int): RemoteViews {
-            val views = RemoteViews(context.packageName, layoutId)
+        private fun createRenderedView(
+            context: Context,
+            size: WidgetSize,
+            angle: Float,
+            palette: com.iatb.materialthemes.data.ColorPalette,
+            mode: com.iatb.materialthemes.data.WidgetContentMode
+        ): RemoteViews {
+            val views = RemoteViews(context.packageName, R.layout.widget_canvas_container)
 
-            // Open MainActivity when tapping widget
+            val (wDp, hDp) = when (size) {
+                WidgetSize.SIZE_2X2 -> 200 to 200
+                WidgetSize.SIZE_3X2 -> 300 to 200
+                WidgetSize.SIZE_4X2 -> 400 to 200
+                WidgetSize.SIZE_2X3 -> 200 to 300
+                WidgetSize.SIZE_2X4 -> 200 to 400
+                WidgetSize.SIZE_3X3 -> 300 to 300
+            }
+
+            val density = context.resources.displayMetrics.density
+            val bitmap = WidgetCanvasRenderer.render(
+                context,
+                (wDp * density).toInt(),
+                (hDp * density).toInt(),
+                angle,
+                palette,
+                mode,
+                size
+            )
+
+            views.setImageViewBitmap(R.id.iv_canvas_render, bitmap)
+
             val intent = Intent(context, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
             }
@@ -93,8 +135,8 @@ class DiagonalWidgetProvider : AppWidgetProvider() {
                 intent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
-
             views.setOnClickPendingIntent(R.id.widget_diagonal_root, pendingIntent)
+
             return views
         }
     }
