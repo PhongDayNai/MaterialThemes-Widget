@@ -1,0 +1,9 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+    <path
+        android:fillColor="@color/widget_bg_primary"
+        android:pathData="M 50,2 Q 59,15 74,8 Q 75,25 92,26 Q 85,41 98,50 Q 85,59 92,74 Q 75,75 74,92 Q 59,85 50,98 Q 41,85 26,92 Q 25,75 8,74 Q 15,59 2,50 Q 15,41 8,26 Q 25,25 26,8 Q 41,15 50,2 Z" />
+</vector>
