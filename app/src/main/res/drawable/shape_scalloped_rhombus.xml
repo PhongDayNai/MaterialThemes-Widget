@@ -1,0 +1,9 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="100"
+    android:viewportHeight="100">
+    <path
+        android:fillColor="@color/widget_bg_primary"
+        android:pathData="M 46,6 C 48,2 52,2 54,6 C 58,16 66,28 74,34 C 84,42 94,46 96,50 C 94,54 84,58 74,66 C 66,72 58,84 54,94 C 52,98 48,98 46,94 C 42,84 34,72 26,66 C 16,58 6,54 4,50 C 6,46 16,42 26,34 C 34,28 42,16 46,6 Z" />
+</vector>

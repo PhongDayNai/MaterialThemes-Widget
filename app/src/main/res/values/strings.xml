@@ -1,3 +1,51 @@
 <resources>
-    <string name="app_name">MaterialThemes</string>
+    <string name="app_name">Material Themes</string>
+
+    <!-- Widget Info & Titles -->
+    <string name="widget_diagonal_name">Diagonal Clock &amp; Weather</string>
+    <string name="widget_diagonal_description">Material You clock and weather widget featuring modern slanted cuts and dynamic colors.</string>
+    <string name="widget_organic_name">Material You Organic Shapes</string>
+    <string name="widget_organic_description">Pixel style floral clover, pebble, and arch shaped widgets with dynamic colors.</string>
+
+    <!-- Size Labels -->
+    <string name="size_2x2">2 × 2</string>
+    <string name="size_3x2">3 × 2</string>
+    <string name="size_4x2">4 × 2</string>
+    <string name="size_2x3">2 × 3</string>
+    <string name="size_3x3">3 × 3</string>
+    <string name="size_2x4">2 × 4</string>
+    <string name="size_4x3">4 × 3</string>
+
+    <!-- UI Strings in MainActivity -->
+    <string name="dashboard_title">Material You Widgets</string>
+    <string name="dashboard_subtitle">Customize and pin responsive Material widgets to your home screen</string>
+    <string name="category_diagonal">Diagonal Cut</string>
+    <string name="category_organic">Organic Shapes</string>
+    <string name="button_pin_widget">Pin to Home Screen</string>
+    <string name="pin_widget_dialog_title">Add Widget to Launcher</string>
+    <string name="pin_widget_success">Widget pin request sent to launcher</string>
+    <string name="pin_widget_not_supported">Launcher does not support direct widget pinning. Please add manually from your home screen.</string>
+    <string name="preview_section_title">Live Preview</string>
+    <string name="shape_section_title">Widget Style</string>
+    <string name="size_section_title">Grid Size</string>
+    <string name="resize_tip">Tip: After placing on your launcher, long press and drag edges to resize between 2x2, 4x2, 3x3, 2x4, etc.</string>
+
+    <!-- Sample Weather & Date Strings for Widgets -->
+    <string name="sample_temp_large">28°</string>
+    <string name="sample_temp_small">28°C</string>
+    <string name="sample_temp_range">H: 31° • L: 23°</string>
+    <string name="sample_weather_condition">Partly Cloudy</string>
+    <string name="sample_weather_condition_short">Sunny</string>
+    <string name="sample_location">Hanoi</string>
+    <string name="sample_humidity">65%</string>
+    <string name="sample_wind">12 km/h</string>
+    <string name="sample_forecast_time_1">12:00</string>
+    <string name="sample_forecast_temp_1">29°</string>
+    <string name="sample_forecast_time_2">15:00</string>
+    <string name="sample_forecast_temp_2">31°</string>
+    <string name="sample_forecast_time_3">18:00</string>
+    <string name="sample_forecast_temp_3">27°</string>
+    <string name="sample_forecast_time_4">21:00</string>
+    <string name="sample_forecast_temp_4">25°</string>
+    <string name="sample_next_alarm">Alarm: 07:00 AM</string>
 </resources>

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Material 3 Dark Scheme -->
+    <color name="md_theme_dark_primary">#82D3E0</color>
+    <color name="md_theme_dark_onPrimary">#00363D</color>
+    <color name="md_theme_dark_primaryContainer">#004F58</color>
+    <color name="md_theme_dark_onPrimaryContainer">#9EEFFD</color>
+    <color name="md_theme_dark_secondary">#B1CBD0</color>
+    <color name="md_theme_dark_onSecondary">#1C3438</color>
+    <color name="md_theme_dark_secondaryContainer">#334B4F</color>
+    <color name="md_theme_dark_onSecondaryContainer">#CDE7EC</color>
+    <color name="md_theme_dark_tertiary">#BAC6EA</color>
+    <color name="md_theme_dark_tertiaryContainer">#3B4664</color>
+    <color name="md_theme_dark_onTertiaryContainer">#DAE2FF</color>
+    <color name="md_theme_dark_surface">#0F1415</color>
+    <color name="md_theme_dark_onSurface">#E0E3E3</color>
+    <color name="md_theme_dark_surfaceVariant">#3F484A</color>
+    <color name="md_theme_dark_onSurfaceVariant">#BFC8CA</color>
+    <color name="md_theme_dark_outline">#899294</color>
+
+    <!-- Widget Specific Semantic Colors (Dark Mode) -->
+    <!-- Primary diagonal side (Deep teal tone) -->
+    <color name="widget_bg_primary">#16373D</color>
+    <!-- Secondary diagonal side / contrasting slice (Warm deep bronze/amber) -->
+    <color name="widget_bg_secondary">#3F261B</color>
+    <!-- Tertiary badge / pill container -->
+    <color name="widget_bg_tertiary">#222B2D</color>
+    <!-- Card outer container -->
+    <color name="widget_container_bg">#181F21</color>
+    <!-- Texts -->
+    <color name="widget_text_primary">#E1F5F8</color>
+    <color name="widget_text_secondary">#A2B6BA</color>
+    <color name="widget_text_accent">#82D3E0</color>
+    <color name="widget_text_on_secondary">#FFDAC9</color>
+    <!-- Accents & Icons -->
+    <color name="widget_accent_sun">#FFB68F</color>
+    <color name="widget_accent_rain">#62C6E8</color>
+    <color name="widget_accent_pill">#283D42</color>
+    <color name="widget_border_subtle">#33FFFFFF</color>
+</resources>
