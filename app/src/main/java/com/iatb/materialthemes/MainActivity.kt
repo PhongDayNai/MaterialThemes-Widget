@@ -16,6 +16,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.button.MaterialButtonToggleGroup
 import com.iatb.materialthemes.widget.DiagonalWidgetProvider
 import com.iatb.materialthemes.widget.OrganicWidgetProvider
+import com.iatb.materialthemes.widget.ScallopWidgetProvider
 
 class MainActivity : AppCompatActivity() {
 
@@ -59,6 +60,7 @@ class MainActivity : AppCompatActivity() {
                 when (checkedId) {
                     R.id.btn_category_diagonal -> viewModel.setCategory(WidgetCategory.DIAGONAL)
                     R.id.btn_category_organic -> viewModel.setCategory(WidgetCategory.ORGANIC)
+                    R.id.btn_category_scallop -> viewModel.setCategory(WidgetCategory.SCALLOP)
                 }
             }
         }
@@ -110,6 +112,7 @@ class MainActivity : AppCompatActivity() {
                 val providerClass = when (viewModel.category.value) {
                     WidgetCategory.DIAGONAL -> DiagonalWidgetProvider::class.java
                     WidgetCategory.ORGANIC -> OrganicWidgetProvider::class.java
+                    WidgetCategory.SCALLOP -> ScallopWidgetProvider::class.java
                     null -> DiagonalWidgetProvider::class.java
                 }
                 val provider = ComponentName(this, providerClass)
