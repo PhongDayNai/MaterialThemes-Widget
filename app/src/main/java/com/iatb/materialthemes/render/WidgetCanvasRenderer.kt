@@ -834,11 +834,9 @@ object WidgetCanvasRenderer {
             1.04f - 0.04f * (0.5f - 0.5f * cos(t * Math.PI.toFloat()))
         }
 
-        val alpha = (0.20f + 0.80f * sin(tau * (Math.PI / 2).toFloat())).coerceIn(0f, 1f)
-        val alphaInt = (alpha * 255).toInt().coerceIn(0, 255)
         val offsetY = (1f - sin(tau * (Math.PI / 2).toFloat())) * slideUpDistance
 
-        val saveCount = canvas.saveLayerAlpha(null, alphaInt)
+        val saveCount = canvas.save()
         canvas.translate(0f, offsetY)
         canvas.scale(scale, scale, cx, cy)
         try {

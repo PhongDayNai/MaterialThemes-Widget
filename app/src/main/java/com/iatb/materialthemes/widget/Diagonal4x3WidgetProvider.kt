@@ -20,12 +20,8 @@ class Diagonal4x3WidgetProvider : AppWidgetProvider() {
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
         when (intent.action) {
-            WidgetAnimationManager.ACTION_RUN_ENTER_ANIMATION -> {
-                WidgetAnimationManager.triggerEnterAnimation(context, isFull = true)
-            }
-            Intent.ACTION_USER_PRESENT -> {
-                WidgetAnimationManager.handleUserPresent(context)
-            }
+            Intent.ACTION_USER_PRESENT,
+            WidgetAnimationManager.ACTION_RUN_ENTER_ANIMATION,
             WidgetUpdateScheduler.ACTION_WIDGET_TICK,
             Intent.ACTION_TIME_TICK,
             Intent.ACTION_TIME_CHANGED,
@@ -96,20 +92,11 @@ class Diagonal4x3WidgetProvider : AppWidgetProvider() {
             val mode = WidgetPreferences.getContentMode(context)
             val transparency = WidgetPreferences.getTransparency(context)
 
-            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                val viewMapping = mapOf(
-                    SizeF(270f, 180f) to createRenderedView(context, WidgetSize.SIZE_4X3, angle, palette, mode, transparency, animProgress),
-                    SizeF(200f, 200f) to createRenderedView(context, WidgetSize.SIZE_3X3, angle, palette, mode, transparency, animProgress),
-                    SizeF(110f, 110f) to createRenderedView(context, WidgetSize.SIZE_4X3, angle, palette, mode, transparency, animProgress)
-                )
-                RemoteViews(viewMapping)
-            } else {
-                val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
-                val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 270)
-                val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 180)
-                val size = if (minWidth < 180 || minHeight < 160) WidgetSize.SIZE_4X3 else resolveWidgetSize(minWidth, minHeight)
-                createRenderedView(context, size, angle, palette, mode, transparency, animProgress)
-            }
+            val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
+            val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 270)
+            val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 180)
+            val size = if (minWidth < 180 || minHeight < 160) WidgetSize.SIZE_4X3 else resolveWidgetSize(minWidth, minHeight)
+            return createRenderedView(context, size, angle, palette, mode, transparency, animProgress)
         }
 
         private fun resolveWidgetSize(minWidth: Int, minHeight: Int): WidgetSize {

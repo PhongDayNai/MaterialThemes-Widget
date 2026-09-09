@@ -315,26 +315,13 @@ class MainActivity : AppCompatActivity() {
         btnApply.setOnClickListener {
             viewModel.saveAndApply(this)
             WeatherRepository.refreshWeather(this)
-            WidgetPreferences.setPendingHomeAnimation(this, true)
             sendBroadcast(Intent(WidgetUpdateScheduler.ACTION_WIDGET_TICK).setPackage(packageName))
             Toast.makeText(this, getString(R.string.settings_saved_toast), Toast.LENGTH_SHORT).show()
         }
 
         btnPin.setOnClickListener {
             viewModel.saveAndApply(this)
-            WidgetPreferences.setPendingHomeAnimation(this, true)
             pinCurrentWidget()
-        }
-    }
-
-    override fun onUserLeaveHint() {
-        super.onUserLeaveHint()
-        if (WidgetPreferences.isPendingHomeAnimation(this)) {
-            WidgetPreferences.setPendingHomeAnimation(this, false)
-            val intent = Intent(WidgetAnimationManager.ACTION_RUN_ENTER_ANIMATION).apply {
-                setPackage(packageName)
-            }
-            sendBroadcast(intent)
         }
     }
 

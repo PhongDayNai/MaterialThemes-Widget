@@ -17,6 +17,7 @@ import com.iatb.materialthemes.data.WeatherRepository
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import android.util.LruCache
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -47,11 +48,10 @@ object ShapeWidgetCanvasRenderer {
         val b3cy: Float
     )
 
-    @Volatile
-    private var cache: CachedLayout? = null
+    private val layoutCache = LruCache<String, CachedLayout>(8)
 
     fun invalidateCache() {
-        cache = null
+        layoutCache.evictAll()
     }
 
     private val bitmapPaint = Paint(Paint.ANTI_ALIAS_FLAG or Paint.FILTER_BITMAP_FLAG)
@@ -95,15 +95,9 @@ object ShapeWidgetCanvasRenderer {
         minuteKey: String,
         tempKey: String
     ): CachedLayout {
-        val existing = cache
-        if (existing != null &&
-            existing.category == category &&
-            existing.size == size &&
-            existing.widthPx == w &&
-            existing.heightPx == h &&
-            existing.minuteKey == minuteKey &&
-            existing.tempKey == tempKey
-        ) {
+        val cacheKey = "$category-$size-$w-$h-$minuteKey-$tempKey"
+        val existing = layoutCache.get(cacheKey)
+        if (existing != null) {
             return existing
         }
 
@@ -198,7 +192,7 @@ object ShapeWidgetCanvasRenderer {
             b2x = b2x, b2y = b2y, b2cx = b2cx, b2cy = b2cy,
             b3x = b3x, b3y = b3y, b3cx = b3cx, b3cy = b3cy
         )
-        cache = newCache
+        layoutCache.put(cacheKey, newCache)
         return newCache
     }
 

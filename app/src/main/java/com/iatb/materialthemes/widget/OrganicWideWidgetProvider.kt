@@ -22,12 +22,8 @@ class OrganicWideWidgetProvider : AppWidgetProvider() {
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
         when (intent.action) {
-            WidgetAnimationManager.ACTION_RUN_ENTER_ANIMATION -> {
-                WidgetAnimationManager.triggerEnterAnimation(context, isFull = true)
-            }
-            Intent.ACTION_USER_PRESENT -> {
-                WidgetAnimationManager.handleUserPresent(context)
-            }
+            Intent.ACTION_USER_PRESENT,
+            WidgetAnimationManager.ACTION_RUN_ENTER_ANIMATION,
             WidgetUpdateScheduler.ACTION_WIDGET_TICK,
             Intent.ACTION_TIME_TICK,
             Intent.ACTION_TIME_CHANGED,
@@ -93,20 +89,11 @@ class OrganicWideWidgetProvider : AppWidgetProvider() {
             appWidgetId: Int,
             animProgress: Float = 1.0f
         ): RemoteViews {
-            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                val viewMapping = mapOf(
-                    SizeF(200f, 110f) to createRenderedView(context, WidgetSize.SIZE_4X2, animProgress),
-                    SizeF(200f, 200f) to createRenderedView(context, WidgetSize.SIZE_3X3, animProgress),
-                    SizeF(110f, 110f) to createRenderedView(context, WidgetSize.SIZE_2X2, animProgress)
-                )
-                RemoteViews(viewMapping)
-            } else {
-                val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
-                val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 200)
-                val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 110)
-                val layoutSize = resolveLayout(minWidth, minHeight)
-                createRenderedView(context, layoutSize, animProgress)
-            }
+            val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
+            val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 200)
+            val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 110)
+            val layoutSize = resolveLayout(minWidth, minHeight)
+            return createRenderedView(context, layoutSize, animProgress)
         }
 
         private fun resolveLayout(minWidth: Int, minHeight: Int): WidgetSize {
