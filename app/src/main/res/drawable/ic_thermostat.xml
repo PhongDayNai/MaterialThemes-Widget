@@ -1,0 +1,17 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- Thermometer Outer Shell (Material Design 3) -->
+    <path
+        android:strokeColor="#FFFFFF"
+        android:strokeWidth="1.8"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M15,13.25 V5 C15,3.34 13.66,2 12,2 C10.34,2 9,3.34 9,5 V13.25 C7.76,14.2 7,15.7 7,17.35 C7,20.12 9.24,22.35 12,22.35 C14.76,22.35 17,20.12 17,17.35 C17,15.7 16.24,14.2 15,13.25 Z" />
+    <!-- Inner Mercury Column & Bulb Core -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M12,14.5 C10.62,14.5 9.5,15.62 9.5,17 C9.5,18.38 10.62,19.5 12,19.5 C13.38,19.5 14.5,18.38 14.5,17 C14.5,15.62 13.38,14.5 12,14.5 Z M10.8,8.5 H13.2 V15.2 C12.8,15.07 12.4,15 12,15 C11.6,15 11.2,15.07 10.8,15.2 Z" />
+</vector>
