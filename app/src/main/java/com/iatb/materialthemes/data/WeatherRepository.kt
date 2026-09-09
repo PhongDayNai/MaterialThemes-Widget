@@ -36,6 +36,8 @@ data class WeatherData(
     val currentTempLabel: String,
     val conditionLabel: String,
     val tempRangeLabel: String,
+    val maxTempLabel: String = "31°",
+    val minTempLabel: String = "23°",
     val humidityLabel: String,
     val windLabel: String,
     val currentIconResId: Int,
@@ -627,7 +629,9 @@ object WeatherRepository {
             locationName = locationName,
             currentTempLabel = "$currentTemp°",
             conditionLabel = conditionStr,
-            tempRangeLabel = "H: $maxTemp° • L: $minTemp°",
+            tempRangeLabel = "$maxTemp° / $minTemp°",
+            maxTempLabel = "$maxTemp°",
+            minTempLabel = "$minTemp°",
             humidityLabel = "$humidity%",
             windLabel = "$windSpeed km/h",
             currentIconResId = iconRes,
@@ -686,7 +690,9 @@ object WeatherRepository {
             locationName = areaName,
             currentTempLabel = "$tempC°",
             conditionLabel = conditionStr,
-            tempRangeLabel = "H: $maxTemp° • L: $minTemp°",
+            tempRangeLabel = "$maxTemp° / $minTemp°",
+            maxTempLabel = "$maxTemp°",
+            minTempLabel = "$minTemp°",
             humidityLabel = "$humidity%",
             windLabel = "$windKmph km/h",
             currentIconResId = iconRes,
@@ -762,6 +768,8 @@ object WeatherRepository {
         json.put("temp", data.currentTempLabel)
         json.put("condition", data.conditionLabel)
         json.put("range", data.tempRangeLabel)
+        json.put("maxTemp", data.maxTempLabel)
+        json.put("minTemp", data.minTempLabel)
         json.put("humidity", data.humidityLabel)
         json.put("wind", data.windLabel)
         json.put("icon", data.currentIconResId)
@@ -782,7 +790,9 @@ object WeatherRepository {
         val loc = json.optString("location", DEFAULT_CITY)
         val temp = json.optString("temp", "28°")
         val cond = json.optString("condition", context.getString(R.string.weather_partly_cloudy))
-        val range = json.optString("range", "H: 31° • L: 23°")
+        val range = json.optString("range", "↑ 31°  ↓ 23°")
+        val maxT = json.optString("maxTemp", "31°")
+        val minT = json.optString("minTemp", "23°")
         val hum = json.optString("humidity", "65%")
         val wind = json.optString("wind", "12 km/h")
         val icon = json.optInt("icon", R.drawable.ic_weather_night_cloudy)
@@ -807,6 +817,8 @@ object WeatherRepository {
             currentTempLabel = temp,
             conditionLabel = cond,
             tempRangeLabel = range,
+            maxTempLabel = maxT,
+            minTempLabel = minT,
             humidityLabel = hum,
             windLabel = wind,
             currentIconResId = icon,
@@ -820,6 +832,8 @@ object WeatherRepository {
             currentTempLabel = context.getString(R.string.sample_temp_11),
             conditionLabel = context.getString(R.string.sample_weather_condition),
             tempRangeLabel = context.getString(R.string.sample_temp_range),
+            maxTempLabel = "31°",
+            minTempLabel = "23°",
             humidityLabel = context.getString(R.string.sample_humidity),
             windLabel = context.getString(R.string.sample_wind),
             currentIconResId = R.drawable.ic_weather_night_cloudy,

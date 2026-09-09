@@ -23,6 +23,7 @@ import com.iatb.materialthemes.data.WeatherRepository
 import com.iatb.materialthemes.data.WidgetContentMode
 import com.iatb.materialthemes.data.WidgetPreferences
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import kotlin.math.abs
@@ -331,23 +332,23 @@ object WidgetCanvasRenderer {
                         contentAngleDeg = cardContentAngle
                     )
 
-                    // Right sub-column: Temp range & Wind/Humidity
-                    drawFittedSingleLineText(
+                    // Right sub-column: Min/Max Temp Row & Wind/Humidity
+                    drawMinMaxTempRow(
+                        context,
                         canvas,
-                        weather.tempRangeLabel,
+                        weather,
                         subRightCx,
-                        cy - safeInnerH * 0.20f,
-                        maxSizePx = rightH * 0.15f,
-                        maxWidth = subColW,
-                        textColor = palette.textColor,
-                        isBold = true,
-                        contentAngleDeg = cardContentAngle
+                        cy - safeInnerH * 0.18f,
+                        subColW,
+                        rightH * 0.22f,
+                        palette.textColor,
+                        cardContentAngle
                     )
                     drawFittedSingleLineText(
                         canvas,
                         weather.windLabel,
                         subRightCx,
-                        cy + safeInnerH * 0.06f,
+                        cy + safeInnerH * 0.08f,
                         maxSizePx = rightH * 0.13f,
                         maxWidth = subColW,
                         textColor = (0xBBFFFFFF.toInt() and palette.textColor),
@@ -365,26 +366,27 @@ object WidgetCanvasRenderer {
                     )
                 }
                 WidgetContentMode.CLOCK -> {
-                    val dayStr = SimpleDateFormat("EEEE", Locale.getDefault()).format(Date())
-                    val dateStr = SimpleDateFormat("MMMM d, yyyy", Locale.getDefault()).format(Date())
+                    val dayStr = formatDayOfWeek()
+                    val dateStr = formatLocalizedDateWithYear()
 
                     drawFittedSingleLineText(canvas, dayStr, subLeftCx, cy - safeInnerH * 0.18f, maxSizePx = rightH * 0.20f, maxWidth = subColW, textColor = palette.textColor, isBold = true, contentAngleDeg = cardContentAngle)
-                    drawStaticLayoutText(canvas, dateStr, subLeftCx, cy + safeInnerH * 0.16f, maxWidth = subColW, maxHeight = safeInnerH * 0.40f, maxLines = 2, initialTextSizePx = rightH * 0.14f, textColor = (0xCCFFFFFF.toInt() and palette.textColor), contentAngleDeg = cardContentAngle)
+                    drawFittedSingleLineText(canvas, dateStr, subLeftCx, cy + safeInnerH * 0.16f, maxSizePx = rightH * 0.15f, maxWidth = subColW, textColor = (0xCCFFFFFF.toInt() and palette.textColor), contentAngleDeg = cardContentAngle)
 
                     drawFittedSingleLineText(canvas, context.getString(R.string.sample_next_alarm), subRightCx, cy, maxSizePx = rightH * 0.15f, maxWidth = subColW, textColor = palette.textColor, isBold = true, contentAngleDeg = cardContentAngle)
                 }
                 WidgetContentMode.COMBO -> {
-                    val dateStr = SimpleDateFormat("EEE, MMM d", Locale.getDefault()).format(Date())
-                    val tempAndCondition = "${weather.currentTempLabel} • ${weather.conditionLabel}"
-                    drawFittedSingleLineText(canvas, weather.locationName, subLeftCx, cy - safeInnerH * 0.22f, maxSizePx = rightH * 0.18f, maxWidth = subColW, textColor = palette.textColor, isBold = true, contentAngleDeg = cardContentAngle)
-                    drawStaticLayoutText(canvas, tempAndCondition, subLeftCx, cy + safeInnerH * 0.16f, maxWidth = subColW, maxHeight = safeInnerH * 0.42f, maxLines = 2, initialTextSizePx = rightH * 0.14f, textColor = (0xCCFFFFFF.toInt() and palette.textColor), contentAngleDeg = cardContentAngle)
+                    val dateStr = formatLocalizedDayAndFullDate()
+                    // Left sub-column: Location + Condition (no duplicated 33°)
+                    drawFittedSingleLineText(canvas, weather.locationName, subLeftCx, cy - safeInnerH * 0.18f, maxSizePx = rightH * 0.18f, maxWidth = subColW, textColor = palette.textColor, isBold = true, contentAngleDeg = cardContentAngle)
+                    drawStaticLayoutText(canvas, weather.conditionLabel, subLeftCx, cy + safeInnerH * 0.16f, maxWidth = subColW, maxHeight = safeInnerH * 0.42f, maxLines = 2, initialTextSizePx = rightH * 0.14f, textColor = (0xCCFFFFFF.toInt() and palette.textColor), contentAngleDeg = cardContentAngle)
 
-                    drawFittedSingleLineText(canvas, dateStr, subRightCx, cy - safeInnerH * 0.12f, maxSizePx = rightH * 0.15f, maxWidth = subColW, textColor = palette.textColor, isBold = true, contentAngleDeg = cardContentAngle)
-                    drawFittedSingleLineText(canvas, weather.tempRangeLabel, subRightCx, cy + safeInnerH * 0.18f, maxSizePx = rightH * 0.13f, maxWidth = subColW, textColor = (0xCCFFFFFF.toInt() and palette.textColor), contentAngleDeg = cardContentAngle)
+                    // Right sub-column: Localized Date + Min/Max Temp Row with icons
+                    drawFittedSingleLineText(canvas, dateStr, subRightCx, cy - safeInnerH * 0.14f, maxSizePx = rightH * 0.15f, maxWidth = subColW, textColor = palette.textColor, isBold = true, contentAngleDeg = cardContentAngle)
+                    drawMinMaxTempRow(context, canvas, weather, subRightCx, cy + safeInnerH * 0.16f, subColW, rightH * 0.22f, palette.textColor, cardContentAngle)
                 }
             }
         } else {
-            // 3x2: Single integrated column with auto-wrapping condition text, safe clearance, and subtle tilt
+            // 3x2: Single integrated column with safe clearance and subtle tilt
             when (mode) {
                 WidgetContentMode.WEATHER -> {
                     // Line 1: Location (e.g. "Hanoi")
@@ -400,7 +402,7 @@ object WidgetCanvasRenderer {
                         contentAngleDeg = cardContentAngle
                     )
 
-                    // Line 2: Weather condition (e.g. "Partly Cloudy" -> wrapped to 2 lines if needed!)
+                    // Line 2: Weather condition (e.g. "Partly Cloudy")
                     drawStaticLayoutText(
                         canvas,
                         weather.conditionLabel,
@@ -416,33 +418,45 @@ object WidgetCanvasRenderer {
                         contentAngleDeg = cardContentAngle
                     )
 
-                    // Line 3: Temp range (e.g. "H: 31° • L: 23°")
-                    drawFittedSingleLineText(
+                    // Line 3: Temp range with icons (↑ 31°  ↓ 23°)
+                    drawMinMaxTempRow(
+                        context,
                         canvas,
-                        weather.tempRangeLabel,
+                        weather,
                         rightCx,
                         cy + safeInnerH * 0.30f,
-                        maxSizePx = rightH * 0.12f,
-                        maxWidth = safeInnerW,
-                        textColor = (0xBBFFFFFF.toInt() and palette.textColor),
-                        isBold = false,
-                        contentAngleDeg = cardContentAngle
+                        safeInnerW,
+                        rightH * 0.18f,
+                        palette.textColor,
+                        cardContentAngle
                     )
                 }
                 WidgetContentMode.CLOCK -> {
-                    val dayStr = SimpleDateFormat("EEEE", Locale.getDefault()).format(Date())
-                    val dateStr = SimpleDateFormat("MMMM d, yyyy", Locale.getDefault()).format(Date())
+                    val dayStr = formatDayOfWeek()
+                    val dateStr = formatLocalizedDateWithYear()
 
                     drawFittedSingleLineText(canvas, dayStr, rightCx, cy - safeInnerH * 0.26f, maxSizePx = rightH * 0.18f, maxWidth = safeInnerW, textColor = palette.textColor, isBold = true, contentAngleDeg = cardContentAngle)
-                    drawStaticLayoutText(canvas, dateStr, rightCx, cy + safeInnerH * 0.04f, maxWidth = safeInnerW, maxHeight = safeInnerH * 0.34f, maxLines = 2, initialTextSizePx = rightH * 0.14f, textColor = (0xCCFFFFFF.toInt() and palette.textColor), contentAngleDeg = cardContentAngle)
+                    drawFittedSingleLineText(canvas, dateStr, rightCx, cy + safeInnerH * 0.04f, maxSizePx = rightH * 0.14f, maxWidth = safeInnerW, textColor = (0xCCFFFFFF.toInt() and palette.textColor), contentAngleDeg = cardContentAngle)
                     drawFittedSingleLineText(canvas, context.getString(R.string.sample_next_alarm), rightCx, cy + safeInnerH * 0.30f, maxSizePx = rightH * 0.12f, maxWidth = safeInnerW, textColor = (0xBBFFFFFF.toInt() and palette.textColor), contentAngleDeg = cardContentAngle)
                 }
                 WidgetContentMode.COMBO -> {
-                    val dateStr = SimpleDateFormat("EEE, MMM d", Locale.getDefault()).format(Date())
-                    val tempAndCondition = "${weather.currentTempLabel} • ${weather.conditionLabel}"
+                    val dateStr = formatLocalizedDayAndFullDate()
+                    // Line 1: Location
                     drawFittedSingleLineText(canvas, weather.locationName, rightCx, cy - safeInnerH * 0.26f, maxSizePx = rightH * 0.16f, maxWidth = safeInnerW, textColor = palette.textColor, isBold = true, contentAngleDeg = cardContentAngle)
-                    drawStaticLayoutText(canvas, tempAndCondition, rightCx, cy + safeInnerH * 0.04f, maxWidth = safeInnerW, maxHeight = safeInnerH * 0.34f, maxLines = 2, initialTextSizePx = rightH * 0.14f, textColor = (0xCCFFFFFF.toInt() and palette.textColor), contentAngleDeg = cardContentAngle)
-                    drawFittedSingleLineText(canvas, dateStr, rightCx, cy + safeInnerH * 0.30f, maxSizePx = rightH * 0.13f, maxWidth = safeInnerW, textColor = (0xBBFFFFFF.toInt() and palette.textColor), contentAngleDeg = cardContentAngle)
+                    // Line 2: Single-line fitted localized date ("Th 4, 9 thg 9")
+                    drawFittedSingleLineText(canvas, dateStr, rightCx, cy + safeInnerH * 0.04f, maxSizePx = rightH * 0.14f, maxWidth = safeInnerW, textColor = (0xCCFFFFFF.toInt() and palette.textColor), contentAngleDeg = cardContentAngle)
+                    // Line 3: Min/Max temp row with icons (↑ 31°  ↓ 23°)
+                    drawMinMaxTempRow(
+                        context,
+                        canvas,
+                        weather,
+                        rightCx,
+                        cy + safeInnerH * 0.30f,
+                        safeInnerW,
+                        rightH * 0.18f,
+                        palette.textColor,
+                        cardContentAngle
+                    )
                 }
             }
         }
@@ -540,20 +554,19 @@ object WidgetCanvasRenderer {
                         WidgetContentMode.WEATHER -> {
                             drawFittedSingleLineText(canvas, weather.locationName, cx, cy - pillHeight * 0.22f, maxSizePx = pillHeight * 0.20f, maxWidth = safeW, textColor = palette.textColor, isBold = true, contentAngleDeg = contentAngle)
                             drawStaticLayoutText(canvas, weather.conditionLabel, cx, cy + pillHeight * 0.04f, maxWidth = safeW, maxHeight = pillHeight * 0.36f, maxLines = 2, initialTextSizePx = pillHeight * 0.15f, textColor = (0xCCFFFFFF.toInt() and palette.textColor), contentAngleDeg = contentAngle)
-                            drawFittedSingleLineText(canvas, weather.tempRangeLabel, cx, cy + pillHeight * 0.28f, maxSizePx = pillHeight * 0.13f, maxWidth = safeW, textColor = (0xBBFFFFFF.toInt() and palette.textColor), contentAngleDeg = contentAngle)
+                            drawMinMaxTempRow(context, canvas, weather, cx, cy + pillHeight * 0.26f, safeW, pillHeight * 0.20f, palette.textColor, contentAngle)
                         }
                         WidgetContentMode.CLOCK -> {
-                            val dayStr = SimpleDateFormat("EEEE", Locale.getDefault()).format(Date())
-                            val dateStr = SimpleDateFormat("MMMM d", Locale.getDefault()).format(Date())
+                            val dayStr = formatDayOfWeek()
+                            val dateStr = formatLocalizedFullDate()
                             drawFittedSingleLineText(canvas, dayStr, cx, cy - pillHeight * 0.18f, maxSizePx = pillHeight * 0.22f, maxWidth = safeW, textColor = palette.textColor, isBold = true, contentAngleDeg = contentAngle)
                             drawFittedSingleLineText(canvas, dateStr, cx, cy + pillHeight * 0.18f, maxSizePx = pillHeight * 0.18f, maxWidth = safeW, textColor = (0xCCFFFFFF.toInt() and palette.textColor), contentAngleDeg = contentAngle)
                         }
                         WidgetContentMode.COMBO -> {
-                            val dateStr = SimpleDateFormat("EEE, MMM d", Locale.getDefault()).format(Date())
-                            val tempAndCondition = "${weather.currentTempLabel} • ${weather.conditionLabel}"
-                            drawFittedSingleLineText(canvas, weather.locationName, cx, cy - pillHeight * 0.20f, maxSizePx = pillHeight * 0.20f, maxWidth = safeW, textColor = palette.textColor, isBold = true, contentAngleDeg = contentAngle)
-                            drawStaticLayoutText(canvas, tempAndCondition, cx, cy + pillHeight * 0.04f, maxWidth = safeW, maxHeight = pillHeight * 0.36f, maxLines = 2, initialTextSizePx = pillHeight * 0.15f, textColor = (0xCCFFFFFF.toInt() and palette.textColor), contentAngleDeg = contentAngle)
-                            drawFittedSingleLineText(canvas, dateStr, cx, cy + pillHeight * 0.28f, maxSizePx = pillHeight * 0.13f, maxWidth = safeW, textColor = (0xBBFFFFFF.toInt() and palette.textColor), contentAngleDeg = contentAngle)
+                            val dateStr = formatLocalizedDayAndFullDate()
+                            drawFittedSingleLineText(canvas, weather.locationName, cx, cy - pillHeight * 0.22f, maxSizePx = pillHeight * 0.20f, maxWidth = safeW, textColor = palette.textColor, isBold = true, contentAngleDeg = contentAngle)
+                            drawFittedSingleLineText(canvas, dateStr, cx, cy + pillHeight * 0.04f, maxSizePx = pillHeight * 0.16f, maxWidth = safeW, textColor = (0xCCFFFFFF.toInt() and palette.textColor), contentAngleDeg = contentAngle)
+                            drawMinMaxTempRow(context, canvas, weather, cx, cy + pillHeight * 0.26f, safeW, pillHeight * 0.20f, palette.textColor, contentAngle)
                         }
                     }
                 }
@@ -570,13 +583,13 @@ object WidgetCanvasRenderer {
                             drawFittedSingleLineText(canvas, weather.windLabel, cx, cy + pillHeight * 0.18f, maxSizePx = pillHeight * 0.18f, maxWidth = safeW, textColor = (0xCCFFFFFF.toInt() and palette.textColor), contentAngleDeg = contentAngle)
                         }
                         WidgetContentMode.CLOCK -> {
-                            val dateStr = SimpleDateFormat("yyyy", Locale.getDefault()).format(Date())
+                            val dateStr = formatLocalizedDateWithYear()
                             drawFittedSingleLineText(canvas, context.getString(R.string.sample_next_alarm), cx, cy - pillHeight * 0.16f, maxSizePx = pillHeight * 0.18f, maxWidth = safeW, textColor = palette.textColor, isBold = true, contentAngleDeg = contentAngle)
                             drawFittedSingleLineText(canvas, dateStr, cx, cy + pillHeight * 0.18f, maxSizePx = pillHeight * 0.18f, maxWidth = safeW, textColor = (0xCCFFFFFF.toInt() and palette.textColor), contentAngleDeg = contentAngle)
                         }
                         WidgetContentMode.COMBO -> {
                             drawFittedSingleLineText(canvas, context.getString(R.string.sample_next_alarm), cx, cy - pillHeight * 0.16f, maxSizePx = pillHeight * 0.18f, maxWidth = safeW, textColor = palette.textColor, isBold = true, contentAngleDeg = contentAngle)
-                            drawFittedSingleLineText(canvas, weather.tempRangeLabel, cx, cy + pillHeight * 0.18f, maxSizePx = pillHeight * 0.16f, maxWidth = safeW, textColor = (0xCCFFFFFF.toInt() and palette.textColor), contentAngleDeg = contentAngle)
+                            drawFittedSingleLineText(canvas, weather.conditionLabel, cx, cy + pillHeight * 0.18f, maxSizePx = pillHeight * 0.16f, maxWidth = safeW, textColor = (0xCCFFFFFF.toInt() and palette.textColor), contentAngleDeg = contentAngle)
                         }
                     }
                 }
@@ -690,20 +703,21 @@ object WidgetCanvasRenderer {
             WidgetContentMode.WEATHER -> {
                 drawFittedSingleLineText(canvas, weather.locationName, p2cx, p2cy - pillThickness * 0.22f, maxSizePx = pillThickness * 0.22f, maxWidth = p2SafeW, textColor = palette.textColor, isBold = true, contentAngleDeg = p2ContentAngle)
                 drawStaticLayoutText(canvas, weather.conditionLabel, p2cx, p2cy + pillThickness * 0.04f, maxWidth = p2SafeW, maxHeight = pillThickness * 0.36f, maxLines = 2, initialTextSizePx = pillThickness * 0.16f, textColor = (0xCCFFFFFF.toInt() and palette.textColor), contentAngleDeg = p2ContentAngle)
-                drawFittedSingleLineText(canvas, weather.tempRangeLabel, p2cx, p2cy + pillThickness * 0.25f, maxSizePx = pillThickness * 0.14f, maxWidth = p2SafeW, textColor = (0xBBFFFFFF.toInt() and palette.textColor), contentAngleDeg = p2ContentAngle)
+                drawMinMaxTempRow(context, canvas, weather, p2cx, p2cy + pillThickness * 0.26f, p2SafeW, pillThickness * 0.22f, palette.textColor, p2ContentAngle)
             }
             WidgetContentMode.CLOCK -> {
-                val dayStr = SimpleDateFormat("EEEE", Locale.getDefault()).format(Date())
-                val dateStr = SimpleDateFormat("MMMM d", Locale.getDefault()).format(Date())
-                drawFittedSingleLineText(canvas, dayStr, p2cx, p2cy - pillThickness * 0.14f, maxSizePx = pillThickness * 0.20f, maxWidth = p2SafeW, textColor = palette.textColor, isBold = true, contentAngleDeg = p2ContentAngle)
-                drawFittedSingleLineText(canvas, dateStr, p2cx, p2cy + pillThickness * 0.16f, maxSizePx = pillThickness * 0.17f, maxWidth = p2SafeW, textColor = (0xCCFFFFFF.toInt() and palette.textColor), contentAngleDeg = p2ContentAngle)
+                val dayStr = formatDayOfWeek()
+                val dateStr = formatLocalizedFullDate()
+                val alarmStr = context.getString(R.string.sample_next_alarm)
+                drawFittedSingleLineText(canvas, dayStr, p2cx, p2cy - pillThickness * 0.22f, maxSizePx = pillThickness * 0.20f, maxWidth = p2SafeW, textColor = palette.textColor, isBold = true, contentAngleDeg = p2ContentAngle)
+                drawFittedSingleLineText(canvas, dateStr, p2cx, p2cy + pillThickness * 0.02f, maxSizePx = pillThickness * 0.16f, maxWidth = p2SafeW, textColor = (0xCCFFFFFF.toInt() and palette.textColor), contentAngleDeg = p2ContentAngle)
+                drawFittedSingleLineText(canvas, alarmStr, p2cx, p2cy + pillThickness * 0.25f, maxSizePx = pillThickness * 0.14f, maxWidth = p2SafeW, textColor = (0xBBFFFFFF.toInt() and palette.textColor), contentAngleDeg = p2ContentAngle)
             }
             WidgetContentMode.COMBO -> {
-                val dateStr = SimpleDateFormat("EEE, MMM d", Locale.getDefault()).format(Date())
-                val tempAndCondition = "${weather.currentTempLabel} • ${weather.conditionLabel}"
+                val dateStr = formatLocalizedDayAndFullDate()
                 drawFittedSingleLineText(canvas, weather.locationName, p2cx, p2cy - pillThickness * 0.22f, maxSizePx = pillThickness * 0.22f, maxWidth = p2SafeW, textColor = palette.textColor, isBold = true, contentAngleDeg = p2ContentAngle)
-                drawStaticLayoutText(canvas, tempAndCondition, p2cx, p2cy + pillThickness * 0.04f, maxWidth = p2SafeW, maxHeight = pillThickness * 0.36f, maxLines = 2, initialTextSizePx = pillThickness * 0.16f, textColor = (0xCCFFFFFF.toInt() and palette.textColor), contentAngleDeg = p2ContentAngle)
-                drawFittedSingleLineText(canvas, dateStr, p2cx, p2cy + pillThickness * 0.25f, maxSizePx = pillThickness * 0.14f, maxWidth = p2SafeW, textColor = (0xBBFFFFFF.toInt() and palette.textColor), contentAngleDeg = p2ContentAngle)
+                drawFittedSingleLineText(canvas, dateStr, p2cx, p2cy + pillThickness * 0.02f, maxSizePx = pillThickness * 0.16f, maxWidth = p2SafeW, textColor = (0xCCFFFFFF.toInt() and palette.textColor), contentAngleDeg = p2ContentAngle)
+                drawMinMaxTempRow(context, canvas, weather, p2cx, p2cy + pillThickness * 0.26f, p2SafeW, pillThickness * 0.22f, palette.textColor, p2ContentAngle)
             }
         }
 
@@ -940,9 +954,13 @@ object WidgetCanvasRenderer {
         cy: Int,
         width: Int,
         height: Int,
-        contentAngleDeg: Float = 0f
+        contentAngleDeg: Float = 0f,
+        tintColor: Int? = null
     ) {
-        val drawable = ContextCompat.getDrawable(context, drawableResId) ?: return
+        val drawable = ContextCompat.getDrawable(context, drawableResId)?.mutate() ?: return
+        if (tintColor != null) {
+            drawable.setTint(tintColor)
+        }
         canvas.save()
         if (contentAngleDeg != 0f) {
             canvas.rotate(contentAngleDeg, cx.toFloat(), cy.toFloat())
@@ -996,6 +1014,140 @@ object WidgetCanvasRenderer {
         val textX = startX + iconSize + gap
         val textY = -textBounds.exactCenterY()
         canvas.drawText(tempStr, textX, textY, paint)
+
+        canvas.restore()
+    }
+
+    private fun formatDayOfWeek(date: Date = Date()): String {
+        return SimpleDateFormat("EEEE", Locale.getDefault()).format(date)
+    }
+
+    private fun formatLocalizedDayMonth(date: Date = Date()): String {
+        val locale = Locale.getDefault()
+        return if (locale.language == "vi") {
+            val cal = Calendar.getInstance(locale).apply { time = date }
+            "${cal.get(Calendar.DAY_OF_MONTH)} thg ${cal.get(Calendar.MONTH) + 1}"
+        } else {
+            SimpleDateFormat("MMM d", locale).format(date)
+        }
+    }
+
+    private fun formatLocalizedFullDate(date: Date = Date()): String {
+        val locale = Locale.getDefault()
+        return if (locale.language == "vi") {
+            val cal = Calendar.getInstance(locale).apply { time = date }
+            "${cal.get(Calendar.DAY_OF_MONTH)} tháng ${cal.get(Calendar.MONTH) + 1}"
+        } else {
+            SimpleDateFormat("MMMM d", locale).format(date)
+        }
+    }
+
+    private fun formatLocalizedDayAndFullDate(date: Date = Date()): String {
+        val locale = Locale.getDefault()
+        return if (locale.language == "vi") {
+            val cal = Calendar.getInstance(locale).apply { time = date }
+            val dayOfWeek = SimpleDateFormat("EEE", locale).format(date)
+            "$dayOfWeek, ${cal.get(Calendar.DAY_OF_MONTH)} thg ${cal.get(Calendar.MONTH) + 1}"
+        } else {
+            SimpleDateFormat("EEE, MMM d", locale).format(date)
+        }
+    }
+
+    private fun formatLocalizedDateWithYear(date: Date = Date()): String {
+        val locale = Locale.getDefault()
+        return if (locale.language == "vi") {
+            val cal = Calendar.getInstance(locale).apply { time = date }
+            "${cal.get(Calendar.DAY_OF_MONTH)} thg ${cal.get(Calendar.MONTH) + 1}, ${cal.get(Calendar.YEAR)}"
+        } else {
+            SimpleDateFormat("MMM d, yyyy", locale).format(date)
+        }
+    }
+
+    private fun drawMinMaxTempRow(
+        context: Context,
+        canvas: Canvas,
+        weather: WeatherData,
+        centerX: Float,
+        centerY: Float,
+        maxWidth: Float,
+        maxHeight: Float,
+        textColor: Int,
+        contentAngleDeg: Float = 0f
+    ) {
+        if (maxWidth <= 0f || maxHeight <= 0f) return
+
+        val iconSize = (maxHeight * 0.90f).coerceAtMost(maxWidth * 0.18f).coerceAtLeast(12f)
+        val textSize = (maxHeight * 0.72f).coerceAtMost(maxWidth * 0.20f).coerceAtLeast(10f)
+
+        val maxPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = textColor
+            this.textSize = textSize
+            typeface = Typeface.DEFAULT_BOLD
+            textAlign = Paint.Align.LEFT
+        }
+
+        val sepPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = (0x77FFFFFF.toInt() and textColor)
+            this.textSize = textSize * 0.85f
+            typeface = Typeface.DEFAULT
+            textAlign = Paint.Align.LEFT
+        }
+
+        val minPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = (0xCCFFFFFF.toInt() and textColor)
+            this.textSize = textSize
+            typeface = Typeface.DEFAULT_BOLD
+            textAlign = Paint.Align.LEFT
+        }
+
+        val maxText = weather.maxTempLabel
+        val sepText = " / "
+        val minText = weather.minTempLabel
+
+        val maxTextW = maxPaint.measureText(maxText)
+        val sepTextW = sepPaint.measureText(sepText)
+        val minTextW = minPaint.measureText(minText)
+        val iconSpacing = iconSize * 0.35f
+
+        val totalW = iconSize + iconSpacing + maxTextW + sepTextW + minTextW
+        val scale = if (totalW > maxWidth && maxWidth > 0f) (maxWidth / totalW).coerceIn(0.5f, 1f) else 1f
+
+        canvas.save()
+        if (contentAngleDeg != 0f) {
+            canvas.rotate(contentAngleDeg, centerX, centerY)
+        }
+        canvas.translate(centerX - (totalW * scale) / 2f, centerY)
+        if (scale < 1f) {
+            canvas.scale(scale, scale)
+        }
+
+        var currX = 0f
+        val textY = (maxPaint.descent() + maxPaint.ascent()) / -2f
+
+        // Sleek Material 3 Thermometer icon tinted matching text color
+        drawDrawable(
+            context,
+            canvas,
+            R.drawable.ic_thermostat,
+            (currX + iconSize / 2f).toInt(),
+            0,
+            iconSize.toInt(),
+            iconSize.toInt(),
+            tintColor = (0xEEFFFFFF.toInt() and textColor)
+        )
+        currX += iconSize + iconSpacing
+
+        // High Temp (e.g. "31°")
+        canvas.drawText(maxText, currX, textY, maxPaint)
+        currX += maxTextW
+
+        // Separator (e.g. " / ")
+        val sepY = (sepPaint.descent() + sepPaint.ascent()) / -2f
+        canvas.drawText(sepText, currX, sepY, sepPaint)
+        currX += sepTextW
+
+        // Low Temp (e.g. "23°")
+        canvas.drawText(minText, currX, textY, minPaint)
 
         canvas.restore()
     }
