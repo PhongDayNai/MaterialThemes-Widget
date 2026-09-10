@@ -71,6 +71,11 @@
             android:exported="false"
             android:theme="@style/Theme.MaterialThemes" />
 
+        <activity
+            android:name=".ui.WidgetPresetEditActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MaterialThemes" />
+
         <!-- Widget Quick Configure Bottom Sheet Activity -->
         <activity
             android:name=".widget.WidgetConfigureActivity"
