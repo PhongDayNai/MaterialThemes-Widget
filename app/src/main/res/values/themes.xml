@@ -17,4 +17,20 @@
     </style>
 
     <style name="Theme.MaterialThemes" parent="Base.Theme.MaterialThemes" />
+
+    <style name="Animation.MaterialThemes.BottomSheet" parent="@android:style/Animation.Activity">
+        <item name="android:activityOpenEnterAnimation">@anim/slide_in_bottom</item>
+        <item name="android:activityOpenExitAnimation">@android:anim/fade_out</item>
+        <item name="android:activityCloseEnterAnimation">@android:anim/fade_in</item>
+        <item name="android:activityCloseExitAnimation">@anim/slide_out_bottom</item>
+    </style>
+
+    <!-- Instant Slide-Up Bottom Sheet Theme for Widget Quick Configure -->
+    <style name="Theme.MaterialThemes.TranslucentBottomSheet" parent="Theme.MaterialThemes">
+        <item name="android:windowBackground">#121415</item>
+        <item name="android:windowIsTranslucent">false</item>
+        <item name="android:windowAnimationStyle">@style/Animation.MaterialThemes.BottomSheet</item>
+        <item name="android:statusBarColor">#121415</item>
+        <item name="android:navigationBarColor">#121415</item>
+    </style>
 </resources>

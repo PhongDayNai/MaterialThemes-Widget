@@ -139,4 +139,121 @@ object WidgetPreferences {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
         prefs.edit().putLong(KEY_LAST_ANIM_TIMESTAMP, timestamp).apply()
     }
+
+    private const val KEY_QUICK_PRESETS = "quick_presets_json"
+
+    fun getDefaultPresets(context: Context): List<QuickPreset> {
+        return listOf(
+            QuickPreset("def_dynamic", context.getString(R.string.preset_dynamic), ColorPalette.DYNAMIC, 100, -45f, isEnabled = true, isDefault = true),
+            QuickPreset("def_olive", context.getString(R.string.preset_olive), ColorPalette.OLIVE, 100, -45f, isEnabled = true, isDefault = true),
+            QuickPreset("def_glass", context.getString(R.string.preset_monet_glass), ColorPalette.DYNAMIC, 70, -45f, isEnabled = true, isDefault = true),
+            QuickPreset("def_slate", context.getString(R.string.preset_dark_slate), ColorPalette.SLATE, 90, -45f, isEnabled = true, isDefault = true),
+            QuickPreset("def_teal", context.getString(R.string.preset_ocean_teal), ColorPalette.TEAL, 100, -45f, isEnabled = true, isDefault = true),
+            QuickPreset("def_amber", context.getString(R.string.preset_warm_amber), ColorPalette.AMBER, 100, -45f, isEnabled = true, isDefault = true)
+        )
+    }
+
+    fun getQuickPresets(context: Context): List<QuickPreset> {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val jsonStr = prefs.getString(KEY_QUICK_PRESETS, null)
+        if (jsonStr.isNullOrBlank()) {
+            val defaults = getDefaultPresets(context)
+            saveQuickPresets(context, defaults)
+            return defaults
+        }
+        return try {
+            val jsonArray = org.json.JSONArray(jsonStr)
+            val list = mutableListOf<QuickPreset>()
+            for (i in 0 until jsonArray.length()) {
+                list.add(QuickPreset.fromJsonObject(jsonArray.getJSONObject(i)))
+            }
+            if (list.isEmpty()) getDefaultPresets(context) else list
+        } catch (_: Exception) {
+            getDefaultPresets(context)
+        }
+    }
+
+    fun saveQuickPresets(context: Context, presets: List<QuickPreset>) {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val jsonArray = org.json.JSONArray()
+        for (p in presets) {
+            jsonArray.put(p.toJsonObject())
+        }
+        prefs.edit().putString(KEY_QUICK_PRESETS, jsonArray.toString()).apply()
+    }
+
+    fun toggleQuickPreset(context: Context, id: String, isEnabled: Boolean) {
+        val current = getQuickPresets(context).map {
+            if (it.id == id) it.copy(isEnabled = isEnabled) else it
+        }
+        saveQuickPresets(context, current)
+    }
+
+    fun addQuickPreset(
+        context: Context,
+        title: String,
+        palette: ColorPalette,
+        transparency: Int,
+        angle: Float
+    ) {
+        val current = getQuickPresets(context).toMutableList()
+        val newPreset = QuickPreset(
+            id = "preset_" + System.currentTimeMillis(),
+            title = title,
+            palette = palette,
+            transparency = transparency,
+            rotationAngle = angle,
+            isEnabled = true,
+            isDefault = false
+        )
+        current.add(newPreset)
+        saveQuickPresets(context, current)
+    }
+
+    fun deleteQuickPreset(context: Context, id: String) {
+        val current = getQuickPresets(context).filterNot { it.id == id }
+        saveQuickPresets(context, current)
+    }
 }
+
+data class QuickPreset(
+    val id: String,
+    val title: String,
+    val palette: ColorPalette,
+    val transparency: Int,
+    val rotationAngle: Float = -45f,
+    val isEnabled: Boolean = true,
+    val isDefault: Boolean = false
+) {
+    fun toJsonObject(): org.json.JSONObject {
+        return org.json.JSONObject().apply {
+            put("id", id)
+            put("title", title)
+            put("palette", palette.name)
+            put("transparency", transparency)
+            put("rotationAngle", rotationAngle.toDouble())
+            put("isEnabled", isEnabled)
+            put("isDefault", isDefault)
+        }
+    }
+
+    companion object {
+        fun fromJsonObject(obj: org.json.JSONObject): QuickPreset {
+            val pal = try {
+                ColorPalette.valueOf(obj.optString("palette", ColorPalette.OLIVE.name))
+            } catch (_: Exception) {
+                ColorPalette.OLIVE
+            }
+            return QuickPreset(
+                id = obj.optString("id", System.currentTimeMillis().toString()),
+                title = obj.optString("title", "Preset"),
+                palette = pal,
+                transparency = obj.optInt("transparency", 100),
+                rotationAngle = obj.optDouble("rotationAngle", -45.0).toFloat(),
+                isEnabled = obj.optBoolean("isEnabled", true),
+                isDefault = obj.optBoolean("isDefault", false)
+            )
+        }
+    }
+}
+

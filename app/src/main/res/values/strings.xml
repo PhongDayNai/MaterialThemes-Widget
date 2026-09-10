@@ -98,4 +98,31 @@
     <string name="sample_temp_range_slash">31° / 23°</string>
     <string name="format_clock_date_short">EEE, d MMM</string>
     <string name="format_clock_date_full">EEEE, d MMMM</string>
+
+    <!-- Quick Configure Bottom Sheet -->
+    <string name="quick_config_title">Quick Styles</string>
+    <string name="quick_config_subtitle">Tap any preset to apply instantly</string>
+    <string name="button_quick_apply">Apply</string>
+    <string name="button_open_full_app">Full App</string>
+    <string name="quick_config_saved">Widget configuration updated</string>
+    <string name="bottom_sheet_applied">Applied: %1$s</string>
+
+    <!-- Quick Presets Management in MainActivity -->
+    <string name="quick_presets_section_title">Quick Presets for Bottom Sheet</string>
+    <string name="quick_presets_section_subtitle">Customize which quick styles appear in the launcher edit sheet</string>
+    <string name="btn_add_current_as_preset">Add Current Style as Preset</string>
+    <string name="dialog_add_preset_title">Save Quick Preset</string>
+    <string name="dialog_add_preset_hint">Preset name (e.g. My Style)</string>
+    <string name="dialog_btn_add">Save</string>
+    <string name="dialog_btn_cancel">Cancel</string>
+    <string name="preset_added_toast">Quick preset saved!</string>
+    <string name="preset_deleted_toast">Preset removed</string>
+
+    <!-- Default Preset Names -->
+    <string name="preset_dynamic">Dynamic Wallpaper</string>
+    <string name="preset_olive">Pixel Olive</string>
+    <string name="preset_monet_glass">Monet Glass 70%</string>
+    <string name="preset_dark_slate">Dark Slate 90%</string>
+    <string name="preset_ocean_teal">Ocean Teal</string>
+    <string name="preset_warm_amber">Warm Amber</string>
 </resources>

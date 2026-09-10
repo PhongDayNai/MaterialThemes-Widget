@@ -3,4 +3,31 @@
     <string name="format_clock_date_short">EEE, d \'thg\' M</string>
     <string name="format_clock_date_full">EEEE, d \'tháng\' M</string>
     <string name="sample_date_display">Th 4, 9 thg 9</string>
+
+    <!-- Quick Configure Bottom Sheet -->
+    <string name="quick_config_title">Kiểu dáng nhanh</string>
+    <string name="quick_config_subtitle">Chạm để đổi ngay tức thì</string>
+    <string name="button_quick_apply">Áp dụng</string>
+    <string name="button_open_full_app">Mở ứng dụng</string>
+    <string name="quick_config_saved">Đã cập nhật cấu hình widget</string>
+    <string name="bottom_sheet_applied">Đã áp dụng: %1$s</string>
+
+    <!-- Quick Presets Management in MainActivity -->
+    <string name="quick_presets_section_title">Kiểu dáng nhanh cho Bottom Sheet</string>
+    <string name="quick_presets_section_subtitle">Tùy chỉnh danh sách các kiểu dáng nhanh xuất hiện khi bấm nút cây bút</string>
+    <string name="btn_add_current_as_preset">Thêm cấu hình này vào Bottom Sheet</string>
+    <string name="dialog_add_preset_title">Lưu kiểu dáng nhanh</string>
+    <string name="dialog_add_preset_hint">Tên kiểu dáng (VD: Phong cách của tôi)</string>
+    <string name="dialog_btn_add">Lưu</string>
+    <string name="dialog_btn_cancel">Hủy</string>
+    <string name="preset_added_toast">Đã lưu kiểu dáng nhanh!</string>
+    <string name="preset_deleted_toast">Đã xóa kiểu dáng</string>
+
+    <!-- Default Preset Names -->
+    <string name="preset_dynamic">Dynamic Wallpaper</string>
+    <string name="preset_olive">Pixel Olive</string>
+    <string name="preset_monet_glass">Monet Kính mờ 70%</string>
+    <string name="preset_dark_slate">Dark Slate 90%</string>
+    <string name="preset_ocean_teal">Ocean Teal</string>
+    <string name="preset_warm_amber">Warm Amber</string>
 </resources>

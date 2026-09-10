@@ -20,7 +20,6 @@ import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
-import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -60,6 +59,9 @@ class MainActivity : AppCompatActivity() {
     private lateinit var tvTransparencyValue: TextView
     private lateinit var btnApply: MaterialButton
     private lateinit var btnPin: MaterialButton
+
+    private lateinit var chipGroupPresetsManager: com.google.android.material.chip.ChipGroup
+    private lateinit var btnAddToPresets: MaterialButton
 
     private var previewAnimator: ValueAnimator? = null
     private var wallpaperColorsListener: WallpaperManager.OnColorsChangedListener? = null
@@ -148,6 +150,7 @@ class MainActivity : AppCompatActivity() {
         )
         setupWallpaperListener()
         updatePreview()
+        refreshQuickPresetsChips()
 
         if (WeatherRepository.isDefaultOrStale(this)) {
             WeatherRepository.refreshWeather(this, force = true) { success ->
@@ -222,6 +225,8 @@ class MainActivity : AppCompatActivity() {
         tvTransparencyValue = findViewById(R.id.tv_transparency_value)
         btnApply = findViewById(R.id.btn_apply)
         btnPin = findViewById(R.id.btn_pin)
+        chipGroupPresetsManager = findViewById(R.id.chip_group_quick_presets_manager)
+        btnAddToPresets = findViewById(R.id.btn_add_to_presets)
 
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main_scroll)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -316,13 +321,74 @@ class MainActivity : AppCompatActivity() {
             viewModel.saveAndApply(this)
             WeatherRepository.refreshWeather(this)
             sendBroadcast(Intent(WidgetUpdateScheduler.ACTION_WIDGET_TICK).setPackage(packageName))
-            Toast.makeText(this, getString(R.string.settings_saved_toast), Toast.LENGTH_SHORT).show()
         }
 
         btnPin.setOnClickListener {
             viewModel.saveAndApply(this)
             pinCurrentWidget()
         }
+
+        setupQuickPresetsManager()
+    }
+
+    private fun setupQuickPresetsManager() {
+        refreshQuickPresetsChips()
+
+        btnAddToPresets.setOnClickListener {
+            showAddPresetDialog()
+        }
+    }
+
+    private fun refreshQuickPresetsChips() {
+        chipGroupPresetsManager.removeAllViews()
+        val presets = com.iatb.materialthemes.data.WidgetPreferences.getQuickPresets(this)
+
+        for (preset in presets) {
+            val chip = com.google.android.material.chip.Chip(this).apply {
+                text = preset.title
+                isCheckable = true
+                isChecked = preset.isEnabled
+                isCloseIconVisible = !preset.isDefault
+                setOnCheckedChangeListener { _, isChecked ->
+                    com.iatb.materialthemes.data.WidgetPreferences.toggleQuickPreset(this@MainActivity, preset.id, isChecked)
+                }
+                setOnCloseIconClickListener {
+                    com.iatb.materialthemes.data.WidgetPreferences.deleteQuickPreset(this@MainActivity, preset.id)
+                    refreshQuickPresetsChips()
+                }
+            }
+            chipGroupPresetsManager.addView(chip)
+        }
+    }
+
+    private fun showAddPresetDialog() {
+        val input = android.widget.EditText(this).apply {
+            hint = getString(R.string.dialog_add_preset_hint)
+            setSingleLine(true)
+            val p = (16 * resources.displayMetrics.density).toInt()
+            setPadding(p, p, p, p)
+        }
+        val container = FrameLayout(this).apply {
+            val hp = (20 * resources.displayMetrics.density).toInt()
+            setPadding(hp, 0, hp, 0)
+            addView(input)
+        }
+
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.dialog_add_preset_title)
+            .setView(container)
+            .setPositiveButton(R.string.dialog_btn_add) { _, _ ->
+                val name = input.text.toString().trim()
+                val finalName = if (name.isNotBlank()) name else getString(R.string.dialog_add_preset_title)
+                val palette = viewModel.palette.value ?: ColorPalette.OLIVE
+                val transparency = viewModel.transparency.value ?: 100
+                val angle = viewModel.angle.value ?: -45f
+
+                com.iatb.materialthemes.data.WidgetPreferences.addQuickPreset(this, finalName, palette, transparency, angle)
+                refreshQuickPresetsChips()
+            }
+            .setNegativeButton(R.string.dialog_btn_cancel, null)
+            .show()
     }
 
     private fun observeViewModel() {
@@ -597,12 +663,7 @@ class MainActivity : AppCompatActivity() {
                 }
 
                 appWidgetManager.requestPinAppWidget(provider, extras, null)
-                Toast.makeText(this, getString(R.string.pin_widget_success), Toast.LENGTH_SHORT).show()
-            } else {
-                Toast.makeText(this, getString(R.string.pin_widget_not_supported), Toast.LENGTH_LONG).show()
             }
-        } else {
-            Toast.makeText(this, getString(R.string.pin_widget_not_supported), Toast.LENGTH_LONG).show()
         }
     }
 }

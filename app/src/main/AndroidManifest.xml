@@ -30,6 +30,17 @@
             </intent-filter>
         </activity>
 
+        <!-- Widget Quick Configure Bottom Sheet Activity -->
+        <activity
+            android:name=".widget.WidgetConfigureActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:theme="@style/Theme.MaterialThemes.TranslucentBottomSheet">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
+            </intent-filter>
+        </activity>
+
         <!-- Diagonal Widget Provider (2x2) -->
         <receiver
             android:name=".widget.DiagonalWidgetProvider"

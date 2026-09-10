@@ -410,6 +410,40 @@
             </com.google.android.material.button.MaterialButtonToggleGroup>
         </HorizontalScrollView>
 
+        <!-- Quick Presets for Bottom Sheet Section -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="@string/quick_presets_section_title"
+            android:textColor="?attr/colorOnSurface"
+            android:textSize="16sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:text="@string/quick_presets_section_subtitle"
+            android:textColor="?attr/colorOnSurfaceVariant"
+            android:textSize="13sp" />
+
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/chip_group_quick_presets_manager"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_add_to_presets"
+            style="?attr/materialButtonOutlinedStyle"
+            android:layout_width="match_parent"
+            android:layout_height="48dp"
+            android:layout_marginTop="8dp"
+            android:text="@string/btn_add_current_as_preset"
+            app:icon="@drawable/ic_tune"
+            app:cornerRadius="14dp" />
+
         <!-- Tip Card -->
         <com.google.android.material.card.MaterialCardView
             android:layout_width="match_parent"
