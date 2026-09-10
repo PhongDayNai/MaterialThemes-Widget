@@ -19,7 +19,8 @@ enum class ColorPalette(
     SLATE(R.string.theme_slate, 0xFF1D2124.toInt(), 0xFFE6E8EB.toInt(), 0xFF2E343A.toInt(), 0xFF434C54.toInt()),
     AMBER(R.string.theme_amber, 0xFF45330E.toInt(), 0xFFFBE2BA.toInt(), 0xFF5E4717.toInt(), 0xFF7D5F22.toInt()),
     CRIMSON(R.string.theme_crimson, 0xFF44181F.toInt(), 0xFFFCD7DC.toInt(), 0xFF632731.toInt(), 0xFF823743.toInt()),
-    DYNAMIC(R.string.theme_dynamic, 0, 0, 0, 0)
+    DYNAMIC(R.string.theme_dynamic, 0, 0, 0, 0),
+    CUSTOM(R.string.theme_custom, 0, 0, 0, 0)
 }
 
 enum class WidgetContentMode(val labelResId: Int) {
@@ -36,6 +37,22 @@ object WidgetPreferences {
     private const val KEY_TRANSPARENCY = "transparency"
     private const val KEY_CATEGORY = "widget_category"
     private const val KEY_SIZE = "widget_size"
+    private const val KEY_CUSTOM_COLOR = "custom_color_seed"
+
+    fun getCustomColor(context: Context): Int {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        return prefs.getInt(KEY_CUSTOM_COLOR, 0xFF00796B.toInt())
+    }
+
+    fun setCustomColor(context: Context, color: Int) {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putInt(KEY_CUSTOM_COLOR, color).apply()
+    }
+
+    fun getCustomPalette(context: Context): ResolvedPaletteColors {
+        val seed = getCustomColor(context)
+        return DynamicThemeExtractor.createHarmoniousTonesFromColor(seed)
+    }
 
     fun getRotationAngle(context: Context): Float {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -146,10 +163,11 @@ object WidgetPreferences {
         return listOf(
             QuickPreset("def_dynamic", context.getString(R.string.preset_dynamic), ColorPalette.DYNAMIC, 100, -45f, isEnabled = true, isDefault = true),
             QuickPreset("def_olive", context.getString(R.string.preset_olive), ColorPalette.OLIVE, 100, -45f, isEnabled = true, isDefault = true),
-            QuickPreset("def_glass", context.getString(R.string.preset_monet_glass), ColorPalette.DYNAMIC, 70, -45f, isEnabled = true, isDefault = true),
+            QuickPreset("def_clean", context.getString(R.string.preset_clean_minimal), ColorPalette.SLATE, 70, -45f, isEnabled = true, isDefault = true),
             QuickPreset("def_slate", context.getString(R.string.preset_dark_slate), ColorPalette.SLATE, 90, -45f, isEnabled = true, isDefault = true),
             QuickPreset("def_teal", context.getString(R.string.preset_ocean_teal), ColorPalette.TEAL, 100, -45f, isEnabled = true, isDefault = true),
-            QuickPreset("def_amber", context.getString(R.string.preset_warm_amber), ColorPalette.AMBER, 100, -45f, isEnabled = true, isDefault = true)
+            QuickPreset("def_amber", context.getString(R.string.preset_warm_amber), ColorPalette.AMBER, 100, -45f, isEnabled = true, isDefault = true),
+            QuickPreset("def_crimson", context.getString(R.string.preset_crimson), ColorPalette.CRIMSON, 100, -45f, isEnabled = true, isDefault = true)
         )
     }
 
@@ -225,6 +243,19 @@ data class QuickPreset(
     val isEnabled: Boolean = true,
     val isDefault: Boolean = false
 ) {
+    fun getLocalizedTitle(context: Context): String {
+        return when (id) {
+            "def_dynamic" -> context.getString(R.string.preset_dynamic)
+            "def_olive" -> context.getString(R.string.preset_olive)
+            "def_clean" -> context.getString(R.string.preset_clean_minimal)
+            "def_slate" -> context.getString(R.string.preset_dark_slate)
+            "def_teal" -> context.getString(R.string.preset_ocean_teal)
+            "def_amber" -> context.getString(R.string.preset_warm_amber)
+            "def_crimson" -> context.getString(R.string.preset_crimson)
+            else -> title
+        }
+    }
+
     fun toJsonObject(): org.json.JSONObject {
         return org.json.JSONObject().apply {
             put("id", id)

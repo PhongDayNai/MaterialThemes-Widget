@@ -51,10 +51,10 @@ object WidgetCanvasRenderer {
         val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
 
-        val rawColors = if (palette == ColorPalette.DYNAMIC) {
-            DynamicThemeExtractor.getDynamicPalette(context)
-        } else {
-            ResolvedPaletteColors(
+        val rawColors = when (palette) {
+            ColorPalette.DYNAMIC -> DynamicThemeExtractor.getDynamicPalette(context)
+            ColorPalette.CUSTOM -> WidgetPreferences.getCustomPalette(context)
+            else -> ResolvedPaletteColors(
                 bgColor = palette.bgColor,
                 secondaryBgColor = palette.secondaryBgColor,
                 tertiaryBgColor = palette.tertiaryBgColor,

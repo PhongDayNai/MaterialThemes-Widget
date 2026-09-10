@@ -91,6 +91,10 @@ object DynamicThemeExtractor {
         )
     }
 
+    fun createHarmoniousTonesFromColor(primary: Int): ResolvedPaletteColors {
+        return createHarmoniousTones(primary, null, null)
+    }
+
     private fun createHarmoniousTones(
         primary: Int,
         secondary: Int?,
