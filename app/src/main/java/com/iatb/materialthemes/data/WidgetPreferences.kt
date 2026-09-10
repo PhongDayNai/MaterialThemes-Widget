@@ -157,6 +157,18 @@ object WidgetPreferences {
         prefs.edit().putLong(KEY_LAST_ANIM_TIMESTAMP, timestamp).apply()
     }
 
+    private const val KEY_APPLIED_PRESET_ID = "applied_preset_id"
+
+    fun getAppliedPresetId(context: Context): String? {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_APPLIED_PRESET_ID, null)
+    }
+
+    fun setAppliedPresetId(context: Context, id: String?) {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_APPLIED_PRESET_ID, id).apply()
+    }
+
     private const val KEY_QUICK_PRESETS = "quick_presets_json"
 
     fun getDefaultPresets(context: Context): List<QuickPreset> {
@@ -212,29 +224,27 @@ object WidgetPreferences {
         palette: ColorPalette,
         transparency: Int,
         angle: Float,
-        category: WidgetCategory
+        category: WidgetCategory,
+        excludeId: String? = null
     ): QuickPreset? {
         val presets = getQuickPresets(context)
         return presets.firstOrNull { preset ->
-            val categoryMatch = preset.category == category
-            val paletteMatch = preset.palette == palette
-            val transparencyMatch = preset.transparency == transparency
-            val angleMatch = if (category == WidgetCategory.DIAGONAL) {
-                kotlin.math.abs(preset.rotationAngle - angle) < 0.5f
-            } else {
-                true
-            }
-            categoryMatch && paletteMatch && transparencyMatch && angleMatch
+            (excludeId == null || preset.id != excludeId) &&
+            preset.category == category &&
+            preset.palette == palette &&
+            preset.transparency == transparency &&
+            (if (category == WidgetCategory.DIAGONAL) kotlin.math.abs(preset.rotationAngle - angle) < 0.5f else true)
         }
     }
 
-    fun isPresetTitleTaken(context: Context, title: String): Boolean {
+    fun isPresetTitleTaken(context: Context, title: String, excludeId: String? = null): Boolean {
         val trimmed = title.trim()
         if (trimmed.isEmpty()) return false
         val presets = getQuickPresets(context)
         return presets.any { preset ->
-            preset.getLocalizedTitle(context).equals(trimmed, ignoreCase = true) ||
-            preset.title.equals(trimmed, ignoreCase = true)
+            (excludeId == null || preset.id != excludeId) &&
+            (preset.getLocalizedTitle(context).equals(trimmed, ignoreCase = true) ||
+             preset.title.equals(trimmed, ignoreCase = true))
         }
     }
 
@@ -244,8 +254,10 @@ object WidgetPreferences {
         palette: ColorPalette,
         transparency: Int,
         angle: Float,
-        category: WidgetCategory = WidgetCategory.DIAGONAL
-    ) {
+        category: WidgetCategory = WidgetCategory.DIAGONAL,
+        size: WidgetSize = WidgetSize.SIZE_2X2,
+        contentMode: WidgetContentMode = WidgetContentMode.WEATHER
+    ): QuickPreset {
         val current = getQuickPresets(context).toMutableList()
         val newPreset = QuickPreset(
             id = "preset_" + System.currentTimeMillis(),
@@ -255,9 +267,41 @@ object WidgetPreferences {
             rotationAngle = angle,
             isEnabled = true,
             isDefault = false,
-            category = category
+            category = category,
+            size = size,
+            contentMode = contentMode
         )
         current.add(newPreset)
+        saveQuickPresets(context, current)
+        return newPreset
+    }
+
+    fun updateQuickPreset(
+        context: Context,
+        id: String,
+        title: String,
+        palette: ColorPalette,
+        transparency: Int,
+        angle: Float,
+        category: WidgetCategory = WidgetCategory.DIAGONAL,
+        size: WidgetSize = WidgetSize.SIZE_2X2,
+        contentMode: WidgetContentMode = WidgetContentMode.WEATHER
+    ) {
+        val current = getQuickPresets(context).map { preset ->
+            if (preset.id == id) {
+                preset.copy(
+                    title = title,
+                    palette = palette,
+                    transparency = transparency,
+                    rotationAngle = angle,
+                    category = category,
+                    size = size,
+                    contentMode = contentMode
+                )
+            } else {
+                preset
+            }
+        }
         saveQuickPresets(context, current)
     }
 
@@ -275,7 +319,9 @@ data class QuickPreset(
     val rotationAngle: Float = -45f,
     val isEnabled: Boolean = true,
     val isDefault: Boolean = false,
-    val category: WidgetCategory = WidgetCategory.DIAGONAL
+    val category: WidgetCategory = WidgetCategory.DIAGONAL,
+    val size: WidgetSize = WidgetSize.SIZE_2X2,
+    val contentMode: WidgetContentMode = WidgetContentMode.WEATHER
 ) {
     fun getLocalizedTitle(context: Context): String {
         return when (id) {
@@ -300,6 +346,8 @@ data class QuickPreset(
             put("isEnabled", isEnabled)
             put("isDefault", isDefault)
             put("category", category.name)
+            put("size", size.name)
+            put("contentMode", contentMode.name)
         }
     }
 
@@ -315,6 +363,16 @@ data class QuickPreset(
             } catch (_: Exception) {
                 WidgetCategory.DIAGONAL
             }
+            val sz = try {
+                WidgetSize.valueOf(obj.optString("size", WidgetSize.SIZE_2X2.name))
+            } catch (_: Exception) {
+                WidgetSize.SIZE_2X2
+            }
+            val cm = try {
+                WidgetContentMode.valueOf(obj.optString("contentMode", WidgetContentMode.WEATHER.name))
+            } catch (_: Exception) {
+                WidgetContentMode.WEATHER
+            }
             return QuickPreset(
                 id = obj.optString("id", System.currentTimeMillis().toString()),
                 title = obj.optString("title", "Preset"),
@@ -323,7 +381,9 @@ data class QuickPreset(
                 rotationAngle = obj.optDouble("rotationAngle", -45.0).toFloat(),
                 isEnabled = obj.optBoolean("isEnabled", true),
                 isDefault = obj.optBoolean("isDefault", false),
-                category = cat
+                category = cat,
+                size = sz,
+                contentMode = cm
             )
         }
     }

@@ -97,8 +97,17 @@ class MainViewModel : ViewModel() {
         _palette.value?.let { WidgetPreferences.setColorPalette(context, it) }
         _contentMode.value?.let { WidgetPreferences.setContentMode(context, it) }
         _transparency.value?.let { WidgetPreferences.setTransparency(context, it) }
+
+        com.iatb.materialthemes.data.DynamicThemeExtractor.invalidateCache()
+
         DiagonalWidgetProvider.updateAllWidgets(context)
+        com.iatb.materialthemes.widget.Diagonal4x3WidgetProvider.updateAllWidgets4x3(context)
+        com.iatb.materialthemes.widget.DiagonalWideWidgetProvider.updateAllWidgets(context)
         com.iatb.materialthemes.widget.OrganicWidgetProvider.updateAllWidgets(context)
+        com.iatb.materialthemes.widget.OrganicWideWidgetProvider.updateAllWidgets(context)
+        com.iatb.materialthemes.widget.Organic4x3WidgetProvider.updateAllWidgets(context)
         com.iatb.materialthemes.widget.ScallopWidgetProvider.updateAllWidgets(context)
+        com.iatb.materialthemes.widget.ScallopWideWidgetProvider.updateAllWidgets(context)
+        com.iatb.materialthemes.widget.Scallop4x3WidgetProvider.updateAllWidgets(context)
     }
 }
