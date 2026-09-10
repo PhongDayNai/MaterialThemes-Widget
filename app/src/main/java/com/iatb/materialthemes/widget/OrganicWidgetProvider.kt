@@ -72,6 +72,7 @@ class OrganicWidgetProvider : AppWidgetProvider() {
                 updateAppWidget(context, appWidgetManager, id, animProgress)
             }
             OrganicWideWidgetProvider.updateAllWidgets(context, animProgress)
+            Organic4x3WidgetProvider.updateAllWidgets(context, animProgress)
         }
 
         fun updateAppWidget(

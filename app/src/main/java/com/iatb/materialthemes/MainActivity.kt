@@ -27,6 +27,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import android.widget.RemoteViews
 import com.iatb.materialthemes.data.ColorPalette
 import com.iatb.materialthemes.data.DynamicThemeExtractor
 import com.iatb.materialthemes.data.WeatherRepository
@@ -36,9 +37,12 @@ import com.iatb.materialthemes.render.WidgetCanvasRenderer
 import com.iatb.materialthemes.ui.WidgetEditActivity
 import com.iatb.materialthemes.ui.WidgetPresetsActivity
 import com.iatb.materialthemes.widget.Diagonal4x3WidgetProvider
+import com.iatb.materialthemes.widget.DiagonalWideWidgetProvider
 import com.iatb.materialthemes.widget.DiagonalWidgetProvider
+import com.iatb.materialthemes.widget.Organic4x3WidgetProvider
 import com.iatb.materialthemes.widget.OrganicWidgetProvider
 import com.iatb.materialthemes.widget.OrganicWideWidgetProvider
+import com.iatb.materialthemes.widget.Scallop4x3WidgetProvider
 import com.iatb.materialthemes.widget.ScallopWidgetProvider
 import com.iatb.materialthemes.widget.ScallopWideWidgetProvider
 import com.iatb.materialthemes.widget.WidgetUpdateScheduler
@@ -297,23 +301,81 @@ class MainActivity : AppCompatActivity() {
 
         val category = viewModel.category.value ?: WidgetCategory.DIAGONAL
         val size = viewModel.size.value ?: WidgetSize.SIZE_2X2
+        val angle = viewModel.angle.value ?: -45f
+        val palette = viewModel.palette.value ?: ColorPalette.DYNAMIC
+        val contentMode = viewModel.contentMode.value ?: WidgetContentMode.COMBO
+        val transparency = viewModel.transparency.value ?: 100
 
         val providerClass = when (category) {
             WidgetCategory.DIAGONAL -> when (size) {
-                WidgetSize.SIZE_4X3 -> Diagonal4x3WidgetProvider::class.java
+                WidgetSize.SIZE_4X3, WidgetSize.SIZE_3X3 -> Diagonal4x3WidgetProvider::class.java
+                WidgetSize.SIZE_4X2, WidgetSize.SIZE_3X2 -> DiagonalWideWidgetProvider::class.java
                 else -> DiagonalWidgetProvider::class.java
             }
             WidgetCategory.ORGANIC -> when (size) {
-                WidgetSize.SIZE_4X2 -> OrganicWideWidgetProvider::class.java
+                WidgetSize.SIZE_4X3, WidgetSize.SIZE_3X3 -> Organic4x3WidgetProvider::class.java
+                WidgetSize.SIZE_4X2, WidgetSize.SIZE_3X2 -> OrganicWideWidgetProvider::class.java
                 else -> OrganicWidgetProvider::class.java
             }
             WidgetCategory.SCALLOP -> when (size) {
-                WidgetSize.SIZE_4X2 -> ScallopWideWidgetProvider::class.java
+                WidgetSize.SIZE_4X3, WidgetSize.SIZE_3X3 -> Scallop4x3WidgetProvider::class.java
+                WidgetSize.SIZE_4X2, WidgetSize.SIZE_3X2 -> ScallopWideWidgetProvider::class.java
                 else -> ScallopWidgetProvider::class.java
             }
         }
 
         val componentName = ComponentName(this, providerClass)
-        appWidgetManager.requestPinAppWidget(componentName, null, null)
+
+        // Generate live preview bitmap matching the user's customized configuration
+        val (wDp, hDp) = when (size) {
+            WidgetSize.SIZE_2X2 -> 200 to 200
+            WidgetSize.SIZE_3X2 -> 300 to 200
+            WidgetSize.SIZE_4X2 -> 400 to 200
+            WidgetSize.SIZE_2X3 -> 200 to 300
+            WidgetSize.SIZE_2X4 -> 200 to 400
+            WidgetSize.SIZE_3X3 -> 300 to 300
+            WidgetSize.SIZE_4X3 -> 400 to 300
+        }
+        val density = resources.displayMetrics.density
+        val widthPx = (wDp * density).toInt()
+        val heightPx = (hDp * density).toInt()
+
+        val weather = WeatherRepository.getWeatherData(this)
+        val previewBitmap = if (category == WidgetCategory.DIAGONAL) {
+            WidgetCanvasRenderer.render(
+                context = this,
+                widthPx = widthPx,
+                heightPx = heightPx,
+                angleDeg = angle,
+                palette = palette,
+                contentMode = contentMode,
+                size = size,
+                weather = weather,
+                transparency = transparency,
+                animProgress = 1.0f
+            )
+        } else {
+            ShapeWidgetCanvasRenderer.render(
+                context = this,
+                category = category,
+                size = size,
+                widthPx = widthPx,
+                heightPx = heightPx,
+                palette = palette,
+                transparency = transparency,
+                weather = weather,
+                animProgress = 1.0f
+            )
+        }
+
+        val previewViews = RemoteViews(packageName, R.layout.widget_pin_preview).apply {
+            setImageViewBitmap(R.id.iv_pin_preview_render, previewBitmap)
+        }
+
+        val extras = Bundle().apply {
+            putParcelable(AppWidgetManager.EXTRA_APPWIDGET_PREVIEW, previewViews)
+        }
+
+        appWidgetManager.requestPinAppWidget(componentName, extras, null)
     }
 }

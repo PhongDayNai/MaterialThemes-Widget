@@ -177,6 +177,24 @@
                 android:resource="@xml/scallop_widget_info" />
         </receiver>
 
+        <!-- Diagonal Wide Widget Provider (4x2) -->
+        <receiver
+            android:name=".widget.DiagonalWideWidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_diagonal_wide_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.iatb.materialthemes.ACTION_WIDGET_TICK" />
+                <action android:name="android.intent.action.USER_PRESENT" />
+                <action android:name="android.intent.action.WALLPAPER_CHANGED" />
+                <action android:name="android.intent.action.CONFIGURATION_CHANGED" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/diagonal_4x2_widget_info" />
+        </receiver>
+
         <!-- Scallop Wide Widget Provider (4x2) -->
         <receiver
             android:name=".widget.ScallopWideWidgetProvider"
@@ -192,6 +210,40 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/scallop_4x2_widget_info" />
+        </receiver>
+
+        <!-- Organic 4x3 Multi-Block Trio Provider -->
+        <receiver
+            android:name=".widget.Organic4x3WidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_organic_4x3_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.iatb.materialthemes.ACTION_WIDGET_TICK" />
+                <action android:name="android.intent.action.WALLPAPER_CHANGED" />
+                <action android:name="android.intent.action.CONFIGURATION_CHANGED" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/organic_4x3_widget_info" />
+        </receiver>
+
+        <!-- Scallop 4x3 Multi-Block Trio Provider -->
+        <receiver
+            android:name=".widget.Scallop4x3WidgetProvider"
+            android:exported="true"
+            android:label="@string/widget_scallop_4x3_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.iatb.materialthemes.ACTION_WIDGET_TICK" />
+                <action android:name="android.intent.action.WALLPAPER_CHANGED" />
+                <action android:name="android.intent.action.CONFIGURATION_CHANGED" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/scallop_4x3_widget_info" />
         </receiver>
     </application>
 

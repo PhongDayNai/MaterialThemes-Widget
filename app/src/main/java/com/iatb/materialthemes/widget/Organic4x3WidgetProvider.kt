@@ -1,6 +1,5 @@
 package com.iatb.materialthemes.widget
 
-import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
@@ -10,14 +9,14 @@ import android.os.Build
 import android.os.Bundle
 import android.util.SizeF
 import android.widget.RemoteViews
-import com.iatb.materialthemes.MainActivity
 import com.iatb.materialthemes.R
 import com.iatb.materialthemes.WidgetCategory
 import com.iatb.materialthemes.WidgetSize
 import com.iatb.materialthemes.data.WeatherRepository
+import com.iatb.materialthemes.data.WidgetPreferences
 import com.iatb.materialthemes.render.ShapeWidgetCanvasRenderer
 
-class ScallopWidgetProvider : AppWidgetProvider() {
+class Organic4x3WidgetProvider : AppWidgetProvider() {
 
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
@@ -66,13 +65,11 @@ class ScallopWidgetProvider : AppWidgetProvider() {
     companion object {
         fun updateAllWidgets(context: Context, animProgress: Float = 1.0f) {
             val appWidgetManager = AppWidgetManager.getInstance(context)
-            val component = ComponentName(context, ScallopWidgetProvider::class.java)
+            val component = ComponentName(context, Organic4x3WidgetProvider::class.java)
             val ids = appWidgetManager.getAppWidgetIds(component)
             for (id in ids) {
                 updateAppWidget(context, appWidgetManager, id, animProgress)
             }
-            ScallopWideWidgetProvider.updateAllWidgets(context, animProgress)
-            Scallop4x3WidgetProvider.updateAllWidgets(context, animProgress)
         }
 
         fun updateAppWidget(
@@ -103,22 +100,10 @@ class ScallopWidgetProvider : AppWidgetProvider() {
             }
 
             val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
-            val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 110)
-            val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 110)
-            val size = resolveWidgetSize(minWidth, minHeight)
+            val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 270)
+            val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 180)
+            val size = if (minWidth >= 292) WidgetSize.SIZE_4X3 else WidgetSize.SIZE_3X3
             return createRenderedView(context, size, animProgress)
-        }
-
-        private fun resolveWidgetSize(minWidth: Int, minHeight: Int): WidgetSize {
-            return if (minHeight >= 250) {
-                if (minWidth >= 292) WidgetSize.SIZE_4X3 else WidgetSize.SIZE_3X3
-            } else {
-                when {
-                    minWidth >= 292 -> WidgetSize.SIZE_4X2
-                    minWidth >= 205 -> WidgetSize.SIZE_3X2
-                    else -> WidgetSize.SIZE_2X2
-                }
-            }
         }
 
         private fun createRenderedView(
@@ -129,21 +114,20 @@ class ScallopWidgetProvider : AppWidgetProvider() {
             val layoutId = WidgetClickRouter.getContainerLayoutId(size)
             val views = RemoteViews(context.packageName, layoutId)
             val (wDp, hDp) = when (size) {
-                WidgetSize.SIZE_2X2 -> 200 to 200
-                WidgetSize.SIZE_3X2 -> 300 to 200
-                WidgetSize.SIZE_4X2 -> 400 to 200
                 WidgetSize.SIZE_3X3 -> 300 to 300
                 WidgetSize.SIZE_4X3 -> 400 to 300
-                else -> 200 to 200
+                else -> 400 to 300
             }
 
             val density = context.resources.displayMetrics.density
             val bitmap = ShapeWidgetCanvasRenderer.render(
                 context = context,
-                category = WidgetCategory.SCALLOP,
+                category = WidgetCategory.ORGANIC,
                 size = size,
                 widthPx = (wDp * density).toInt(),
                 heightPx = (hDp * density).toInt(),
+                palette = WidgetPreferences.getColorPalette(context),
+                transparency = WidgetPreferences.getTransparency(context),
                 animProgress = animProgress
             )
 
@@ -153,7 +137,7 @@ class ScallopWidgetProvider : AppWidgetProvider() {
             WidgetClickRouter.bindClickZones(
                 views = views,
                 context = context,
-                category = WidgetCategory.SCALLOP,
+                category = WidgetCategory.ORGANIC,
                 size = size,
                 locationName = weather.locationName
             )

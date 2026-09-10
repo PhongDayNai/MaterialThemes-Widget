@@ -4,16 +4,22 @@
     <!-- Widget Info & Titles -->
     <string name="widget_diagonal_name">Thanh nghiêng Pixel (2x2)</string>
     <string name="widget_diagonal_description">Tiện ích đồng hồ và thời tiết Material You với các thanh bo tròn nghiêng và màu sắc tương thích hình nền.</string>
+    <string name="widget_diagonal_wide_name">Thanh nghiêng Dạng rộng (4x2)</string>
+    <string name="widget_diagonal_wide_description">Tiện ích thanh nghiêng dạng rộng kết hợp đồng hồ và thời tiết.</string>
     <string name="widget_diagonal_4x3_name">Dự báo Đa khối Nghiêng (4x3)</string>
     <string name="widget_diagonal_4x3_description">Tiện ích đa khối gồm đồng hồ, thời tiết hiện tại và dự báo theo giờ.</string>
     <string name="widget_organic_name">Đồng hồ Cỏ hoa Tự nhiên (2x2)</string>
     <string name="widget_organic_description">Tiện ích đồng hồ cỏ bốn lá và viên sỏi lấy cảm hứng từ Material You.</string>
     <string name="widget_organic_4x2_name">Đồng hồ &amp; Thời tiết Cỏ hoa (4x2)</string>
     <string name="widget_organic_4x2_description">Tiện ích dạng thanh kép kết hợp đồng hồ cỏ hoa và thẻ thời tiết viên sỏi.</string>
+    <string name="widget_organic_4x3_name">Dự báo Đa khối Cỏ hoa (4x3)</string>
+    <string name="widget_organic_4x3_description">Tiện ích đa khối gồm đồng hồ cỏ hoa, thời tiết viên sỏi và dự báo theo giờ.</string>
     <string name="widget_scallop_name">Đồng hồ Hoa lượn sóng &amp; Sao (2x2)</string>
     <string name="widget_scallop_description">Tiện ích đồng hồ hoa 12 cánh uốn lượn và ngôi sao 8 cánh độc đáo.</string>
     <string name="widget_scallop_4x2_name">Dự báo Hoa uốn lượn (4x2)</string>
     <string name="widget_scallop_4x2_description">Tiện ích đa hình khối gồm đồng hồ hoa 12 cánh và thẻ dự báo thời tiết hình lá.</string>
+    <string name="widget_scallop_4x3_name">Dự báo Đa khối Hoa lượn sóng (4x3)</string>
+    <string name="widget_scallop_4x3_description">Tiện ích đa khối gồm đồng hồ hoa 12 cánh, thẻ hình lá và dự báo theo giờ.</string>
 
     <!-- Size Labels -->
     <string name="size_2x2">2 × 2</string>

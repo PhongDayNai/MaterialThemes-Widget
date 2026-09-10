@@ -4,16 +4,22 @@
     <!-- Widget Info & Titles -->
     <string name="widget_diagonal_name">Slanted Pills (2x2)</string>
     <string name="widget_diagonal_description">Material You clock and weather widget featuring modern slanted cuts and dynamic colors.</string>
+    <string name="widget_diagonal_wide_name">Slanted Pills (4x2)</string>
+    <string name="widget_diagonal_wide_description">Material You wide capsule widget with clock and weather.</string>
     <string name="widget_diagonal_4x3_name">Slanted Multi-Block (4x3)</string>
     <string name="widget_diagonal_4x3_description">Material You multi-block widget with clock, current weather, and hourly forecast.</string>
     <string name="widget_organic_name">Clover &amp; Pebble Clock (2x2)</string>
     <string name="widget_organic_description">Pixel style floral clover and pebble clock widget with dynamic colors.</string>
     <string name="widget_organic_4x2_name">Clover &amp; Weather Duo (4x2)</string>
     <string name="widget_organic_4x2_description">Material You dual-pill widget with floral clock and pebble weather card.</string>
+    <string name="widget_organic_4x3_name">Clover Multi-Block Trio (4x3)</string>
+    <string name="widget_organic_4x3_description">Material You multi-block widget with clover clock, pebble weather, and hourly forecast.</string>
     <string name="widget_scallop_name">Scallop &amp; Star Clock (2x2)</string>
     <string name="widget_scallop_description">Iconic 12-petal flower and 8-point starburst clock widget with dynamic colors.</string>
     <string name="widget_scallop_4x2_name">Scallop &amp; Leaf Forecast (4x2)</string>
     <string name="widget_scallop_4x2_description">Material You multi-shape widget with 12-petal clock and leaf forecast card.</string>
+    <string name="widget_scallop_4x3_name">Scallop Multi-Block Trio (4x3)</string>
+    <string name="widget_scallop_4x3_description">Material You multi-block widget with 12-lobed clock, leaf weather, and forecast container.</string>
 
     <!-- Size Labels -->
     <string name="size_2x2">2 × 2</string>
