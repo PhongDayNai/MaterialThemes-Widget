@@ -8,6 +8,7 @@ import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
 import android.widget.FrameLayout
@@ -27,17 +28,24 @@ import com.google.android.material.button.MaterialButtonToggleGroup
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.slider.Slider
+import android.widget.RemoteViews
 import com.iatb.materialthemes.MainViewModel
 import com.iatb.materialthemes.R
 import com.iatb.materialthemes.WidgetCategory
 import com.iatb.materialthemes.WidgetSize
 import com.iatb.materialthemes.data.ColorPalette
+import com.iatb.materialthemes.data.WeatherRepository
 import com.iatb.materialthemes.data.WidgetContentMode
 import com.iatb.materialthemes.data.WidgetPreferences
+import com.iatb.materialthemes.render.ShapeWidgetCanvasRenderer
+import com.iatb.materialthemes.render.WidgetCanvasRenderer
 import com.iatb.materialthemes.widget.Diagonal4x3WidgetProvider
+import com.iatb.materialthemes.widget.DiagonalWideWidgetProvider
 import com.iatb.materialthemes.widget.DiagonalWidgetProvider
+import com.iatb.materialthemes.widget.Organic4x3WidgetProvider
 import com.iatb.materialthemes.widget.OrganicWidgetProvider
 import com.iatb.materialthemes.widget.OrganicWideWidgetProvider
+import com.iatb.materialthemes.widget.Scallop4x3WidgetProvider
 import com.iatb.materialthemes.widget.ScallopWidgetProvider
 import com.iatb.materialthemes.widget.ScallopWideWidgetProvider
 import kotlin.math.abs
@@ -58,7 +66,6 @@ class WidgetEditActivity : AppCompatActivity() {
     private lateinit var panelToolDetail: LinearLayout
     private lateinit var tvActiveToolTitle: TextView
     private lateinit var btnBackToTools: ImageButton
-    private lateinit var btnConfirmTool: ImageButton
 
     // Tool Buttons in Carousel
     private lateinit var btnToolPalette: View
@@ -194,7 +201,6 @@ class WidgetEditActivity : AppCompatActivity() {
         panelToolDetail = findViewById(R.id.panel_tool_detail)
         tvActiveToolTitle = findViewById(R.id.tv_active_tool_title)
         btnBackToTools = findViewById(R.id.btn_back_to_tools)
-        btnConfirmTool = findViewById(R.id.btn_confirm_tool)
 
         // Tool buttons in carousel
         btnToolPalette = findViewById(R.id.btn_tool_palette)
@@ -276,7 +282,7 @@ class WidgetEditActivity : AppCompatActivity() {
 
         // Apply fluid press-scale animations to ALL interactive views
         val interactiveViews = listOf(
-            btnBack, btnDone, btnPinTop, btnBackToTools, btnConfirmTool,
+            btnBack, btnDone, btnPinTop, btnBackToTools,
             cardShapeDiagonal, cardShapeOrganic, cardShapeScallop,
             btnToolPalette, btnToolSize, btnToolAngle, btnToolContent, btnToolTransparency, btnToolPin,
             swatchDynamic, swatchCustomPicker, swatchOlive, swatchTeal, swatchSlate, swatchAmber, swatchCrimson,
@@ -349,7 +355,6 @@ class WidgetEditActivity : AppCompatActivity() {
 
         // Back from detail to main tools
         btnBackToTools.setOnClickListener { closeToolDetail() }
-        btnConfirmTool.setOnClickListener { closeToolDetail() }
 
         // Swatches (wrapped in cards) with selection pop
         swatchDynamic.setOnClickListener {
@@ -486,18 +491,28 @@ class WidgetEditActivity : AppCompatActivity() {
         }
     }
 
+    private var currentActiveTool: ToolType? = null
+
     /**
      * Tactile spring pop effect when an item is selected.
      */
     private fun animateSelectionPop(view: View) {
+        var p = view.parent
+        var depth = 0
+        while (p is ViewGroup && depth < 5) {
+            p.clipChildren = false
+            p.clipToPadding = false
+            depth++
+            p = p.parent
+        }
         view.animate().cancel()
-        view.scaleX = 0.90f
-        view.scaleY = 0.90f
+        view.scaleX = 0.94f
+        view.scaleY = 0.94f
         view.animate()
-            .scaleX(1.06f)
-            .scaleY(1.06f)
+            .scaleX(1.04f)
+            .scaleY(1.04f)
             .setDuration(120)
-            .setInterpolator(OvershootInterpolator(2.4f))
+            .setInterpolator(OvershootInterpolator(1.5f))
             .withEndAction {
                 view.animate()
                     .scaleX(1.0f)
@@ -509,9 +524,34 @@ class WidgetEditActivity : AppCompatActivity() {
     }
 
     /**
+     * Staggered cascade entrance animation for visible tools in the carousel.
+     */
+    private fun animateToolsEntrance() {
+        val tools = listOf(btnToolPalette, btnToolSize, btnToolAngle, btnToolContent, btnToolTransparency, btnToolPin)
+            .filter { it.visibility == View.VISIBLE }
+        tools.forEachIndexed { index, toolView ->
+            toolView.animate().cancel()
+            toolView.alpha = 0f
+            toolView.translationY = 24f
+            toolView.scaleX = 0.92f
+            toolView.scaleY = 0.92f
+            toolView.animate()
+                .alpha(1f)
+                .translationY(0f)
+                .scaleX(1f)
+                .scaleY(1f)
+                .setDuration(260)
+                .setStartDelay(index * 35L)
+                .setInterpolator(DecelerateInterpolator(1.5f))
+                .start()
+        }
+    }
+
+    /**
      * Smooth Photo-Editor style layout transition when opening tool drawer.
      */
     private fun openToolDetail(type: ToolType) {
+        currentActiveTool = type
         val container = findViewById<LinearLayout>(R.id.edit_content_container)
         android.transition.TransitionManager.beginDelayedTransition(
             container,
@@ -562,12 +602,21 @@ class WidgetEditActivity : AppCompatActivity() {
 
         activeSubView.visibility = View.VISIBLE
         panelToolDetail.visibility = View.VISIBLE
+        panelToolDetail.alpha = 0f
+        panelToolDetail.translationY = 24f
+        panelToolDetail.animate()
+            .alpha(1f)
+            .translationY(0f)
+            .setDuration(220)
+            .setInterpolator(DecelerateInterpolator(1.4f))
+            .start()
     }
 
     /**
      * Smooth Photo-Editor style layout transition when closing tool drawer.
      */
     private fun closeToolDetail() {
+        currentActiveTool = null
         val container = findViewById<LinearLayout>(R.id.edit_content_container)
         android.transition.TransitionManager.beginDelayedTransition(
             container,
@@ -587,6 +636,7 @@ class WidgetEditActivity : AppCompatActivity() {
 
         panelToolDetail.visibility = View.GONE
         panelMainTools.visibility = View.VISIBLE
+        animateToolsEntrance()
     }
 
     private fun setPresetAngle(targetAngle: Float) {
@@ -708,7 +758,7 @@ class WidgetEditActivity : AppCompatActivity() {
     private fun observeViewModel() {
         viewModel.category.observe(this) { category ->
             updateShapeCardsUi(category)
-            updateCategoryDependentUi(category)
+            updateCategoryDependentUi(category, animate = true)
             updatePreview(animate = true)
         }
         viewModel.size.observe(this) { size ->
@@ -761,7 +811,7 @@ class WidgetEditActivity : AppCompatActivity() {
         sliderTransparency.value = trans
         tvTransparencyValue.text = getString(R.string.transparency_value_format, trans.toInt())
 
-        updateCategoryDependentUi(viewModel.category.value)
+        updateCategoryDependentUi(viewModel.category.value, animate = false)
     }
 
     private fun getThemeColor(attr: Int, defaultColor: Int = 0): Int {
@@ -878,10 +928,55 @@ class WidgetEditActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateCategoryDependentUi(category: WidgetCategory?) {
+    private fun updateCategoryDependentUi(category: WidgetCategory?, animate: Boolean = true) {
         val isDiagonal = category == WidgetCategory.DIAGONAL
-        btnToolAngle.visibility = if (isDiagonal) View.VISIBLE else View.GONE
-        layoutSizeSecondary.visibility = if (isDiagonal) View.VISIBLE else View.GONE
+
+        if (!isDiagonal && (currentActiveTool == ToolType.ANGLE || currentActiveTool == ToolType.CONTENT)) {
+            closeToolDetail()
+        }
+
+        val targetAngleVis = if (isDiagonal) View.VISIBLE else View.GONE
+        val targetContentVis = if (isDiagonal) View.VISIBLE else View.GONE
+        val targetSecondaryVis = if (isDiagonal) View.VISIBLE else View.GONE
+
+        val visibilityChanged = btnToolAngle.visibility != targetAngleVis ||
+                btnToolContent.visibility != targetContentVis ||
+                layoutSizeSecondary.visibility != targetSecondaryVis
+
+        if (animate && visibilityChanged) {
+            val transition = android.transition.TransitionSet().apply {
+                ordering = android.transition.TransitionSet.ORDERING_TOGETHER
+                addTransition(android.transition.ChangeBounds().apply {
+                    duration = 260
+                    interpolator = DecelerateInterpolator(1.4f)
+                })
+                addTransition(android.transition.Fade().apply {
+                    duration = 200
+                })
+            }
+            android.transition.TransitionManager.beginDelayedTransition(panelMainTools, transition)
+            android.transition.TransitionManager.beginDelayedTransition(detailContainerSize as ViewGroup, transition)
+        }
+
+        btnToolAngle.visibility = targetAngleVis
+        btnToolContent.visibility = targetContentVis
+        layoutSizeSecondary.visibility = targetSecondaryVis
+
+        if (isDiagonal && animate && visibilityChanged) {
+            listOf(btnToolAngle, btnToolContent).forEachIndexed { idx, tool ->
+                tool.alpha = 0f
+                tool.scaleX = 0.82f
+                tool.scaleY = 0.82f
+                tool.animate()
+                    .alpha(1f)
+                    .scaleX(1f)
+                    .scaleY(1f)
+                    .setDuration(260)
+                    .setStartDelay(50L * idx)
+                    .setInterpolator(OvershootInterpolator(1.3f))
+                    .start()
+            }
+        }
 
         if (!isDiagonal) {
             val currentSize = viewModel.size.value
@@ -965,18 +1060,7 @@ class WidgetEditActivity : AppCompatActivity() {
             .setInterpolator(DecelerateInterpolator(1.5f))
             .start()
 
-        val tools = listOf(btnToolPalette, btnToolSize, btnToolAngle, btnToolContent, btnToolTransparency, btnToolPin)
-        tools.forEachIndexed { index, tool ->
-            tool.alpha = 0f
-            tool.translationX = 35f
-            tool.animate()
-                .alpha(1f)
-                .translationX(0f)
-                .setStartDelay(100L + index * 25L)
-                .setDuration(220)
-                .setInterpolator(DecelerateInterpolator())
-                .start()
-        }
+        animateToolsEntrance()
     }
 
     private fun pinCurrentWidget() {
@@ -992,23 +1076,81 @@ class WidgetEditActivity : AppCompatActivity() {
 
         val category = viewModel.category.value ?: WidgetCategory.DIAGONAL
         val size = viewModel.size.value ?: WidgetSize.SIZE_2X2
+        val angle = viewModel.angle.value ?: -45f
+        val palette = viewModel.palette.value ?: ColorPalette.DYNAMIC
+        val contentMode = viewModel.contentMode.value ?: WidgetContentMode.COMBO
+        val transparency = viewModel.transparency.value ?: 100
 
         val providerClass = when (category) {
             WidgetCategory.DIAGONAL -> when (size) {
-                WidgetSize.SIZE_4X3 -> Diagonal4x3WidgetProvider::class.java
+                WidgetSize.SIZE_4X3, WidgetSize.SIZE_3X3 -> Diagonal4x3WidgetProvider::class.java
+                WidgetSize.SIZE_4X2, WidgetSize.SIZE_3X2 -> DiagonalWideWidgetProvider::class.java
                 else -> DiagonalWidgetProvider::class.java
             }
             WidgetCategory.ORGANIC -> when (size) {
-                WidgetSize.SIZE_4X2 -> OrganicWideWidgetProvider::class.java
+                WidgetSize.SIZE_4X3, WidgetSize.SIZE_3X3 -> Organic4x3WidgetProvider::class.java
+                WidgetSize.SIZE_4X2, WidgetSize.SIZE_3X2 -> OrganicWideWidgetProvider::class.java
                 else -> OrganicWidgetProvider::class.java
             }
             WidgetCategory.SCALLOP -> when (size) {
-                WidgetSize.SIZE_4X2 -> ScallopWideWidgetProvider::class.java
+                WidgetSize.SIZE_4X3, WidgetSize.SIZE_3X3 -> Scallop4x3WidgetProvider::class.java
+                WidgetSize.SIZE_4X2, WidgetSize.SIZE_3X2 -> ScallopWideWidgetProvider::class.java
                 else -> ScallopWidgetProvider::class.java
             }
         }
 
         val componentName = ComponentName(this, providerClass)
-        appWidgetManager.requestPinAppWidget(componentName, null, null)
+
+        // Generate live preview bitmap matching the user's customized configuration
+        val (wDp, hDp) = when (size) {
+            WidgetSize.SIZE_2X2 -> 200 to 200
+            WidgetSize.SIZE_3X2 -> 300 to 200
+            WidgetSize.SIZE_4X2 -> 400 to 200
+            WidgetSize.SIZE_2X3 -> 200 to 300
+            WidgetSize.SIZE_2X4 -> 200 to 400
+            WidgetSize.SIZE_3X3 -> 300 to 300
+            WidgetSize.SIZE_4X3 -> 400 to 300
+        }
+        val density = resources.displayMetrics.density
+        val widthPx = (wDp * density).toInt()
+        val heightPx = (hDp * density).toInt()
+
+        val weather = WeatherRepository.getWeatherData(this)
+        val previewBitmap = if (category == WidgetCategory.DIAGONAL) {
+            WidgetCanvasRenderer.render(
+                context = this,
+                widthPx = widthPx,
+                heightPx = heightPx,
+                angleDeg = angle,
+                palette = palette,
+                contentMode = contentMode,
+                size = size,
+                weather = weather,
+                transparency = transparency,
+                animProgress = 1.0f
+            )
+        } else {
+            ShapeWidgetCanvasRenderer.render(
+                context = this,
+                category = category,
+                size = size,
+                widthPx = widthPx,
+                heightPx = heightPx,
+                palette = palette,
+                transparency = transparency,
+                weather = weather,
+                animProgress = 1.0f
+            )
+        }
+
+        val previewViews = RemoteViews(packageName, R.layout.widget_pin_preview).apply {
+            setImageViewBitmap(R.id.iv_pin_preview_render, previewBitmap)
+        }
+
+        val extras = Bundle().apply {
+            putParcelable(AppWidgetManager.EXTRA_APPWIDGET_PREVIEW, previewViews)
+        }
+
+        appWidgetManager.requestPinAppWidget(componentName, extras, null)
     }
 }
