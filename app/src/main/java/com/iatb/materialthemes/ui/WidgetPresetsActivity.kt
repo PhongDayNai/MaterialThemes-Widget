@@ -143,6 +143,19 @@ class WidgetPresetsActivity : AppCompatActivity() {
         val contentMode = viewModel.contentMode.value ?: WidgetContentMode.WEATHER
         val transparency = viewModel.transparency.value ?: 100
 
+        if (animate) {
+            previewContainer.animate().cancel()
+            previewContainer.scaleX = 0.96f
+            previewContainer.scaleY = 0.96f
+            previewContainer.alpha = 0.88f
+            previewContainer.animate()
+                .scaleX(1.0f)
+                .scaleY(1.0f)
+                .alpha(1.0f)
+                .setDuration(260)
+                .start()
+        }
+
         previewAnimator = WidgetPreviewHelper.updatePreview(
             context = this,
             container = previewContainer,
@@ -157,6 +170,24 @@ class WidgetPresetsActivity : AppCompatActivity() {
         )
     }
 
+    private fun animateSelectionPop(view: View) {
+        view.animate().cancel()
+        view.scaleX = 0.90f
+        view.scaleY = 0.90f
+        view.animate()
+            .scaleX(1.05f)
+            .scaleY(1.05f)
+            .setDuration(120)
+            .withEndAction {
+                view.animate()
+                    .scaleX(1.0f)
+                    .scaleY(1.0f)
+                    .setDuration(90)
+                    .start()
+            }
+            .start()
+    }
+
     private inner class PresetsAdapter(
         private var items: List<QuickPreset>
     ) : RecyclerView.Adapter<PresetsAdapter.PresetViewHolder>() {
@@ -165,6 +196,7 @@ class WidgetPresetsActivity : AppCompatActivity() {
 
         fun updateItems(newItems: List<QuickPreset>) {
             items = newItems
+            dynamicColorCached = null
             notifyDataSetChanged()
         }
 
@@ -247,6 +279,7 @@ class WidgetPresetsActivity : AppCompatActivity() {
             }
 
             holder.card.setOnClickListener {
+                animateSelectionPop(holder.card)
                 viewModel.setColorPalette(preset.palette)
                 viewModel.setTransparency(preset.transparency)
                 if (viewModel.category.value == WidgetCategory.DIAGONAL) {
