@@ -49,6 +49,13 @@
     <string name="content_weather">Thời tiết</string>
     <string name="content_clock">Đồng hồ</string>
     <string name="content_combo">Cả hai</string>
+    <string name="btn_angle_custom">Tùy chỉnh</string>
+    <string name="tool_palette">Bảng màu</string>
+    <string name="tool_size">Kích thước</string>
+    <string name="tool_angle">Góc xoay</string>
+    <string name="tool_content">Nội dung</string>
+    <string name="tool_transparency">Độ mờ</string>
+    <string name="tool_pin">Ghim</string>
 
     <!-- Theme Palettes -->
     <string name="theme_section_title">Bảng màu sắc</string>
