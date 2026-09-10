@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_diagonal_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent">
+
+    <!-- Lớp đồ họa dựng Canvas -->
+    <ImageView
+        android:id="@+id/iv_canvas_render"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:contentDescription="@string/widget_diagonal_name"
+        android:scaleType="fitCenter" />
+
+    <!-- Lớp cảm ứng 2 khối ngang (Wide 3x2, 4x2 Touch Overlay) -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="horizontal">
+
+        <!-- Cột Trái: Clock (weight 1) -->
+        <FrameLayout
+            android:id="@+id/touch_zone_left"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@android:color/transparent" />
+
+        <!-- Cột Phải: Weather & Location (weight 1.2) -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1.2"
+            android:orientation="vertical">
+
+            <!-- Phải trên: Location / Maps -->
+            <FrameLayout
+                android:id="@+id/touch_zone_top_right"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="@android:color/transparent" />
+
+            <!-- Phải dưới: Weather -->
+            <FrameLayout
+                android:id="@+id/touch_zone_bottom_right"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="@android:color/transparent" />
+        </LinearLayout>
+    </LinearLayout>
+
+</FrameLayout>

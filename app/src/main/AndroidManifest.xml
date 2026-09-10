@@ -8,6 +8,37 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <queries>
+        <!-- Clock Intents & Packages -->
+        <intent>
+            <action android:name="android.intent.action.SHOW_ALARMS" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.SET_ALARM" />
+        </intent>
+        <package android:name="com.google.android.deskclock" />
+        <package android:name="com.android.deskclock" />
+        <package android:name="com.sec.android.app.clockpackage" />
+        <package android:name="com.coloros.alarmclock" />
+        <package android:name="com.oplus.alarmclock" />
+        <package android:name="com.vivo.alarmclock" />
+
+        <!-- Weather Packages -->
+        <package android:name="com.miui.weather2" />
+        <package android:name="com.sec.android.daemonapp" />
+        <package android:name="com.coloros.weather" />
+        <package android:name="com.oplus.weather" />
+        <package android:name="com.huawei.android.totemweather" />
+        <package android:name="com.google.android.apps.weather" />
+        <package android:name="com.vivo.weather" />
+
+        <!-- Maps Intents & Packages -->
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="geo" />
+        </intent>
+        <package android:name="com.google.android.apps.maps" />
+    </queries>
 
     <application
         android:name=".MaterialThemesApp"
@@ -40,6 +71,15 @@
                 <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE" />
             </intent-filter>
         </activity>
+
+        <!-- Widget Multi-Zone Click Router Activity -->
+        <activity
+            android:name=".widget.WidgetClickRouterActivity"
+            android:exported="true"
+            android:theme="@android:style/Theme.NoDisplay"
+            android:taskAffinity=""
+            android:excludeFromRecents="true"
+            android:noHistory="true" />
 
         <!-- Diagonal Widget Provider (2x2) -->
         <receiver

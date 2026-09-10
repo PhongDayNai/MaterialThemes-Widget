@@ -125,7 +125,8 @@ class OrganicWidgetProvider : AppWidgetProvider() {
             size: WidgetSize,
             animProgress: Float = 1.0f
         ): RemoteViews {
-            val views = RemoteViews(context.packageName, R.layout.widget_canvas_container)
+            val layoutId = WidgetClickRouter.getContainerLayoutId(size)
+            val views = RemoteViews(context.packageName, layoutId)
             val (wDp, hDp) = when (size) {
                 WidgetSize.SIZE_2X2 -> 200 to 200
                 WidgetSize.SIZE_3X2 -> 300 to 200
@@ -147,16 +148,14 @@ class OrganicWidgetProvider : AppWidgetProvider() {
 
             views.setImageViewBitmap(R.id.iv_canvas_render, bitmap)
 
-            val intent = Intent(context, MainActivity::class.java).apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-            }
-            val pendingIntent = PendingIntent.getActivity(
-                context,
-                0,
-                intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            val weather = WeatherRepository.getWeatherData(context)
+            WidgetClickRouter.bindClickZones(
+                views = views,
+                context = context,
+                category = WidgetCategory.ORGANIC,
+                size = size,
+                locationName = weather.locationName
             )
-            views.setOnClickPendingIntent(R.id.widget_diagonal_root, pendingIntent)
 
             return views
         }
