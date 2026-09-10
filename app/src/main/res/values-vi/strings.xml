@@ -33,7 +33,7 @@
     <!-- UI Strings in MainActivity -->
     <string name="dashboard_title">Bộ sưu tập Tiện ích</string>
     <string name="dashboard_subtitle">Cá nhân hóa và ghim widget tuyệt đẹp lên màn hình chính</string>
-    <string name="category_diagonal">Thanh nghiêng Pixel</string>
+    <string name="category_diagonal">Thanh nghiêng</string>
     <string name="category_organic">Cỏ hoa &amp; Viên sỏi</string>
     <string name="category_scallop">Hoa tuyết &amp; Ngôi sao</string>
     <string name="category_diagonal_desc">Khối capsule nghiêng phong cách Pixel độc đáo</string>
@@ -65,12 +65,12 @@
 
     <!-- Theme Palettes -->
     <string name="theme_section_title">Bảng màu sắc</string>
-    <string name="theme_olive">Xanh rêu Pixel</string>
+    <string name="theme_olive">Xanh rêu</string>
     <string name="theme_teal">Xanh biển sâu</string>
     <string name="theme_slate">Đá than chì</string>
     <string name="theme_amber">Hổ phách ấm</string>
     <string name="theme_crimson">Đỏ thẫm nổi bật</string>
-    <string name="theme_dynamic">Màu hình nền động</string>
+    <string name="theme_dynamic">Màu động</string>
 
     <!-- Opacity -->
     <string name="transparency_section_title">Độ đậm bề mặt</string>
@@ -202,4 +202,58 @@
     <string name="preset_duplicate_config_message">Cấu hình này đã tồn tại trong danh sách preset với tên \"%1$s\".</string>
     <string name="preset_duplicate_name_warning">Tên preset \"%1$s\" đã tồn tại, vui lòng chọn tên khác.</string>
     <string name="preset_name_empty_warning">Vui lòng nhập tên preset.</string>
+    <string name="action_delete">Xóa</string>
+    <string name="dialog_delete_preset_title">Xóa phong cách</string>
+    <string name="dialog_delete_preset_message">Bạn có chắc chắn muốn xóa phong cách \"%1$s\" khỏi bộ sưu tập không?</string>
+    <string name="badge_add_preset">Thêm phong cách</string>
+    <string name="badge_edit_preset">Chỉnh sửa phong cách</string>
+    <string name="badge_drag_handle">Kéo thẻ đánh dấu</string>
+    <string name="preset_create_screen_title">Tạo phong cách</string>
+    <string name="preset_edit_screen_title">Chỉnh sửa phong cách</string>
+    <string name="preset_updated_toast">Đã cập nhật phong cách!</string>
+    <string name="dialog_edit_preset_title">Chỉnh sửa phong cách</string>
+    <string name="dialog_edit_preset_name_title">Đổi tên phong cách</string>
+    <string name="preset_name_updated_toast">Đã đổi tên phong cách</string>
+    <string name="preset_name_suggestion_format">Gợi ý: %1$s</string>
+    <string name="preset_name_too_long_warning">Tên không được vượt quá %1$d ký tự</string>
+    <string name="preset_short_cat_diagonal">Nghiêng</string>
+    <string name="preset_short_cat_organic">Cỏ hoa</string>
+    <string name="preset_short_cat_scallop">Lượn sóng</string>
+    <string name="preset_short_pal_dynamic">Màu động</string>
+    <string name="preset_short_pal_olive">Xanh rêu</string>
+    <string name="preset_short_pal_teal">Xanh biển</string>
+    <string name="preset_short_pal_slate">Than chì</string>
+    <string name="preset_short_pal_amber">Hổ phách</string>
+    <string name="preset_short_pal_crimson">Đỏ thẫm</string>
+    <string name="preset_short_pal_custom">Tùy chỉnh</string>
+    <!-- Expressive Preset Name Suggestions -->
+    <string name="preset_expr_pixel">Pixel</string>
+    <string name="preset_expr_dynamic_1">Động tinh tế</string>
+    <string name="preset_expr_dynamic_2">Động sắc nét</string>
+    <string name="preset_expr_dynamic_3">Màu động Pixel</string>
+    <string name="preset_expr_dynamic_4">Hình nền động</string>
+    <string name="preset_expr_olive_1">Xanh rêu Pixel</string>
+    <string name="preset_expr_olive_2">Rêu cổ điển</string>
+    <string name="preset_expr_olive_3">Rêu thanh lịch</string>
+    <string name="preset_expr_olive_4">Xanh rêu mộc</string>
+    <string name="preset_expr_teal_1">Biển sâu lắng</string>
+    <string name="preset_expr_teal_2">Biển tươi mát</string>
+    <string name="preset_expr_teal_3">Xanh biển Pixel</string>
+    <string name="preset_expr_teal_4">Biển ngọc bích</string>
+    <string name="preset_expr_slate_1">Than chì huyền bí</string>
+    <string name="preset_expr_slate_2">Than chì tối giản</string>
+    <string name="preset_expr_slate_3">Than chì Pixel</string>
+    <string name="preset_expr_slate_4">Bóng đêm than chì</string>
+    <string name="preset_expr_amber_1">Hổ phách ấm áp</string>
+    <string name="preset_expr_amber_2">Hổ phách rực rỡ</string>
+    <string name="preset_expr_amber_3">Hổ phách Pixel</string>
+    <string name="preset_expr_amber_4">Ánh mật ong</string>
+    <string name="preset_expr_crimson_1">Đỏ thẫm đam mê</string>
+    <string name="preset_expr_crimson_2">Đỏ thẫm nổi bật</string>
+    <string name="preset_expr_crimson_3">Đỏ thẫm Pixel</string>
+    <string name="preset_expr_crimson_4">Đỏ nhung sang</string>
+    <string name="preset_expr_custom_1">Sắc màu cá tính</string>
+    <string name="preset_expr_custom_2">Phong cách riêng</string>
+    <string name="preset_expr_custom_3">Sắc màu tự do</string>
+    <string name="preset_expr_custom_4">Dấu ấn cá nhân</string>
 </resources>
