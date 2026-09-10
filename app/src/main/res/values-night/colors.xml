@@ -1,22 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Material 3 Dark Scheme -->
+    <color name="glass_card_bg">#331E293B</color>
+    <color name="glass_card_stroke">#33FFFFFF</color>
+    <!-- Material 3 Dark Scheme (OLED Charcoal Slate / Soft Mint Cyan - Zero Purple) -->
     <color name="md_theme_dark_primary">#82D3E0</color>
     <color name="md_theme_dark_onPrimary">#00363D</color>
     <color name="md_theme_dark_primaryContainer">#004F58</color>
-    <color name="md_theme_dark_onPrimaryContainer">#9EEFFD</color>
+    <color name="md_theme_dark_onPrimaryContainer">#A2EFFB</color>
     <color name="md_theme_dark_secondary">#B1CBD0</color>
     <color name="md_theme_dark_onSecondary">#1C3438</color>
     <color name="md_theme_dark_secondaryContainer">#334B4F</color>
     <color name="md_theme_dark_onSecondaryContainer">#CDE7EC</color>
-    <color name="md_theme_dark_tertiary">#BAC6EA</color>
-    <color name="md_theme_dark_tertiaryContainer">#3B4664</color>
-    <color name="md_theme_dark_onTertiaryContainer">#DAE2FF</color>
-    <color name="md_theme_dark_surface">#0F1415</color>
-    <color name="md_theme_dark_onSurface">#E0E3E3</color>
+    <color name="md_theme_dark_tertiary">#B0CBE7</color>
+    <color name="md_theme_dark_tertiaryContainer">#304861</color>
+    <color name="md_theme_dark_onTertiaryContainer">#CEE5FF</color>
+    <color name="md_theme_dark_surface">#101314</color>
+    <color name="md_theme_dark_onSurface">#E1E3E4</color>
     <color name="md_theme_dark_surfaceVariant">#3F484A</color>
     <color name="md_theme_dark_onSurfaceVariant">#BFC8CA</color>
-    <color name="md_theme_dark_outline">#899294</color>
+    <color name="md_theme_dark_outline">#3F494C</color>
+
+    <!-- Additional M3 Surface Container Hierarchy for Dark Mode -->
+    <color name="surface_container_lowest">#0C0E0F</color>
+    <color name="surface_container_low">#161B1D</color>
+    <color name="surface_container">#1E2427</color>
+    <color name="surface_container_high">#273034</color>
+    <color name="surface_container_highest">#323D42</color>
+
+    <!-- Palette Swatch Accent Colors for UI Pickers -->
+    <color name="palette_olive_primary">#343B14</color>
+    <color name="palette_olive_accent">#CCD2A3</color>
+    <color name="palette_teal_primary">#13383B</color>
+    <color name="palette_teal_accent">#C9F0F4</color>
+    <color name="palette_slate_primary">#1D2124</color>
+    <color name="palette_slate_accent">#E6E8EB</color>
+    <color name="palette_amber_primary">#45330E</color>
+    <color name="palette_amber_accent">#FBE2BA</color>
+    <color name="palette_crimson_primary">#44181F</color>
+    <color name="palette_crimson_accent">#FCD7DC</color>
 
     <!-- Widget Specific Semantic Colors (Dark Mode) -->
     <color name="widget_bg_primary">#272D0F</color>

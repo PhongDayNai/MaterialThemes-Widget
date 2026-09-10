@@ -14,6 +14,7 @@
         <item name="colorSurfaceVariant">@color/md_theme_light_surfaceVariant</item>
         <item name="colorOnSurfaceVariant">@color/md_theme_light_onSurfaceVariant</item>
         <item name="colorOutline">@color/md_theme_light_outline</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 
     <style name="Theme.MaterialThemes" parent="Base.Theme.MaterialThemes" />
@@ -25,12 +26,13 @@
         <item name="android:activityCloseExitAnimation">@anim/slide_out_bottom</item>
     </style>
 
-    <!-- Instant Slide-Up Bottom Sheet Theme for Widget Quick Configure -->
+    <!-- Instant Slide-Up Quick Sheet Theme (Adapts to Light / Dark Mode) -->
     <style name="Theme.MaterialThemes.TranslucentBottomSheet" parent="Theme.MaterialThemes">
-        <item name="android:windowBackground">#121415</item>
+        <item name="android:windowBackground">@color/md_theme_light_surface</item>
         <item name="android:windowIsTranslucent">false</item>
         <item name="android:windowAnimationStyle">@style/Animation.MaterialThemes.BottomSheet</item>
-        <item name="android:statusBarColor">#121415</item>
-        <item name="android:navigationBarColor">#121415</item>
+        <item name="android:statusBarColor">@color/md_theme_light_surface</item>
+        <item name="android:navigationBarColor">@color/md_theme_light_surface</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 </resources>

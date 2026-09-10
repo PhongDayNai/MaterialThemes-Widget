@@ -3,26 +3,47 @@
     <!-- Basic Black & White -->
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
+    <color name="glass_card_bg">#B3FFFFFF</color>
+    <color name="glass_card_stroke">#99FFFFFF</color>
 
-    <!-- Material 3 Light Scheme (Coral / Teal Material You Palette) -->
+    <!-- Material 3 Light Scheme (Clean Slate Teal / Porcelain / Alabaster - Zero Purple) -->
     <color name="md_theme_light_primary">#006874</color>
     <color name="md_theme_light_onPrimary">#FFFFFF</color>
-    <color name="md_theme_light_primaryContainer">#9EEFFD</color>
+    <color name="md_theme_light_primaryContainer">#A2EFFB</color>
     <color name="md_theme_light_onPrimaryContainer">#001F24</color>
     <color name="md_theme_light_secondary">#4A6267</color>
     <color name="md_theme_light_onSecondary">#FFFFFF</color>
     <color name="md_theme_light_secondaryContainer">#CDE7EC</color>
     <color name="md_theme_light_onSecondaryContainer">#051F23</color>
-    <color name="md_theme_light_tertiary">#525E7D</color>
-    <color name="md_theme_light_tertiaryContainer">#DAE2FF</color>
-    <color name="md_theme_light_onTertiaryContainer">#0E1A37</color>
-    <color name="md_theme_light_surface">#F8FDFF</color>
+    <color name="md_theme_light_tertiary">#48607A</color>
+    <color name="md_theme_light_tertiaryContainer">#CEE5FF</color>
+    <color name="md_theme_light_onTertiaryContainer">#001D33</color>
+    <color name="md_theme_light_surface">#F8F9FA</color>
     <color name="md_theme_light_onSurface">#191C1D</color>
     <color name="md_theme_light_surfaceVariant">#DBE4E6</color>
     <color name="md_theme_light_onSurfaceVariant">#3F484A</color>
-    <color name="md_theme_light_outline">#6F797A</color>
+    <color name="md_theme_light_outline">#CBD5E1</color>
 
-    <!-- Widget Specific Semantic Colors (Pixel Olive / Material You) -->
+    <!-- Additional M3 Surface Container Hierarchy for Light Mode -->
+    <color name="surface_container_lowest">#FFFFFF</color>
+    <color name="surface_container_low">#F1F3F5</color>
+    <color name="surface_container">#E9ECEF</color>
+    <color name="surface_container_high">#DEE2E6</color>
+    <color name="surface_container_highest">#CED4DA</color>
+
+    <!-- Palette Swatch Accent Colors for UI Pickers -->
+    <color name="palette_olive_primary">#343B14</color>
+    <color name="palette_olive_accent">#CCD2A3</color>
+    <color name="palette_teal_primary">#13383B</color>
+    <color name="palette_teal_accent">#C9F0F4</color>
+    <color name="palette_slate_primary">#1D2124</color>
+    <color name="palette_slate_accent">#E6E8EB</color>
+    <color name="palette_amber_primary">#45330E</color>
+    <color name="palette_amber_accent">#FBE2BA</color>
+    <color name="palette_crimson_primary">#44181F</color>
+    <color name="palette_crimson_accent">#FCD7DC</color>
+
+    <!-- Widget Specific Semantic Colors -->
     <color name="widget_bg_primary">#343B14</color>
     <color name="widget_bg_secondary">#4D5620</color>
     <color name="widget_bg_tertiary">#E2E5CC</color>
@@ -39,6 +60,6 @@
     <color name="widget_accent_pill">#474F1C</color>
     <color name="widget_border_subtle">#00000000</color>
 
-    <!-- Preview Wallpaper Background (from user screenshot) -->
+    <!-- Preview Wallpaper Background -->
     <color name="preview_wallpaper_bg">#B6AF62</color>
 </resources>

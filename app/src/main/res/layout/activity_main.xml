@@ -1,486 +1,314 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main_scroll"
+    android:id="@+id/main_root"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="?android:attr/colorBackground"
-    android:fillViewport="true">
+    android:layout_height="match_parent">
 
-    <LinearLayout
-        android:id="@+id/main_content"
+    <!-- Organic Multi-Point Ambient Mesh Gradient Background (Randomized small glowing orbs on dark bg) -->
+    <com.iatb.materialthemes.ui.AmbientMeshBackgroundView
+        android:id="@+id/ambient_bg_view"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingStart="20dp"
-        android:paddingTop="28dp"
-        android:paddingEnd="20dp"
-        android:paddingBottom="40dp">
+        android:layout_height="match_parent" />
 
-        <!-- Top Header -->
-        <TextView
-            android:id="@+id/tv_app_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/dashboard_title"
-            android:textColor="?attr/colorOnSurface"
-            android:textSize="26sp"
-            android:textStyle="bold" />
+    <!-- Foreground Content with Smooth Scrolling -->
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/main_content_scroll"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:scrollbars="none">
 
-        <TextView
-            android:id="@+id/tv_app_subtitle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="@string/dashboard_subtitle"
-            android:textColor="?attr/colorOnSurfaceVariant"
-            android:textSize="14sp" />
-
-        <!-- Live Preview Section -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="@string/preview_section_title"
-            android:textColor="?attr/colorOnSurface"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-        <!-- Preview Canvas with Natural Landscape Wallpaper Background -->
-        <com.google.android.material.card.MaterialCardView
-            android:id="@+id/card_preview"
-            android:layout_width="match_parent"
-            android:layout_height="220dp"
-            android:layout_marginTop="8dp"
-            app:cardCornerRadius="24dp"
-            app:cardElevation="2dp"
-            app:strokeColor="?attr/colorOutline"
-            app:strokeWidth="1dp">
-
-            <ImageView
-                android:id="@+id/iv_preview_wallpaper"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scaleType="centerCrop"
-                android:src="@drawable/bg_preview_wallpaper"
-                android:contentDescription="@null" />
-
-            <FrameLayout
-                android:id="@+id/preview_container"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:padding="12dp" />
-        </com.google.android.material.card.MaterialCardView>
-
-        <!-- Category Selector Header -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="@string/shape_section_title"
-            android:textColor="?attr/colorOnSurface"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-        <!-- Category Toggle Group -->
-        <com.google.android.material.button.MaterialButtonToggleGroup
-            android:id="@+id/toggle_category"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            app:checkedButton="@id/btn_category_diagonal"
-            app:selectionRequired="true"
-            app:singleSelection="true">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_category_diagonal"
-                style="?attr/materialButtonOutlinedStyle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/category_diagonal" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_category_organic"
-                style="?attr/materialButtonOutlinedStyle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/category_organic" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_category_scallop"
-                style="?attr/materialButtonOutlinedStyle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/category_scallop" />
-        </com.google.android.material.button.MaterialButtonToggleGroup>
-
-        <!-- Rotation Angle Section -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="@string/angle_section_title"
-            android:textColor="?attr/colorOnSurface"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-        <HorizontalScrollView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:scrollbars="none">
-
-            <com.google.android.material.button.MaterialButtonToggleGroup
-                android:id="@+id/toggle_angle"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:checkedButton="@id/btn_angle_minus_45"
-                app:selectionRequired="true"
-                app:singleSelection="true">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_angle_minus_45"
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/angle_minus_45" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_angle_minus_30"
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/angle_minus_30" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_angle_0"
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/angle_0" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_angle_30"
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/angle_30" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_angle_45"
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/angle_45" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_angle_60"
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/angle_60" />
-            </com.google.android.material.button.MaterialButtonToggleGroup>
-        </HorizontalScrollView>
-
-        <!-- Content Mode Section -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="@string/content_section_title"
-            android:textColor="?attr/colorOnSurface"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-        <com.google.android.material.button.MaterialButtonToggleGroup
-            android:id="@+id/toggle_content"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            app:checkedButton="@id/btn_content_weather"
-            app:selectionRequired="true"
-            app:singleSelection="true">
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_content_weather"
-                style="?attr/materialButtonOutlinedStyle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/content_weather" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_content_clock"
-                style="?attr/materialButtonOutlinedStyle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/content_clock" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_content_combo"
-                style="?attr/materialButtonOutlinedStyle"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/content_combo" />
-        </com.google.android.material.button.MaterialButtonToggleGroup>
-
-        <!-- Color Palette Section -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="@string/theme_section_title"
-            android:textColor="?attr/colorOnSurface"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-        <HorizontalScrollView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:scrollbars="none">
-
-            <com.google.android.material.button.MaterialButtonToggleGroup
-                android:id="@+id/toggle_palette"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:checkedButton="@id/btn_palette_olive"
-                app:selectionRequired="true"
-                app:singleSelection="true">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_palette_olive"
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/theme_olive" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_palette_teal"
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/theme_teal" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_palette_slate"
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/theme_slate" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_palette_amber"
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/theme_amber" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_palette_crimson"
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/theme_crimson" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_palette_dynamic"
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/theme_dynamic" />
-            </com.google.android.material.button.MaterialButtonToggleGroup>
-        </HorizontalScrollView>
-
-        <!-- Background Opacity / Transparency Slider Section -->
         <LinearLayout
+            android:id="@+id/main_content_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:orientation="horizontal"
-            android:gravity="center_vertical">
+            android:orientation="vertical"
+            android:paddingStart="22dp"
+            android:paddingTop="16dp"
+            android:paddingEnd="22dp"
+            android:paddingBottom="36dp">
 
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="@string/transparency_section_title"
-                android:textColor="?attr/colorOnSurface"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/tv_transparency_value"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:textColor="?attr/colorPrimary"
-                android:textSize="14sp"
-                android:textStyle="bold" />
-        </LinearLayout>
-
-        <com.google.android.material.slider.Slider
-            android:id="@+id/slider_transparency"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:valueFrom="0.0"
-            android:valueTo="100.0"
-            android:stepSize="5.0"
-            android:value="100.0" />
-
-        <!-- Size Selector Header -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            android:text="@string/size_section_title"
-            android:textColor="?attr/colorOnSurface"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-        <!-- Size Horizontal Scroll View -->
-        <HorizontalScrollView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:scrollbars="none">
-
-            <com.google.android.material.button.MaterialButtonToggleGroup
-                android:id="@+id/toggle_size"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                app:checkedButton="@id/btn_size_2x2"
-                app:selectionRequired="true"
-                app:singleSelection="true">
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_size_2x2"
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/size_2x2" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_size_3x2"
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/size_3x2" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_size_4x2"
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/size_4x2" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_size_2x3"
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/size_2x3" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_size_3x3"
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/size_3x3" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_size_2x4"
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/size_2x4" />
-
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_size_4x3"
-                    style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/size_4x3" />
-            </com.google.android.material.button.MaterialButtonToggleGroup>
-        </HorizontalScrollView>
-
-        <!-- Quick Presets for Bottom Sheet Section -->
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="24dp"
-            android:text="@string/quick_presets_section_title"
-            android:textColor="?attr/colorOnSurface"
-            android:textSize="16sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="2dp"
-            android:text="@string/quick_presets_section_subtitle"
-            android:textColor="?attr/colorOnSurfaceVariant"
-            android:textSize="13sp" />
-
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/chip_group_quick_presets_manager"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp" />
-
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_add_to_presets"
-            style="?attr/materialButtonOutlinedStyle"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:layout_marginTop="8dp"
-            android:text="@string/btn_add_current_as_preset"
-            app:icon="@drawable/ic_tune"
-            app:cornerRadius="14dp" />
-
-        <!-- Tip Card -->
-        <com.google.android.material.card.MaterialCardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
-            app:cardBackgroundColor="?attr/colorSecondaryContainer"
-            app:cardCornerRadius="16dp"
-            app:cardElevation="0dp">
-
-            <TextView
+            <!-- Top App Bar Header -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="14dp"
-                android:text="@string/resize_tip"
-                android:textColor="?attr/colorOnSecondaryContainer"
-                android:textSize="13sp" />
-        </com.google.android.material.card.MaterialCardView>
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
 
-        <!-- Apply / Save Customization Button -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_apply"
-            style="?attr/materialButtonTonalStyle"
-            android:layout_width="match_parent"
-            android:layout_height="52dp"
-            android:layout_marginTop="16dp"
-            android:text="@string/button_apply_changes"
-            android:textSize="15sp"
-            app:cornerRadius="16dp" />
+                <FrameLayout
+                    android:layout_width="46dp"
+                    android:layout_height="46dp"
+                    android:background="@drawable/shape_circle"
+                    android:backgroundTint="#26FFFFFF">
 
-        <!-- Pin Button -->
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btn_pin"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:layout_marginTop="10dp"
-            android:text="@string/button_pin_widget"
-            android:textSize="16sp"
-            app:cornerRadius="16dp" />
-    </LinearLayout>
-</androidx.core.widget.NestedScrollView>
+                    <ImageView
+                        android:layout_width="26dp"
+                        android:layout_height="26dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_widgets"
+                        app:tint="#38BDF8" />
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="14dp"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tv_app_title"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/dashboard_title"
+                        android:textColor="#FFFFFF"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_app_subtitle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:text="@string/dashboard_subtitle"
+                        android:textColor="#B3FFFFFF"
+                        android:textSize="13sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Large Live Preview Stage (Tăng lên gấp rưỡi: 300dp, NO rectangular shadow artifact) -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/card_preview"
+                android:layout_width="match_parent"
+                android:layout_height="300dp"
+                android:layout_marginTop="18dp"
+                android:layout_marginBottom="18dp"
+                app:cardBackgroundColor="@color/glass_card_bg"
+                app:cardCornerRadius="32dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/glass_card_stroke"
+                app:strokeWidth="1.5dp">
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent">
+
+                    <ImageView
+                        android:id="@+id/iv_preview_wallpaper"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@null"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/bg_preview_wallpaper" />
+
+                    <!-- Live widget preview container -->
+                    <FrameLayout
+                        android:id="@+id/preview_container"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:padding="16dp" />
+
+                    <!-- Floating Status Badge Pill (Glassmorphic) -->
+                    <LinearLayout
+                        android:id="@+id/pill_floating_status"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom|start"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginBottom="16dp"
+                        android:background="@drawable/shape_drag_handle"
+                        android:backgroundTint="#CC000000"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingStart="14dp"
+                        android:paddingTop="7dp"
+                        android:paddingEnd="14dp"
+                        android:paddingBottom="7dp">
+
+                        <ImageView
+                            android:layout_width="14dp"
+                            android:layout_height="14dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_widgets"
+                            app:tint="#FFFFFF" />
+
+                        <TextView
+                            android:id="@+id/tv_floating_status"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:textColor="#FFFFFF"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            tools:text="Thanh nghiêng • 2 × 2 • Hình nền động" />
+                    </LinearLayout>
+                </FrameLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- TWO LARGE ACTION CARDS (TĂNG HEIGHT GẤP ĐÔI: 180DP, REAL-TIME FROSTED BLUR, ZERO RECTANGULAR ARTIFACTS) -->
+
+            <!-- Card 1: Customize Widget (Tùy Biến Chi Tiết) -->
+            <com.iatb.materialthemes.ui.GlassBlurCardView
+                android:id="@+id/card_home_edit"
+                android:layout_width="match_parent"
+                android:layout_height="180dp"
+                android:layout_marginBottom="16dp"
+                android:clickable="true"
+                android:focusable="true">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="22dp"
+                    android:paddingTop="18dp"
+                    android:paddingEnd="22dp"
+                    android:paddingBottom="18dp">
+
+                    <!-- Glowing squircle icon container -->
+                    <FrameLayout
+                        android:layout_width="72dp"
+                        android:layout_height="72dp"
+                        android:background="@drawable/shape_circle"
+                        android:backgroundTint="?attr/colorPrimary">
+
+                        <ImageView
+                            android:layout_width="38dp"
+                            android:layout_height="38dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_tune"
+                            app:tint="?attr/colorOnPrimary" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginEnd="14dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/btn_home_edit_title"
+                            android:textColor="#FFFFFF"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:ellipsize="end"
+                            android:lineSpacingExtra="3dp"
+                            android:maxLines="3"
+                            android:text="@string/btn_home_edit_subtitle"
+                            android:textColor="#D0FFFFFF"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+
+                    <FrameLayout
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:background="@drawable/shape_circle"
+                        android:backgroundTint="#26FFFFFF">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_chevron_right"
+                            app:tint="#FFFFFF" />
+                    </FrameLayout>
+                </LinearLayout>
+            </com.iatb.materialthemes.ui.GlassBlurCardView>
+
+            <!-- Card 2: Preset Styles (Bộ Sưu Tập Phong Cách) -->
+            <com.iatb.materialthemes.ui.GlassBlurCardView
+                android:id="@+id/card_home_presets"
+                android:layout_width="match_parent"
+                android:layout_height="180dp"
+                android:clickable="true"
+                android:focusable="true">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="22dp"
+                    android:paddingTop="18dp"
+                    android:paddingEnd="22dp"
+                    android:paddingBottom="18dp">
+
+                    <!-- Glowing squircle icon container -->
+                    <FrameLayout
+                        android:layout_width="72dp"
+                        android:layout_height="72dp"
+                        android:background="@drawable/shape_circle"
+                        android:backgroundTint="?attr/colorSecondary">
+
+                        <ImageView
+                            android:layout_width="38dp"
+                            android:layout_height="38dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_palette"
+                            app:tint="?attr/colorOnSecondary" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="20dp"
+                        android:layout_marginEnd="14dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/btn_home_presets_title"
+                            android:textColor="#FFFFFF"
+                            android:textSize="20sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="6dp"
+                            android:ellipsize="end"
+                            android:lineSpacingExtra="3dp"
+                            android:maxLines="3"
+                            android:text="@string/btn_home_presets_subtitle"
+                            android:textColor="#D0FFFFFF"
+                            android:textSize="14sp" />
+                    </LinearLayout>
+
+                    <FrameLayout
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:background="@drawable/shape_circle"
+                        android:backgroundTint="#26FFFFFF">
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_chevron_right"
+                            app:tint="#FFFFFF" />
+                    </FrameLayout>
+                </LinearLayout>
+            </com.iatb.materialthemes.ui.GlassBlurCardView>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</FrameLayout>

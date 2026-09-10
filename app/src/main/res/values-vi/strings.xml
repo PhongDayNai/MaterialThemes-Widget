@@ -1,33 +1,186 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">Material Themes</string>
+
+    <!-- Widget Info & Titles -->
+    <string name="widget_diagonal_name">Thanh nghiêng Pixel (2x2)</string>
+    <string name="widget_diagonal_description">Tiện ích đồng hồ và thời tiết Material You với các thanh bo tròn nghiêng và màu sắc tương thích hình nền.</string>
+    <string name="widget_diagonal_4x3_name">Dự báo Đa khối Nghiêng (4x3)</string>
+    <string name="widget_diagonal_4x3_description">Tiện ích đa khối gồm đồng hồ, thời tiết hiện tại và dự báo theo giờ.</string>
+    <string name="widget_organic_name">Đồng hồ Cỏ hoa Tự nhiên (2x2)</string>
+    <string name="widget_organic_description">Tiện ích đồng hồ cỏ bốn lá và viên sỏi lấy cảm hứng từ Material You.</string>
+    <string name="widget_organic_4x2_name">Đồng hồ &amp; Thời tiết Cỏ hoa (4x2)</string>
+    <string name="widget_organic_4x2_description">Tiện ích dạng thanh kép kết hợp đồng hồ cỏ hoa và thẻ thời tiết viên sỏi.</string>
+    <string name="widget_scallop_name">Đồng hồ Hoa lượn sóng &amp; Sao (2x2)</string>
+    <string name="widget_scallop_description">Tiện ích đồng hồ hoa 12 cánh uốn lượn và ngôi sao 8 cánh độc đáo.</string>
+    <string name="widget_scallop_4x2_name">Dự báo Hoa uốn lượn (4x2)</string>
+    <string name="widget_scallop_4x2_description">Tiện ích đa hình khối gồm đồng hồ hoa 12 cánh và thẻ dự báo thời tiết hình lá.</string>
+
+    <!-- Size Labels -->
+    <string name="size_2x2">2 × 2</string>
+    <string name="size_3x2">3 × 2</string>
+    <string name="size_4x2">4 × 2</string>
+    <string name="size_2x3">2 × 3</string>
+    <string name="size_3x3">3 × 3</string>
+    <string name="size_2x4">2 × 4</string>
+    <string name="size_4x3">4 × 3</string>
+
+    <!-- UI Strings in MainActivity -->
+    <string name="dashboard_title">Bộ sưu tập Tiện ích</string>
+    <string name="dashboard_subtitle">Cá nhân hóa và ghim widget tuyệt đẹp lên màn hình chính</string>
+    <string name="category_diagonal">Thanh nghiêng Pixel</string>
+    <string name="category_organic">Cỏ hoa &amp; Viên sỏi</string>
+    <string name="category_scallop">Hoa tuyết &amp; Ngôi sao</string>
+    <string name="category_diagonal_desc">Khối capsule nghiêng phong cách Pixel độc đáo</string>
+    <string name="category_organic_desc">Cỏ bốn lá &amp; sỏi cuội tự nhiên thanh thoát</string>
+    <string name="category_scallop_desc">Cánh hoa 12 lớp uốn lượn &amp; sao 8 cánh</string>
+
+    <string name="button_pin_widget">Thêm vào Màn hình chính</string>
+    <string name="pin_widget_dialog_title">Thêm Tiện ích ra Màn hình</string>
+    <string name="pin_widget_success">Đã thêm tiện ích ra màn hình chính</string>
+    <string name="pin_widget_not_supported">Trình khởi chạy không hỗ trợ ghim tự động. Vui lòng giữ màn hình chính và thêm tiện ích thủ công.</string>
+    <string name="preview_section_title">Xem trước trực tiếp</string>
+    <string name="shape_section_title">Kiểu dáng hình khối</string>
+    <string name="size_section_title">Kích thước tiện ích</string>
+    <string name="angle_section_title">Góc xoay</string>
+    <string name="angle_minus_45">-45° (Pixel)</string>
+    <string name="angle_flat">0° (Thẳng)</string>
+    <string name="angle_45">45° (Nghiêng ngược)</string>
+    <string name="content_section_title">Nội dung hiển thị</string>
+    <string name="content_weather">Thời tiết</string>
+    <string name="content_clock">Đồng hồ</string>
+    <string name="content_combo">Cả hai</string>
+
+    <!-- Theme Palettes -->
+    <string name="theme_section_title">Bảng màu sắc</string>
+    <string name="theme_olive">Xanh rêu Pixel</string>
+    <string name="theme_teal">Xanh biển sâu</string>
+    <string name="theme_slate">Đá than chì</string>
+    <string name="theme_amber">Hổ phách ấm</string>
+    <string name="theme_crimson">Đỏ thẫm nổi bật</string>
+    <string name="theme_dynamic">Màu hình nền động</string>
+
+    <!-- Opacity -->
+    <string name="transparency_section_title">Độ đậm bề mặt</string>
+    <string name="transparency_value_format">%1$d%%</string>
+    <string name="opacity_solid">Đậm nét (100%)</string>
+    <string name="opacity_balanced">Cân bằng (80%)</string>
+    <string name="opacity_subtle">Tối giản (60%)</string>
+
+    <string name="button_apply_changes">Áp dụng thay đổi</string>
+    <string name="settings_saved_toast">Đã cập nhật tiện ích!</string>
+    <string name="resize_tip">Mẹo: Sau khi thêm ra màn hình chính, bạn có thể nhấn giữ để thay đổi kích thước linh hoạt.</string>
+
+    <!-- Sample Weather & Date Strings for Widgets -->
+    <string name="sample_temp_11">11°</string>
+    <string name="sample_temp_large">28°</string>
+    <string name="sample_temp_small">28°C</string>
+    <string name="sample_temp_range">C: 31° • T: 23°</string>
+    <string name="sample_weather_condition">Có mây rải rác</string>
+    <string name="sample_weather_condition_short">Nắng đẹp</string>
+    <string name="sample_location">Hà Nội</string>
+    <string name="sample_humidity">65%</string>
+    <string name="sample_wind">12 km/h</string>
+    <string name="sample_forecast_time_1">12:00</string>
+    <string name="sample_forecast_temp_1">29°</string>
+    <string name="sample_forecast_time_2">15:00</string>
+    <string name="sample_forecast_temp_2">31°</string>
+    <string name="sample_forecast_time_3">18:00</string>
+    <string name="sample_forecast_temp_3">27°</string>
+    <string name="sample_forecast_time_4">21:00</string>
+    <string name="sample_forecast_temp_4">25°</string>
+    <string name="sample_forecast_time_5">00:00</string>
+    <string name="sample_forecast_temp_5">23°</string>
+    <string name="sample_forecast_time_6">03:00</string>
+    <string name="sample_forecast_temp_6">22°</string>
+
+    <!-- Dynamic Weather Strings -->
+    <string name="weather_clear">Trời quang</string>
+    <string name="weather_partly_cloudy">Có mây rải rác</string>
+    <string name="weather_cloudy">Nhiều mây</string>
+    <string name="weather_overcast">U ám</string>
+    <string name="weather_rainy">Có mưa</string>
+    <string name="weather_drizzle">Mưa phùn</string>
+    <string name="weather_thunder">Dông sét</string>
+    <string name="weather_snow">Có tuyết</string>
+    <string name="weather_fog">Sương mù</string>
+    <string name="sample_next_alarm">Báo thức: 07:00</string>
+    <string name="sample_date_display">Th 4, 9 thg 9</string>
+    <string name="sample_temp_range_slash">31° / 23°</string>
     <string name="format_clock_date_short">EEE, d \'thg\' M</string>
     <string name="format_clock_date_full">EEEE, d \'tháng\' M</string>
-    <string name="sample_date_display">Th 4, 9 thg 9</string>
 
     <!-- Quick Configure Bottom Sheet -->
-    <string name="quick_config_title">Kiểu dáng nhanh</string>
-    <string name="quick_config_subtitle">Chạm để đổi ngay tức thì</string>
+    <string name="quick_config_title">Phong cách nhanh</string>
+    <string name="quick_config_subtitle">Chạm vào phong cách để đổi widget ngay lập tức</string>
     <string name="button_quick_apply">Áp dụng</string>
-    <string name="button_open_full_app">Mở ứng dụng</string>
-    <string name="quick_config_saved">Đã cập nhật cấu hình widget</string>
-    <string name="bottom_sheet_applied">Đã áp dụng: %1$s</string>
+    <string name="button_open_full_app">Tùy biến</string>
+    <string name="quick_config_saved">Đã cập nhật tiện ích</string>
+    <string name="bottom_sheet_applied">Đã chọn: %1$s</string>
 
-    <!-- Quick Presets Management in MainActivity -->
-    <string name="quick_presets_section_title">Kiểu dáng nhanh cho Bottom Sheet</string>
-    <string name="quick_presets_section_subtitle">Tùy chỉnh danh sách các kiểu dáng nhanh xuất hiện khi bấm nút cây bút</string>
-    <string name="btn_add_current_as_preset">Thêm cấu hình này vào Bottom Sheet</string>
-    <string name="dialog_add_preset_title">Lưu kiểu dáng nhanh</string>
-    <string name="dialog_add_preset_hint">Tên kiểu dáng (VD: Phong cách của tôi)</string>
+    <!-- Presets Management -->
+    <string name="quick_presets_section_title">Bộ sưu tập phong cách</string>
+    <string name="quick_presets_section_subtitle">Các phong cách tuyển chọn giúp thay đổi diện mạo widget tức thì</string>
+    <string name="btn_add_current_as_preset">Lưu phong cách hiện tại</string>
+    <string name="dialog_add_preset_title">Lưu phong cách mới</string>
+    <string name="dialog_add_preset_hint">Tên phong cách (VD: Phong cách của tôi)</string>
     <string name="dialog_btn_add">Lưu</string>
     <string name="dialog_btn_cancel">Hủy</string>
-    <string name="preset_added_toast">Đã lưu kiểu dáng nhanh!</string>
-    <string name="preset_deleted_toast">Đã xóa kiểu dáng</string>
+    <string name="preset_added_toast">Đã lưu phong cách thành công!</string>
+    <string name="preset_deleted_toast">Đã xóa phong cách</string>
+
+    <!-- UI Tabs & Sections in MainActivity -->
+    <string name="tab_presets">Bộ sưu tập</string>
+    <string name="tab_custom">Tùy biến Studio</string>
+    <string name="floating_badge_format">%1$s • %2$s • %3$s</string>
+    <string name="section_shape_title">Kiểu dáng thiết kế</string>
+    <string name="section_palette_title">Bảng màu chủ đạo</string>
+    <string name="section_size_title">Kích thước hiển thị</string>
+    <string name="section_details_title">Góc xoay &amp; Bố cục</string>
+    <string name="section_opacity_title">Độ mờ đục bề mặt</string>
 
     <!-- Default Preset Names -->
-    <string name="preset_dynamic">Dynamic Wallpaper</string>
-    <string name="preset_olive">Pixel Olive</string>
-    <string name="preset_monet_glass">Monet Kính mờ 70%</string>
-    <string name="preset_dark_slate">Dark Slate 90%</string>
-    <string name="preset_ocean_teal">Ocean Teal</string>
-    <string name="preset_warm_amber">Warm Amber</string>
+    <string name="preset_dynamic">Màu hình nền động</string>
+    <string name="preset_olive">Xanh rêu Pixel</string>
+    <string name="preset_clean_minimal">Tối giản thanh lịch</string>
+    <string name="preset_dark_slate">Đá than chì 90%</string>
+    <string name="preset_ocean_teal">Xanh biển sâu</string>
+    <string name="preset_warm_amber">Hổ phách ấm áp</string>
+    <string name="preset_crimson">Đỏ thẫm nổi bật</string>
+
+    <!-- Home Navigation Buttons -->
+    <string name="btn_home_edit_title">Tùy biến chi tiết</string>
+    <string name="btn_home_edit_subtitle">Hình khối, màu sắc, kích thước, góc xoay &amp; độ mờ</string>
+    <string name="btn_home_presets_title">Bộ sưu tập phong cách</string>
+    <string name="btn_home_presets_subtitle">Các mẫu thiết kế phối sẵn, chọn nhanh 1 chạm</string>
+
+    <!-- Color Picker Strings -->
+    <string name="theme_custom">Tùy chọn</string>
+    <string name="color_picker_title">Tùy chọn màu sắc</string>
+    <string name="color_picker_desc">Chạm vào vòng xoay màu để tạo bảng màu Material You</string>
+    <string name="color_picker_select">Áp dụng màu</string>
+    <string name="color_picker_cancel">Hủy</string>
+    <string name="color_tone_bg1">Nền chính</string>
+    <string name="color_tone_bg2">Nền phụ</string>
+    <string name="color_tone_text">Chữ/Icon</string>
+
+    <!-- Screen Titles & Navigation -->
+    <string name="edit_screen_title">Tùy biến tiện ích</string>
+    <string name="presets_screen_title">Bộ sưu tập phong cách</string>
+    <string name="btn_done">Xong</string>
+    <string name="btn_save_preset">Lưu kiểu</string>
+
+    <!-- Angle Options & Custom Slider -->
+    <string name="angle_neg_60">-60°</string>
+    <string name="angle_neg_45">-45°</string>
+    <string name="angle_neg_30">-30°</string>
+    <string name="angle_0">0°</string>
+    <string name="angle_pos_30">30°</string>
+    <string name="angle_pos_45">45°</string>
+    <string name="angle_pos_60">60°</string>
+    <string name="btn_custom_angle">Chỉnh tay</string>
+    <string name="angle_slider_label">Góc xoay: %1$d°</string>
+
+    <!-- VIP Palette Badges -->
+    <string name="badge_auto">Tự động</string>
+    <string name="badge_custom">Tự chọn</string>
 </resources>

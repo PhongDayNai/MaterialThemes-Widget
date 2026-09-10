@@ -61,6 +61,16 @@
             </intent-filter>
         </activity>
 
+        <activity
+            android:name=".ui.WidgetEditActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MaterialThemes" />
+
+        <activity
+            android:name=".ui.WidgetPresetsActivity"
+            android:exported="false"
+            android:theme="@style/Theme.MaterialThemes" />
+
         <!-- Widget Quick Configure Bottom Sheet Activity -->
         <activity
             android:name=".widget.WidgetConfigureActivity"
