@@ -92,20 +92,40 @@ class Diagonal4x3WidgetProvider : AppWidgetProvider() {
             val mode = WidgetPreferences.getContentMode(context)
             val transparency = WidgetPreferences.getTransparency(context)
 
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val viewMapping = mapOf(
+                    SizeF(110f, 110f) to createRenderedView(context, WidgetSize.SIZE_2X2, angle, palette, mode, transparency, animProgress),
+                    SizeF(205f, 110f) to createRenderedView(context, WidgetSize.SIZE_3X2, angle, palette, mode, transparency, animProgress),
+                    SizeF(292f, 110f) to createRenderedView(context, WidgetSize.SIZE_4X2, angle, palette, mode, transparency, animProgress),
+                    SizeF(110f, 250f) to createRenderedView(context, WidgetSize.SIZE_2X3, angle, palette, mode, transparency, animProgress),
+                    SizeF(110f, 350f) to createRenderedView(context, WidgetSize.SIZE_2X4, angle, palette, mode, transparency, animProgress),
+                    SizeF(205f, 250f) to createRenderedView(context, WidgetSize.SIZE_3X3, angle, palette, mode, transparency, animProgress),
+                    SizeF(292f, 250f) to createRenderedView(context, WidgetSize.SIZE_4X3, angle, palette, mode, transparency, animProgress)
+                )
+                return RemoteViews(viewMapping)
+            }
+
             val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
             val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 270)
             val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 180)
-            val size = if (minWidth < 180 || minHeight < 160) WidgetSize.SIZE_4X3 else resolveWidgetSize(minWidth, minHeight)
+            val size = resolveWidgetSize(minWidth, minHeight)
             return createRenderedView(context, size, angle, palette, mode, transparency, animProgress)
         }
 
         private fun resolveWidgetSize(minWidth: Int, minHeight: Int): WidgetSize {
-            return when {
-                minWidth >= 270 && minHeight >= 180 -> WidgetSize.SIZE_4X3
-                minWidth >= 180 && minHeight >= 180 -> WidgetSize.SIZE_3X3
-                minWidth >= 270 && minHeight < 160 -> WidgetSize.SIZE_4X2
-                minWidth >= 180 && minHeight < 160 -> WidgetSize.SIZE_3X2
-                else -> WidgetSize.SIZE_4X3
+            return if (minHeight >= 250) {
+                when {
+                    minWidth >= 292 -> WidgetSize.SIZE_4X3
+                    minWidth >= 205 -> WidgetSize.SIZE_3X3
+                    minHeight >= 350 -> WidgetSize.SIZE_2X4
+                    else -> WidgetSize.SIZE_2X3
+                }
+            } else {
+                when {
+                    minWidth >= 292 -> WidgetSize.SIZE_4X2
+                    minWidth >= 205 -> WidgetSize.SIZE_3X2
+                    else -> WidgetSize.SIZE_2X2
+                }
             }
         }
 

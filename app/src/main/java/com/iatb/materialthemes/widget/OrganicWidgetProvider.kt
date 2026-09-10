@@ -90,6 +90,17 @@ class OrganicWidgetProvider : AppWidgetProvider() {
             appWidgetId: Int,
             animProgress: Float = 1.0f
         ): RemoteViews {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                val viewMapping = mapOf(
+                    SizeF(110f, 110f) to createRenderedView(context, WidgetSize.SIZE_2X2, animProgress),
+                    SizeF(205f, 110f) to createRenderedView(context, WidgetSize.SIZE_3X2, animProgress),
+                    SizeF(292f, 110f) to createRenderedView(context, WidgetSize.SIZE_4X2, animProgress),
+                    SizeF(205f, 250f) to createRenderedView(context, WidgetSize.SIZE_3X3, animProgress),
+                    SizeF(292f, 250f) to createRenderedView(context, WidgetSize.SIZE_4X3, animProgress)
+                )
+                return RemoteViews(viewMapping)
+            }
+
             val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
             val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 110)
             val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 110)
@@ -98,10 +109,14 @@ class OrganicWidgetProvider : AppWidgetProvider() {
         }
 
         private fun resolveWidgetSize(minWidth: Int, minHeight: Int): WidgetSize {
-            return when {
-                minWidth >= 180 && minHeight < 160 -> WidgetSize.SIZE_4X2
-                minWidth >= 180 && minHeight >= 160 -> WidgetSize.SIZE_3X3
-                else -> WidgetSize.SIZE_2X2
+            return if (minHeight >= 250) {
+                if (minWidth >= 292) WidgetSize.SIZE_4X3 else WidgetSize.SIZE_3X3
+            } else {
+                when {
+                    minWidth >= 292 -> WidgetSize.SIZE_4X2
+                    minWidth >= 205 -> WidgetSize.SIZE_3X2
+                    else -> WidgetSize.SIZE_2X2
+                }
             }
         }
 
@@ -112,8 +127,11 @@ class OrganicWidgetProvider : AppWidgetProvider() {
         ): RemoteViews {
             val views = RemoteViews(context.packageName, R.layout.widget_canvas_container)
             val (wDp, hDp) = when (size) {
-                WidgetSize.SIZE_4X2, WidgetSize.SIZE_3X2 -> 400 to 200
-                WidgetSize.SIZE_3X3, WidgetSize.SIZE_4X3 -> 300 to 300
+                WidgetSize.SIZE_2X2 -> 200 to 200
+                WidgetSize.SIZE_3X2 -> 300 to 200
+                WidgetSize.SIZE_4X2 -> 400 to 200
+                WidgetSize.SIZE_3X3 -> 300 to 300
+                WidgetSize.SIZE_4X3 -> 400 to 300
                 else -> 200 to 200
             }
 
