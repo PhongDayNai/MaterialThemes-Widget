@@ -178,11 +178,12 @@ class WidgetConfigureActivity : AppCompatActivity() {
         // Render preview asynchronously to keep UI thread fluid and instant
         lifecycleScope.launch(Dispatchers.Default) {
             val weather = WeatherRepository.getWeatherData(this@WidgetConfigureActivity)
+            val palette = WidgetPreferences.getColorPalette(this@WidgetConfigureActivity)
+            val transparency = WidgetPreferences.getTransparency(this@WidgetConfigureActivity)
+
             val bitmap = if (currentCategory == WidgetCategory.DIAGONAL) {
                 val angle = WidgetPreferences.getRotationAngle(this@WidgetConfigureActivity)
-                val palette = WidgetPreferences.getColorPalette(this@WidgetConfigureActivity)
                 val mode = WidgetPreferences.getContentMode(this@WidgetConfigureActivity)
-                val transparency = WidgetPreferences.getTransparency(this@WidgetConfigureActivity)
 
                 WidgetCanvasRenderer.render(
                     context = this@WidgetConfigureActivity,
@@ -203,6 +204,8 @@ class WidgetConfigureActivity : AppCompatActivity() {
                     size = currentSize,
                     widthPx = wPx,
                     heightPx = hPx,
+                    palette = palette,
+                    transparency = transparency,
                     weather = weather,
                     animProgress = 1.0f
                 )

@@ -124,6 +124,8 @@ object WidgetPreviewHelper {
                             size = size,
                             widthPx = widthPx,
                             heightPx = heightPx,
+                            palette = palette,
+                            transparency = transparency,
                             weather = weather,
                             animProgress = p
                         )
@@ -139,6 +141,8 @@ object WidgetPreviewHelper {
                     size = size,
                     widthPx = widthPx,
                     heightPx = heightPx,
+                    palette = palette,
+                    transparency = transparency,
                     weather = weather,
                     animProgress = 1.0f
                 )

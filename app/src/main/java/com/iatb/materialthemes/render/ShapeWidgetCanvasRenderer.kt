@@ -3,6 +3,7 @@ package com.iatb.materialthemes.render
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Color
 import android.graphics.Paint
 import android.view.LayoutInflater
 import android.view.View
@@ -12,8 +13,12 @@ import android.widget.TextView
 import com.iatb.materialthemes.R
 import com.iatb.materialthemes.WidgetCategory
 import com.iatb.materialthemes.WidgetSize
+import com.iatb.materialthemes.data.ColorPalette
+import com.iatb.materialthemes.data.DynamicThemeExtractor
+import com.iatb.materialthemes.data.ResolvedPaletteColors
 import com.iatb.materialthemes.data.WeatherData
 import com.iatb.materialthemes.data.WeatherRepository
+import com.iatb.materialthemes.data.WidgetPreferences
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -62,6 +67,8 @@ object ShapeWidgetCanvasRenderer {
         size: WidgetSize,
         widthPx: Int,
         heightPx: Int,
+        palette: ColorPalette = WidgetPreferences.getColorPalette(context),
+        transparency: Int = WidgetPreferences.getTransparency(context),
         weather: WeatherData = WeatherRepository.getWeatherData(context),
         animProgress: Float = 1.0f
     ): Bitmap {
@@ -71,7 +78,7 @@ object ShapeWidgetCanvasRenderer {
         val minuteKey = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
         val tempKey = weather.currentTempLabel
 
-        val layoutData = getOrCreateLayout(context, category, size, w, h, weather, minuteKey, tempKey)
+        val layoutData = getOrCreateLayout(context, category, size, w, h, palette, transparency, weather, minuteKey, tempKey)
 
         val bitmap = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
@@ -91,11 +98,13 @@ object ShapeWidgetCanvasRenderer {
         size: WidgetSize,
         w: Int,
         h: Int,
+        palette: ColorPalette,
+        transparency: Int,
         weather: WeatherData,
         minuteKey: String,
         tempKey: String
     ): CachedLayout {
-        val cacheKey = "$category-$size-$w-$h-$minuteKey-$tempKey"
+        val cacheKey = "$category-$size-$w-$h-$palette-$transparency-$minuteKey-$tempKey"
         val existing = layoutCache.get(cacheKey)
         if (existing != null) {
             return existing
@@ -104,7 +113,7 @@ object ShapeWidgetCanvasRenderer {
         val layoutId = resolveLayoutId(category, size)
         val view = LayoutInflater.from(context).inflate(layoutId, null)
 
-        bindDataToView(context, category, view, size, weather)
+        bindDataToView(context, category, view, size, weather, palette, transparency)
 
         view.measure(
             View.MeasureSpec.makeMeasureSpec(w, View.MeasureSpec.EXACTLY),
@@ -226,7 +235,9 @@ object ShapeWidgetCanvasRenderer {
         category: WidgetCategory,
         view: View,
         size: WidgetSize,
-        weather: WeatherData
+        weather: WeatherData,
+        palette: ColorPalette,
+        transparency: Int
     ) {
         val now = Date()
         val is24Hour = android.text.format.DateFormat.is24HourFormat(context)
@@ -289,6 +300,88 @@ object ShapeWidgetCanvasRenderer {
                 }
             }
         }
+
+        applyPaletteAndTransparency(context, category, view, size, palette, transparency)
+    }
+
+    private fun applyPaletteAndTransparency(
+        context: Context,
+        category: WidgetCategory,
+        view: View,
+        size: WidgetSize,
+        palette: ColorPalette,
+        transparency: Int
+    ) {
+        val rawColors = when (palette) {
+            ColorPalette.DYNAMIC -> DynamicThemeExtractor.getDynamicPalette(context)
+            ColorPalette.CUSTOM -> WidgetPreferences.getCustomPalette(context)
+            else -> ResolvedPaletteColors(
+                bgColor = palette.bgColor,
+                secondaryBgColor = palette.secondaryBgColor,
+                tertiaryBgColor = palette.tertiaryBgColor,
+                textColor = palette.textColor
+            )
+        }
+
+        val alphaInt = ((transparency.coerceIn(0, 100) / 100f) * 255).toInt()
+        fun applyBgAlpha(color: Int): Int {
+            return Color.argb(alphaInt, Color.red(color), Color.green(color), Color.blue(color))
+        }
+
+        val resolved = ResolvedPaletteColors(
+            bgColor = applyBgAlpha(rawColors.bgColor),
+            secondaryBgColor = applyBgAlpha(rawColors.secondaryBgColor),
+            tertiaryBgColor = applyBgAlpha(rawColors.tertiaryBgColor),
+            textColor = rawColors.textColor
+        )
+
+        val rootGroup = view as? ViewGroup ?: return
+
+        when (size) {
+            WidgetSize.SIZE_2X2 -> {
+                val block1 = rootGroup.getChildAt(0)
+                block1?.background?.mutate()?.setTint(resolved.bgColor)
+            }
+            WidgetSize.SIZE_4X2, WidgetSize.SIZE_3X2 -> {
+                val block1 = rootGroup.getChildAt(0)
+                val block2 = rootGroup.getChildAt(1)
+                block1?.background?.mutate()?.setTint(resolved.bgColor)
+                block2?.background?.mutate()?.setTint(resolved.secondaryBgColor)
+            }
+            WidgetSize.SIZE_3X3, WidgetSize.SIZE_4X3 -> {
+                val topRow = rootGroup.getChildAt(0) as? ViewGroup
+                val block1 = topRow?.getChildAt(0)
+                val block2 = topRow?.getChildAt(1)
+                val block3 = rootGroup.getChildAt(1)
+
+                block1?.background?.mutate()?.setTint(resolved.bgColor)
+                block2?.background?.mutate()?.setTint(resolved.secondaryBgColor)
+                block3?.background?.mutate()?.setTint(resolved.tertiaryBgColor)
+
+                // Sub-forecast columns in block 3
+                val bottomRow = block3 as? ViewGroup
+                if (bottomRow != null) {
+                    for (i in 0 until bottomRow.childCount) {
+                        val col = bottomRow.getChildAt(i) as? ViewGroup ?: continue
+                        (col.getChildAt(0) as? TextView)?.setTextColor(resolved.textColor)
+                        (col.getChildAt(1) as? ImageView)?.setColorFilter(resolved.textColor)
+                        (col.getChildAt(2) as? TextView)?.setTextColor(resolved.textColor)
+                    }
+                }
+            }
+            else -> {
+                val block1 = rootGroup.getChildAt(0)
+                block1?.background?.mutate()?.setTint(resolved.bgColor)
+            }
+        }
+
+        // Apply text and icon colors with high contrast
+        view.findViewById<TextView>(R.id.clock_hour)?.setTextColor(resolved.textColor)
+        view.findViewById<TextView>(R.id.clock_minute)?.setTextColor(resolved.textColor)
+        view.findViewById<TextView>(R.id.clock_date)?.setTextColor(resolved.textColor)
+        view.findViewById<TextView>(R.id.tv_temp)?.setTextColor(resolved.textColor)
+        view.findViewById<TextView>(R.id.tv_condition)?.setTextColor(resolved.textColor)
+        view.findViewById<ImageView>(R.id.img_weather)?.setColorFilter(resolved.textColor)
     }
 
     private fun renderAnimatedBlocks(
