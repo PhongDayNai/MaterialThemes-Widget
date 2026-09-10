@@ -261,7 +261,7 @@ class WidgetConfigureActivity : AppCompatActivity() {
         private var items: List<QuickPreset>
     ) : RecyclerView.Adapter<QuickPresetsAdapter.PresetViewHolder>() {
 
-        private var dynamicColorCached: Int? = null
+        private var dynamicColorCached: Pair<Int, Int>? = null
 
         fun updateItems(newItems: List<QuickPreset>) {
             items = newItems
@@ -270,10 +270,10 @@ class WidgetConfigureActivity : AppCompatActivity() {
 
         inner class PresetViewHolder(view: View) : RecyclerView.ViewHolder(view) {
             val card: MaterialCardView = view.findViewById(R.id.card_preset)
-            val viewPaletteColor: View = view.findViewById(R.id.view_palette_color)
+            val ivPalettePreview: ImageView = view.findViewById(R.id.iv_palette_preview)
             val tvName: TextView = view.findViewById(R.id.tv_preset_name)
             val tvSubtitle: TextView = view.findViewById(R.id.tv_preset_subtitle)
-            val ivCheck: ImageView = view.findViewById(R.id.iv_check)
+            val badgeCheckContainer: View = view.findViewById(R.id.badge_check_container)
         }
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PresetViewHolder {
@@ -288,38 +288,55 @@ class WidgetConfigureActivity : AppCompatActivity() {
             val currentTransparency = WidgetPreferences.getTransparency(this@WidgetConfigureActivity)
             val currentAngle = WidgetPreferences.getRotationAngle(this@WidgetConfigureActivity)
 
-            holder.tvName.text = preset.title
-            val angleText = if (currentCategory == WidgetCategory.DIAGONAL) " • ${preset.rotationAngle.toInt()}°" else ""
-            holder.tvSubtitle.text = getString(R.string.transparency_value_format, preset.transparency) + angleText
+            holder.tvName.text = preset.getLocalizedTitle(this@WidgetConfigureActivity)
+            val paletteName = getString(preset.palette.labelResId)
+            val opacityText = getString(R.string.transparency_value_format, preset.transparency)
+            holder.tvSubtitle.text = "$paletteName • $opacityText"
 
-            // Color dot
-            val dotDrawable = GradientDrawable().apply {
-                shape = GradientDrawable.OVAL
-                if (preset.palette == ColorPalette.DYNAMIC) {
-                    val color = dynamicColorCached ?: DynamicThemeExtractor.getDynamicPalette(this@WidgetConfigureActivity).bgColor.also {
-                        dynamicColorCached = it
-                    }
-                    setColor(color)
-                } else {
-                    setColor(preset.palette.bgColor)
+            // Dual-tone color preview disc
+            val (mainColor, accentColor) = if (preset.palette == ColorPalette.DYNAMIC) {
+                dynamicColorCached ?: run {
+                    val dyn = DynamicThemeExtractor.getDynamicPalette(this@WidgetConfigureActivity)
+                    (dyn.bgColor to dyn.textColor).also { dynamicColorCached = it }
                 }
+            } else {
+                preset.palette.bgColor to preset.palette.textColor
             }
-            holder.viewPaletteColor.background = dotDrawable
+
+            val bgOval = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(mainColor)
+            }
+            val centerDot = GradientDrawable().apply {
+                shape = GradientDrawable.OVAL
+                setColor(accentColor)
+            }
+            val density = resources.displayMetrics.density
+            val insetPx = (8 * density).toInt()
+            val layerDrawable = android.graphics.drawable.LayerDrawable(arrayOf(bgOval, centerDot)).apply {
+                setLayerInset(1, insetPx, insetPx, insetPx, insetPx)
+            }
+            holder.ivPalettePreview.setImageDrawable(layerDrawable)
 
             val isSelected = (preset.palette == currentPalette) &&
                     (preset.transparency == currentTransparency) &&
                     (currentCategory != WidgetCategory.DIAGONAL || preset.rotationAngle.toInt() == currentAngle.toInt())
 
+            val primaryColor = getThemeColor(androidx.appcompat.R.attr.colorPrimary, 0xFF006874.toInt())
+            val outlineColor = getThemeColor(com.google.android.material.R.attr.colorOutline, 0xFF6F797A.toInt())
+            val surfaceVariant = getThemeColor(com.google.android.material.R.attr.colorSurfaceVariant, 0xFFDBE4E6.toInt())
+            val surfaceColor = getThemeColor(com.google.android.material.R.attr.colorSurface, 0xFFF8FDFF.toInt())
+
             if (isSelected) {
-                holder.ivCheck.visibility = View.VISIBLE
-                holder.card.strokeColor = Color.parseColor("#4DD0E1")
-                holder.card.strokeWidth = (2 * resources.displayMetrics.density).toInt()
-                holder.card.setCardBackgroundColor(Color.parseColor("#22333B"))
+                holder.badgeCheckContainer.visibility = View.VISIBLE
+                holder.card.strokeColor = primaryColor
+                holder.card.strokeWidth = (2 * density).toInt()
+                holder.card.setCardBackgroundColor(surfaceVariant)
             } else {
-                holder.ivCheck.visibility = View.GONE
-                holder.card.strokeColor = Color.parseColor("#2E383F")
-                holder.card.strokeWidth = (1 * resources.displayMetrics.density).toInt()
-                holder.card.setCardBackgroundColor(Color.parseColor("#151A1D"))
+                holder.badgeCheckContainer.visibility = View.GONE
+                holder.card.strokeColor = outlineColor
+                holder.card.strokeWidth = (1 * density).toInt()
+                holder.card.setCardBackgroundColor(surfaceColor)
             }
 
             holder.card.setOnClickListener {
@@ -328,5 +345,14 @@ class WidgetConfigureActivity : AppCompatActivity() {
         }
 
         override fun getItemCount(): Int = items.size
+    }
+
+    private fun getThemeColor(attr: Int, defaultColor: Int = 0): Int {
+        val typedValue = android.util.TypedValue()
+        return if (theme.resolveAttribute(attr, typedValue, true)) {
+            typedValue.data
+        } else {
+            defaultColor
+        }
     }
 }
