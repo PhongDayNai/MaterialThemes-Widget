@@ -46,6 +46,16 @@
                 android:textStyle="bold" />
 
             <ImageButton
+                android:id="@+id/btn_save_preset_top"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:layout_marginEnd="4dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:contentDescription="@string/button_save_preset"
+                android:src="@drawable/ic_bookmark_add"
+                app:tint="?attr/colorPrimary" />
+
+            <ImageButton
                 android:id="@+id/btn_pin_top"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
@@ -119,7 +129,7 @@
             android:layout_height="wrap_content"
             android:clipChildren="false"
             android:clipToPadding="false"
-            android:background="?attr/colorSurface">
+            android:background="@drawable/bg_bottom_control_sheet">
 
             <!-- ============================================================== -->
             <!-- STATE 1: MAIN TOOLS PANEL (Shapes on top, Tools Carousel below) -->
@@ -290,8 +300,7 @@
                             <FrameLayout
                                 android:layout_width="44dp"
                                 android:layout_height="44dp"
-                                android:background="@drawable/shape_circle"
-                                android:backgroundTint="?attr/colorSurfaceVariant">
+                                android:background="@drawable/shape_circle_bordered">
 
                                 <ImageView
                                     android:layout_width="22dp"
@@ -330,8 +339,7 @@
                             <FrameLayout
                                 android:layout_width="44dp"
                                 android:layout_height="44dp"
-                                android:background="@drawable/shape_circle"
-                                android:backgroundTint="?attr/colorSurfaceVariant">
+                                android:background="@drawable/shape_circle_bordered">
 
                                 <ImageView
                                     android:layout_width="22dp"
@@ -370,8 +378,7 @@
                             <FrameLayout
                                 android:layout_width="44dp"
                                 android:layout_height="44dp"
-                                android:background="@drawable/shape_circle"
-                                android:backgroundTint="?attr/colorSurfaceVariant">
+                                android:background="@drawable/shape_circle_bordered">
 
                                 <ImageView
                                     android:layout_width="22dp"
@@ -410,8 +417,7 @@
                             <FrameLayout
                                 android:layout_width="44dp"
                                 android:layout_height="44dp"
-                                android:background="@drawable/shape_circle"
-                                android:backgroundTint="?attr/colorSurfaceVariant">
+                                android:background="@drawable/shape_circle_bordered">
 
                                 <ImageView
                                     android:layout_width="22dp"
@@ -450,8 +456,7 @@
                             <FrameLayout
                                 android:layout_width="44dp"
                                 android:layout_height="44dp"
-                                android:background="@drawable/shape_circle"
-                                android:backgroundTint="?attr/colorSurfaceVariant">
+                                android:background="@drawable/shape_circle_bordered">
 
                                 <ImageView
                                     android:layout_width="22dp"
@@ -467,6 +472,45 @@
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="5dp"
                                 android:text="@string/tool_transparency"
+                                android:textColor="?attr/colorOnSurface"
+                                android:textSize="11sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <!-- Tool: Save Preset -->
+                        <LinearLayout
+                            android:id="@+id/btn_tool_save_preset"
+                            android:layout_width="72dp"
+                            android:layout_height="wrap_content"
+                            android:background="?attr/selectableItemBackgroundBorderless"
+                            android:clickable="true"
+                            android:focusable="true"
+                            android:clipChildren="false"
+                            android:clipToPadding="false"
+                            android:gravity="center"
+                            android:orientation="vertical"
+                            android:paddingTop="6dp"
+                            android:paddingBottom="6dp">
+
+                            <FrameLayout
+                                android:layout_width="44dp"
+                                android:layout_height="44dp"
+                                android:background="@drawable/shape_circle_bordered">
+
+                                <ImageView
+                                    android:layout_width="22dp"
+                                    android:layout_height="22dp"
+                                    android:layout_gravity="center"
+                                    android:contentDescription="@null"
+                                    android:src="@drawable/ic_bookmark_add"
+                                    app:tint="?attr/colorPrimary" />
+                            </FrameLayout>
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="5dp"
+                                android:text="@string/tool_save_preset"
                                 android:textColor="?attr/colorOnSurface"
                                 android:textSize="11sp"
                                 android:textStyle="bold" />
@@ -490,8 +534,7 @@
                             <FrameLayout
                                 android:layout_width="44dp"
                                 android:layout_height="44dp"
-                                android:background="@drawable/shape_circle"
-                                android:backgroundTint="?attr/colorSurfaceVariant">
+                                android:background="@drawable/shape_circle_bordered">
 
                                 <ImageView
                                     android:layout_width="22dp"

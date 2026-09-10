@@ -207,12 +207,44 @@ object WidgetPreferences {
         saveQuickPresets(context, current)
     }
 
+    fun findDuplicatePreset(
+        context: Context,
+        palette: ColorPalette,
+        transparency: Int,
+        angle: Float,
+        category: WidgetCategory
+    ): QuickPreset? {
+        val presets = getQuickPresets(context)
+        return presets.firstOrNull { preset ->
+            val categoryMatch = preset.category == category
+            val paletteMatch = preset.palette == palette
+            val transparencyMatch = preset.transparency == transparency
+            val angleMatch = if (category == WidgetCategory.DIAGONAL) {
+                kotlin.math.abs(preset.rotationAngle - angle) < 0.5f
+            } else {
+                true
+            }
+            categoryMatch && paletteMatch && transparencyMatch && angleMatch
+        }
+    }
+
+    fun isPresetTitleTaken(context: Context, title: String): Boolean {
+        val trimmed = title.trim()
+        if (trimmed.isEmpty()) return false
+        val presets = getQuickPresets(context)
+        return presets.any { preset ->
+            preset.getLocalizedTitle(context).equals(trimmed, ignoreCase = true) ||
+            preset.title.equals(trimmed, ignoreCase = true)
+        }
+    }
+
     fun addQuickPreset(
         context: Context,
         title: String,
         palette: ColorPalette,
         transparency: Int,
-        angle: Float
+        angle: Float,
+        category: WidgetCategory = WidgetCategory.DIAGONAL
     ) {
         val current = getQuickPresets(context).toMutableList()
         val newPreset = QuickPreset(
@@ -222,7 +254,8 @@ object WidgetPreferences {
             transparency = transparency,
             rotationAngle = angle,
             isEnabled = true,
-            isDefault = false
+            isDefault = false,
+            category = category
         )
         current.add(newPreset)
         saveQuickPresets(context, current)
@@ -241,7 +274,8 @@ data class QuickPreset(
     val transparency: Int,
     val rotationAngle: Float = -45f,
     val isEnabled: Boolean = true,
-    val isDefault: Boolean = false
+    val isDefault: Boolean = false,
+    val category: WidgetCategory = WidgetCategory.DIAGONAL
 ) {
     fun getLocalizedTitle(context: Context): String {
         return when (id) {
@@ -265,6 +299,7 @@ data class QuickPreset(
             put("rotationAngle", rotationAngle.toDouble())
             put("isEnabled", isEnabled)
             put("isDefault", isDefault)
+            put("category", category.name)
         }
     }
 
@@ -275,6 +310,11 @@ data class QuickPreset(
             } catch (_: Exception) {
                 ColorPalette.OLIVE
             }
+            val cat = try {
+                WidgetCategory.valueOf(obj.optString("category", WidgetCategory.DIAGONAL.name))
+            } catch (_: Exception) {
+                WidgetCategory.DIAGONAL
+            }
             return QuickPreset(
                 id = obj.optString("id", System.currentTimeMillis().toString()),
                 title = obj.optString("title", "Preset"),
@@ -282,7 +322,8 @@ data class QuickPreset(
                 transparency = obj.optInt("transparency", 100),
                 rotationAngle = obj.optDouble("rotationAngle", -45.0).toFloat(),
                 isEnabled = obj.optBoolean("isEnabled", true),
-                isDefault = obj.optBoolean("isDefault", false)
+                isDefault = obj.optBoolean("isDefault", false),
+                category = cat
             )
         }
     }

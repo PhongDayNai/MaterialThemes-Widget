@@ -196,4 +196,10 @@
     <!-- VIP Palette Badges -->
     <string name="badge_auto">Tự động</string>
     <string name="badge_custom">Tự chọn</string>
+    <string name="tool_save_preset">Lưu preset</string>
+    <string name="button_save_preset">Thêm vào preset</string>
+    <string name="preset_duplicate_title">Preset đã tồn tại</string>
+    <string name="preset_duplicate_config_message">Cấu hình này đã tồn tại trong danh sách preset với tên \"%1$s\".</string>
+    <string name="preset_duplicate_name_warning">Tên preset \"%1$s\" đã tồn tại, vui lòng chọn tên khác.</string>
+    <string name="preset_name_empty_warning">Vui lòng nhập tên preset.</string>
 </resources>

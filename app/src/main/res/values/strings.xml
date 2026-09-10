@@ -197,4 +197,10 @@
     <!-- VIP Palette Badges -->
     <string name="badge_auto">Auto</string>
     <string name="badge_custom">Pick</string>
+    <string name="tool_save_preset">Save Preset</string>
+    <string name="button_save_preset">Add to Presets</string>
+    <string name="preset_duplicate_title">Preset Exists</string>
+    <string name="preset_duplicate_config_message">This design is already saved in your presets as \"%1$s\".</string>
+    <string name="preset_duplicate_name_warning">The name \"%1$s\" is already used. Please choose a different name.</string>
+    <string name="preset_name_empty_warning">Please enter a preset name.</string>
 </resources>

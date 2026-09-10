@@ -73,6 +73,7 @@ class WidgetEditActivity : AppCompatActivity() {
     private lateinit var btnToolAngle: View
     private lateinit var btnToolContent: View
     private lateinit var btnToolTransparency: View
+    private lateinit var btnToolSavePreset: View
     private lateinit var btnToolPin: View
 
     // Sub-panel Containers
@@ -167,15 +168,30 @@ class WidgetEditActivity : AppCompatActivity() {
     }
 
     private fun initViews() {
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.edit_content_container)) { v, insets ->
+        val editContentContainer = findViewById<LinearLayout>(R.id.edit_content_container)
+        bottomControlContainer = findViewById(R.id.bottom_control_container)
+
+        ViewCompat.setOnApplyWindowInsetsListener(editContentContainer) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
+            v.setPadding(systemBars.left, systemBars.top, systemBars.right, 0)
+            bottomControlContainer.setPadding(
+                bottomControlContainer.paddingLeft,
+                bottomControlContainer.paddingTop,
+                bottomControlContainer.paddingRight,
+                systemBars.bottom
+            )
             insets
         }
 
         val btnBack = findViewById<ImageButton>(R.id.btn_back)
         val btnDone = findViewById<MaterialButton>(R.id.btn_done)
+        val btnSavePresetTop = findViewById<ImageButton>(R.id.btn_save_preset_top)
         val btnPinTop = findViewById<ImageButton>(R.id.btn_pin_top)
+
+        btnSavePresetTop.setOnClickListener {
+            animateSelectionPop(btnSavePresetTop)
+            showAddPresetDialog()
+        }
 
         btnBack.setOnClickListener {
             if (panelToolDetail.visibility == View.VISIBLE) {
@@ -196,7 +212,6 @@ class WidgetEditActivity : AppCompatActivity() {
         previewContainer = findViewById(R.id.preview_container)
 
         // Two-state panels
-        bottomControlContainer = findViewById(R.id.bottom_control_container)
         panelMainTools = findViewById(R.id.panel_main_tools)
         panelToolDetail = findViewById(R.id.panel_tool_detail)
         tvActiveToolTitle = findViewById(R.id.tv_active_tool_title)
@@ -208,6 +223,7 @@ class WidgetEditActivity : AppCompatActivity() {
         btnToolAngle = findViewById(R.id.btn_tool_angle)
         btnToolContent = findViewById(R.id.btn_tool_content)
         btnToolTransparency = findViewById(R.id.btn_tool_transparency)
+        btnToolSavePreset = findViewById(R.id.btn_tool_save_preset)
         btnToolPin = findViewById(R.id.btn_tool_pin)
 
         // Sub-panel containers
@@ -282,9 +298,9 @@ class WidgetEditActivity : AppCompatActivity() {
 
         // Apply fluid press-scale animations to ALL interactive views
         val interactiveViews = listOf(
-            btnBack, btnDone, btnPinTop, btnBackToTools,
+            btnBack, btnDone, btnSavePresetTop, btnPinTop, btnBackToTools,
             cardShapeDiagonal, cardShapeOrganic, cardShapeScallop,
-            btnToolPalette, btnToolSize, btnToolAngle, btnToolContent, btnToolTransparency, btnToolPin,
+            btnToolPalette, btnToolSize, btnToolAngle, btnToolContent, btnToolTransparency, btnToolSavePreset, btnToolPin,
             swatchDynamic, swatchCustomPicker, swatchOlive, swatchTeal, swatchSlate, swatchAmber, swatchCrimson,
             cardSize2x2, cardSize4x2, cardSize3x3, cardSize4x3, cardSize3x2, cardSize2x3, cardSize2x4,
             chipAngleNeg60, chipAngleNeg45, chipAngleNeg30, chipAngle0,
@@ -346,6 +362,10 @@ class WidgetEditActivity : AppCompatActivity() {
         btnToolTransparency.setOnClickListener {
             animateSelectionPop(btnToolTransparency)
             openToolDetail(ToolType.TRANSPARENCY)
+        }
+        btnToolSavePreset.setOnClickListener {
+            animateSelectionPop(btnToolSavePreset)
+            showAddPresetDialog()
         }
         btnToolPin.setOnClickListener {
             animateSelectionPop(btnToolPin)
@@ -527,7 +547,7 @@ class WidgetEditActivity : AppCompatActivity() {
      * Staggered cascade entrance animation for visible tools in the carousel.
      */
     private fun animateToolsEntrance() {
-        val tools = listOf(btnToolPalette, btnToolSize, btnToolAngle, btnToolContent, btnToolTransparency, btnToolPin)
+        val tools = listOf(btnToolPalette, btnToolSize, btnToolAngle, btnToolContent, btnToolTransparency, btnToolSavePreset, btnToolPin)
             .filter { it.visibility == View.VISIBLE }
         tools.forEachIndexed { index, toolView ->
             toolView.animate().cancel()
@@ -1152,5 +1172,72 @@ class WidgetEditActivity : AppCompatActivity() {
         }
 
         appWidgetManager.requestPinAppWidget(componentName, extras, null)
+    }
+
+    private fun showAddPresetDialog() {
+        val category = viewModel.category.value ?: WidgetCategory.DIAGONAL
+        val palette = viewModel.palette.value ?: ColorPalette.DYNAMIC
+        val transparency = viewModel.transparency.value ?: 100
+        val angle = viewModel.angle.value ?: -45f
+
+        // 1. Check if identical configuration already exists
+        val duplicateConfig = WidgetPreferences.findDuplicatePreset(
+            this, palette, transparency, angle, category
+        )
+        if (duplicateConfig != null) {
+            val existingTitle = duplicateConfig.getLocalizedTitle(this)
+            MaterialAlertDialogBuilder(this)
+                .setTitle(R.string.preset_duplicate_title)
+                .setMessage(getString(R.string.preset_duplicate_config_message, existingTitle))
+                .setPositiveButton(R.string.btn_done, null)
+                .show()
+            return
+        }
+
+        // 2. Configuration is unique; prompt user for preset name with duplicate name validation
+        val input = android.widget.EditText(this).apply {
+            hint = getString(R.string.dialog_add_preset_hint)
+            setSingleLine()
+        }
+        val container = FrameLayout(this).apply {
+            val pad = (20 * resources.displayMetrics.density).toInt()
+            setPadding(pad, pad / 2, pad, pad / 2)
+            addView(input)
+        }
+
+        val dialog = MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.dialog_add_preset_title)
+            .setView(container)
+            .setPositiveButton(R.string.dialog_btn_add, null)
+            .setNegativeButton(R.string.dialog_btn_cancel, null)
+            .create()
+
+        dialog.show()
+
+        // Intercept positive click to prevent auto-dismissal on validation error
+        dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).setOnClickListener {
+            val name = input.text.toString().trim()
+            if (name.isEmpty()) {
+                input.error = getString(R.string.preset_name_empty_warning)
+                input.requestFocus()
+                return@setOnClickListener
+            }
+            if (WidgetPreferences.isPresetTitleTaken(this, name)) {
+                input.error = getString(R.string.preset_duplicate_name_warning, name)
+                input.requestFocus()
+                return@setOnClickListener
+            }
+
+            WidgetPreferences.addQuickPreset(
+                context = this,
+                title = name,
+                palette = palette,
+                transparency = transparency,
+                angle = angle,
+                category = category
+            )
+            android.widget.Toast.makeText(this, R.string.preset_added_toast, android.widget.Toast.LENGTH_SHORT).show()
+            dialog.dismiss()
+        }
     }
 }
