@@ -22,5 +22,11 @@ object WidgetAnimationManager {
         DiagonalWidgetProvider.updateAllWidgets(context, animProgress)
         OrganicWidgetProvider.updateAllWidgets(context, animProgress)
         ScallopWidgetProvider.updateAllWidgets(context, animProgress)
+        DiagonalWideWidgetProvider.updateAllWidgets(context, animProgress)
+        OrganicWideWidgetProvider.updateAllWidgets(context, animProgress)
+        ScallopWideWidgetProvider.updateAllWidgets(context, animProgress)
+        Diagonal4x3WidgetProvider.updateAllWidgets(context, animProgress)
+        Organic4x3WidgetProvider.updateAllWidgets(context, animProgress)
+        Scallop4x3WidgetProvider.updateAllWidgets(context, animProgress)
     }
 }

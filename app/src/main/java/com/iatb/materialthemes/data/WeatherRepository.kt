@@ -39,7 +39,8 @@ import kotlin.math.roundToInt
 data class HourlyForecast(
     val timeLabel: String,
     val tempLabel: String,
-    val iconResId: Int
+    val iconResId: Int,
+    val tempC: Int = 25
 )
 
 data class WeatherData(
@@ -52,8 +53,38 @@ data class WeatherData(
     val humidityLabel: String,
     val windLabel: String,
     val currentIconResId: Int,
-    val hourlyForecasts: List<HourlyForecast>
-)
+    val hourlyForecasts: List<HourlyForecast>,
+    val currentTempC: Int = 28,
+    val maxTempC: Int = 31,
+    val minTempC: Int = 23
+) {
+    fun withUnit(unit: String): WeatherData {
+        if (unit != "F") return this
+        val curF = celsiusToFahrenheit(currentTempC)
+        val maxF = celsiusToFahrenheit(maxTempC)
+        val minF = celsiusToFahrenheit(minTempC)
+        val convertedHourly = hourlyForecasts.map { h ->
+            val hF = celsiusToFahrenheit(h.tempC)
+            h.copy(tempLabel = "$hF°")
+        }
+        val convertedRange = when {
+            tempRangeLabel.contains("•") -> "H: $maxF° • L: $minF°"
+            tempRangeLabel.contains("↑") -> "↑ $maxF°  ↓ $minF°"
+            else -> "$maxF° / $minF°"
+        }
+        return copy(
+            currentTempLabel = "$curF°",
+            maxTempLabel = "$maxF°",
+            minTempLabel = "$minF°",
+            tempRangeLabel = convertedRange,
+            hourlyForecasts = convertedHourly
+        )
+    }
+
+    companion object {
+        fun celsiusToFahrenheit(c: Int): Int = (c * 9.0 / 5.0 + 32.0).roundToInt()
+    }
+}
 
 object WeatherRepository {
 
@@ -86,6 +117,10 @@ object WeatherRepository {
     private var pendingForceFetch = false
     private val pendingCallbacks = Collections.synchronizedList(mutableListOf<(Boolean) -> Unit>())
 
+    fun invalidateCache() {
+        cachedInMemory = null
+    }
+
     fun isDefaultOrStale(context: Context): Boolean {
         if (cachedInMemory == null) {
             val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
@@ -98,6 +133,12 @@ object WeatherRepository {
     }
 
     fun getWeatherData(context: Context): WeatherData {
+        val rawData = getRawWeatherData(context)
+        val unit = WidgetPreferences.getTemperatureUnit(context)
+        return rawData.withUnit(unit)
+    }
+
+    fun getRawWeatherData(context: Context): WeatherData {
         val inMem = cachedInMemory
         if (inMem != null) {
             checkAndScheduleRefreshIfStale(context)
@@ -120,7 +161,9 @@ object WeatherRepository {
 
         // Trigger immediate fetch in background
         refreshWeather(context, force = false, onComplete = null)
-        return getDefaultWeatherData(context)
+        val defaultData = getDefaultWeatherData(context)
+        cachedInMemory = defaultData
+        return defaultData
     }
 
     fun refreshWeather(
@@ -748,7 +791,7 @@ object WeatherRepository {
                     val hCode = codeArray?.optInt(idx, weatherCode) ?: weatherCode
                     val hIcon = mapWeatherCodeToDrawable(hCode)
 
-                    hourlyList.add(HourlyForecast(hourLabel, "$tempVal°", hIcon))
+                    hourlyList.add(HourlyForecast(hourLabel, "$tempVal°", hIcon, tempC = tempVal))
                     count++
                     idx += 2 // Step 2 hours for broad forecast range
                 }
@@ -772,7 +815,10 @@ object WeatherRepository {
             humidityLabel = "$humidity%",
             windLabel = "$windSpeed km/h",
             currentIconResId = iconRes,
-            hourlyForecasts = hourlyList
+            hourlyForecasts = hourlyList,
+            currentTempC = currentTemp,
+            maxTempC = maxTemp,
+            minTempC = minTemp
         )
     }
 
@@ -807,11 +853,11 @@ object WeatherRepository {
                 val rawTime = hObj.optString("time", "0")
                 val hourInt = (rawTime.toIntOrNull() ?: 0) / 100
                 if (hourInt >= nowHour || hourlyList.isNotEmpty()) {
-                    val hTemp = hObj.optString("tempC", "$tempC")
+                    val hTempC = hObj.optString("tempC", "$tempC").toIntOrNull() ?: tempC
                     val hDesc = hObj.optJSONArray("weatherDesc")?.optJSONObject(0)?.optString("value", "Partly cloudy") ?: "Partly cloudy"
                     val hIcon = mapDescToDrawable(hDesc)
                     val label = String.format(Locale.getDefault(), "%02d:00", hourInt)
-                    hourlyList.add(HourlyForecast(label, "$hTemp°", hIcon))
+                    hourlyList.add(HourlyForecast(label, "$hTempC°", hIcon, tempC = hTempC))
                     if (hourlyList.size >= 6) break
                 }
             }
@@ -833,7 +879,10 @@ object WeatherRepository {
             humidityLabel = "$humidity%",
             windLabel = "$windKmph km/h",
             currentIconResId = iconRes,
-            hourlyForecasts = hourlyList
+            hourlyForecasts = hourlyList,
+            currentTempC = tempC,
+            maxTempC = maxTemp,
+            minTempC = minTemp
         )
     }
 
@@ -903,10 +952,13 @@ object WeatherRepository {
         val json = JSONObject()
         json.put("location", data.locationName)
         json.put("temp", data.currentTempLabel)
+        json.put("tempC", data.currentTempC)
         json.put("condition", data.conditionLabel)
         json.put("range", data.tempRangeLabel)
         json.put("maxTemp", data.maxTempLabel)
+        json.put("maxTempC", data.maxTempC)
         json.put("minTemp", data.minTempLabel)
+        json.put("minTempC", data.minTempC)
         json.put("humidity", data.humidityLabel)
         json.put("wind", data.windLabel)
         json.put("icon", data.currentIconResId)
@@ -916,6 +968,7 @@ object WeatherRepository {
             val obj = JSONObject()
             obj.put("time", h.timeLabel)
             obj.put("temp", h.tempLabel)
+            obj.put("tempC", h.tempC)
             obj.put("icon", h.iconResId)
             array.put(obj)
         }
@@ -925,11 +978,11 @@ object WeatherRepository {
 
     private fun parseStoredJson(context: Context, json: JSONObject): WeatherData {
         val loc = json.optString("location", DEFAULT_CITY)
-        val temp = json.optString("temp", "28°")
+        val tempC = json.optInt("tempC", json.optString("temp", "28°").replace("°", "").toIntOrNull() ?: 28)
+        val maxTempC = json.optInt("maxTempC", json.optString("maxTemp", "31°").replace("°", "").toIntOrNull() ?: 31)
+        val minTempC = json.optInt("minTempC", json.optString("minTemp", "23°").replace("°", "").toIntOrNull() ?: 23)
         val cond = json.optString("condition", context.getString(R.string.weather_partly_cloudy))
         val range = json.optString("range", "↑ 31°  ↓ 23°")
-        val maxT = json.optString("maxTemp", "31°")
-        val minT = json.optString("minTemp", "23°")
         val hum = json.optString("humidity", "65%")
         val wind = json.optString("wind", "12 km/h")
         val icon = json.optInt("icon", R.drawable.ic_weather_night_cloudy)
@@ -939,11 +992,13 @@ object WeatherRepository {
         if (array != null) {
             for (i in 0 until array.length()) {
                 val obj = array.getJSONObject(i)
+                val hTempC = obj.optInt("tempC", obj.optString("temp", "25°").replace("°", "").toIntOrNull() ?: 25)
                 hourlyList.add(
                     HourlyForecast(
                         timeLabel = obj.getString("time"),
-                        tempLabel = obj.getString("temp"),
-                        iconResId = obj.getInt("icon")
+                        tempLabel = "$hTempC°",
+                        iconResId = obj.getInt("icon"),
+                        tempC = hTempC
                     )
                 )
             }
@@ -951,22 +1006,25 @@ object WeatherRepository {
 
         return WeatherData(
             locationName = loc,
-            currentTempLabel = temp,
+            currentTempLabel = "$tempC°",
             conditionLabel = cond,
             tempRangeLabel = range,
-            maxTempLabel = maxT,
-            minTempLabel = minT,
+            maxTempLabel = "$maxTempC°",
+            minTempLabel = "$minTempC°",
             humidityLabel = hum,
             windLabel = wind,
             currentIconResId = icon,
-            hourlyForecasts = if (hourlyList.isNotEmpty()) hourlyList else getDefaultHourlyList(context)
+            hourlyForecasts = if (hourlyList.isNotEmpty()) hourlyList else getDefaultHourlyList(context),
+            currentTempC = tempC,
+            maxTempC = maxTempC,
+            minTempC = minTempC
         )
     }
 
     private fun getDefaultWeatherData(context: Context): WeatherData {
         return WeatherData(
             locationName = DEFAULT_CITY,
-            currentTempLabel = context.getString(R.string.sample_temp_11),
+            currentTempLabel = "28°",
             conditionLabel = context.getString(R.string.sample_weather_condition),
             tempRangeLabel = context.getString(R.string.sample_temp_range),
             maxTempLabel = "31°",
@@ -974,18 +1032,21 @@ object WeatherRepository {
             humidityLabel = context.getString(R.string.sample_humidity),
             windLabel = context.getString(R.string.sample_wind),
             currentIconResId = R.drawable.ic_weather_night_cloudy,
-            hourlyForecasts = getDefaultHourlyList(context)
+            hourlyForecasts = getDefaultHourlyList(context),
+            currentTempC = 28,
+            maxTempC = 31,
+            minTempC = 23
         )
     }
 
     private fun getDefaultHourlyList(context: Context): List<HourlyForecast> {
         return listOf(
-            HourlyForecast(context.getString(R.string.sample_forecast_time_1), context.getString(R.string.sample_forecast_temp_1), R.drawable.ic_weather_sunny),
-            HourlyForecast(context.getString(R.string.sample_forecast_time_2), context.getString(R.string.sample_forecast_temp_2), R.drawable.ic_weather_sunny),
-            HourlyForecast(context.getString(R.string.sample_forecast_time_3), context.getString(R.string.sample_forecast_temp_3), R.drawable.ic_weather_partly_cloudy),
-            HourlyForecast(context.getString(R.string.sample_forecast_time_4), context.getString(R.string.sample_forecast_temp_4), R.drawable.ic_weather_rainy),
-            HourlyForecast(context.getString(R.string.sample_forecast_time_5), context.getString(R.string.sample_forecast_temp_5), R.drawable.ic_weather_partly_cloudy),
-            HourlyForecast(context.getString(R.string.sample_forecast_time_6), context.getString(R.string.sample_forecast_temp_6), R.drawable.ic_weather_partly_cloudy)
+            HourlyForecast(context.getString(R.string.sample_forecast_time_1), context.getString(R.string.sample_forecast_temp_1), R.drawable.ic_weather_sunny, tempC = 29),
+            HourlyForecast(context.getString(R.string.sample_forecast_time_2), context.getString(R.string.sample_forecast_temp_2), R.drawable.ic_weather_sunny, tempC = 31),
+            HourlyForecast(context.getString(R.string.sample_forecast_time_3), context.getString(R.string.sample_forecast_temp_3), R.drawable.ic_weather_partly_cloudy, tempC = 27),
+            HourlyForecast(context.getString(R.string.sample_forecast_time_4), context.getString(R.string.sample_forecast_temp_4), R.drawable.ic_weather_rainy, tempC = 25),
+            HourlyForecast(context.getString(R.string.sample_forecast_time_5), context.getString(R.string.sample_forecast_temp_5), R.drawable.ic_weather_partly_cloudy, tempC = 23),
+            HourlyForecast(context.getString(R.string.sample_forecast_time_6), context.getString(R.string.sample_forecast_temp_6), R.drawable.ic_weather_partly_cloudy, tempC = 22)
         )
     }
 }

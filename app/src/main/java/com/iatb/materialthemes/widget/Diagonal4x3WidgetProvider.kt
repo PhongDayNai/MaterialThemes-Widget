@@ -62,6 +62,8 @@ class Diagonal4x3WidgetProvider : AppWidgetProvider() {
     }
 
     companion object {
+        fun updateAllWidgets(context: Context, animProgress: Float = 1.0f) = updateAllWidgets4x3(context, animProgress)
+
         fun updateAllWidgets4x3(context: Context, animProgress: Float = 1.0f) {
             val appWidgetManager = AppWidgetManager.getInstance(context)
             val component = ComponentName(context, Diagonal4x3WidgetProvider::class.java)
