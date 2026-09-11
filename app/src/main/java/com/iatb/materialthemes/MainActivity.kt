@@ -60,6 +60,7 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var cardHomeEdit: com.iatb.materialthemes.ui.GlassBlurCardView
     private lateinit var cardHomePresets: com.iatb.materialthemes.ui.GlassBlurCardView
+    private lateinit var btnHomeSettings: View
     private lateinit var ambientBgView: com.iatb.materialthemes.ui.AmbientMeshBackgroundView
     private var isFirstResume: Boolean = true
     private var isFromSplash: Boolean = false
@@ -277,6 +278,8 @@ class MainActivity : AppCompatActivity() {
         // Fluid press scale animations
         com.iatb.materialthemes.ui.WidgetPreviewHelper.applyPressScaleEffect(cardHomeEdit)
         com.iatb.materialthemes.ui.WidgetPreviewHelper.applyPressScaleEffect(cardHomePresets)
+        btnHomeSettings = findViewById(R.id.btn_home_settings)
+        com.iatb.materialthemes.ui.WidgetPreviewHelper.applyPressScaleEffect(btnHomeSettings)
     }
 
     private fun playHomeScreenEntranceAnimation() {
@@ -369,6 +372,10 @@ class MainActivity : AppCompatActivity() {
 
         previewContainer.setOnClickListener {
             updatePreview(animate = true)
+        }
+
+        btnHomeSettings.setOnClickListener {
+            android.widget.Toast.makeText(this, getString(R.string.home_settings_title), android.widget.Toast.LENGTH_SHORT).show()
         }
     }
 

@@ -35,8 +35,9 @@
     <string name="size_4x3">4 × 3</string>
 
     <!-- UI Strings in MainActivity -->
-    <string name="dashboard_title">Widget Gallery</string>
-    <string name="dashboard_subtitle">Personalize and add Material widgets to your home screen</string>
+    <string name="dashboard_title">Material You Widgets</string>
+    <string name="dashboard_subtitle">Personalize your home screen with dynamic Material You widgets</string>
+    <string name="home_settings_title">Settings</string>
     <string name="category_diagonal">Slanted Pills</string>
     <string name="category_organic">Clover &amp; Pebble</string>
     <string name="category_scallop">Scallop &amp; Star</string>

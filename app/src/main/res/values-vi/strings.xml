@@ -35,8 +35,9 @@
     <string name="size_4x3">4 × 3</string>
 
     <!-- UI Strings in MainActivity -->
-    <string name="dashboard_title">Bộ sưu tập Tiện ích</string>
-    <string name="dashboard_subtitle">Cá nhân hóa và ghim widget tuyệt đẹp lên màn hình chính</string>
+    <string name="dashboard_title">Tiện ích Material You</string>
+    <string name="dashboard_subtitle">Cá nhân hóa màn hình chính với phong cách Material You sống động</string>
+    <string name="home_settings_title">Cài đặt</string>
     <string name="category_diagonal">Thanh nghiêng</string>
     <string name="category_organic">Cỏ hoa &amp; Viên sỏi</string>
     <string name="category_scallop">Hoa tuyết &amp; Ngôi sao</string>
