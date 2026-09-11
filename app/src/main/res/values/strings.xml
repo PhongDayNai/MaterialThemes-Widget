@@ -1,6 +1,10 @@
 <resources>
     <string name="app_name">Material Themes</string>
 
+    <!-- Splash Screen -->
+    <string name="splash_subtitle">Material You Clock &amp; Weather Widgets</string>
+    <string name="splash_loading">Preparing widgets…</string>
+
     <!-- Widget Info & Titles -->
     <string name="widget_diagonal_name">Slanted Pills (2x2)</string>
     <string name="widget_diagonal_description">Material You clock and weather widget featuring modern slanted cuts and dynamic colors.</string>

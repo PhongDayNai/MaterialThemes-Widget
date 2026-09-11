@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/splash_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0F172A">
+
+    <!-- Ambient Mesh Gradient Organic Background (Same style as Main Activity) -->
+    <com.iatb.materialthemes.ui.AmbientMeshBackgroundView
+        android:id="@+id/splash_ambient_bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Center Content Container -->
+    <LinearLayout
+        android:id="@+id/splash_content_container"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:paddingStart="32dp"
+        android:paddingTop="24dp"
+        android:paddingEnd="32dp"
+        android:paddingBottom="24dp">
+
+        <!-- App Icon with Glowing Rounded Corner Frame (1.5x scale) -->
+        <FrameLayout
+            android:id="@+id/splash_icon_card"
+            android:layout_width="128dp"
+            android:layout_height="128dp"
+            android:background="@drawable/shape_rounded_icon_glow">
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="104dp"
+                android:layout_height="104dp"
+                android:layout_gravity="center"
+                app:cardCornerRadius="24dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="0dp"
+                app:cardBackgroundColor="@android:color/transparent">
+
+                <ImageView
+                    android:id="@+id/splash_iv_icon"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:contentDescription="@null"
+                    android:scaleType="fitCenter"
+                    android:src="@drawable/ic_launcher_playstore" />
+            </com.google.android.material.card.MaterialCardView>
+        </FrameLayout>
+
+        <!-- App Title -->
+        <TextView
+            android:id="@+id/splash_tv_title"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:fontFamily="sans-serif-medium"
+            android:text="@string/app_name"
+            android:textColor="#FFFFFF"
+            android:textSize="26sp"
+            android:textStyle="bold" />
+
+        <!-- App Subtitle -->
+        <TextView
+            android:id="@+id/splash_tv_subtitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:gravity="center"
+            android:text="@string/splash_subtitle"
+            android:textColor="#B3FFFFFF"
+            android:textSize="14sp" />
+
+        <!-- Circular Arc Progress Bar (Bottom open) -->
+        <com.iatb.materialthemes.ui.CircularArcProgressView
+            android:id="@+id/splash_arc_progress"
+            android:layout_width="136dp"
+            android:layout_height="136dp"
+            android:layout_marginTop="36dp" />
+
+        <!-- Loading Status Label -->
+        <TextView
+            android:id="@+id/splash_tv_status"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="@string/splash_loading"
+            android:textColor="#80FFFFFF"
+            android:textSize="13sp" />
+    </LinearLayout>
+
+</FrameLayout>

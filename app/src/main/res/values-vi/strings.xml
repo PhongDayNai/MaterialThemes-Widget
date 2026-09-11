@@ -1,6 +1,10 @@
 <resources>
     <string name="app_name">Material Themes</string>
 
+    <!-- Splash Screen -->
+    <string name="splash_subtitle">Tiện ích đồng hồ &amp; thời tiết Material You</string>
+    <string name="splash_loading">Đang chuẩn bị tiện ích…</string>
+
     <!-- Widget Info & Titles -->
     <string name="widget_diagonal_name">Thanh nghiêng Pixel (2x2)</string>
     <string name="widget_diagonal_description">Tiện ích đồng hồ và thời tiết Material You với các thanh bo tròn nghiêng và màu sắc tương thích hình nền.</string>
