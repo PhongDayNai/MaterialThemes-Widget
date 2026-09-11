@@ -38,6 +38,17 @@ object WidgetPreferences {
     private const val KEY_CATEGORY = "widget_category"
     private const val KEY_SIZE = "widget_size"
     private const val KEY_CUSTOM_COLOR = "custom_color_seed"
+    private const val KEY_TEMP_UNIT = "temp_unit"
+
+    fun getTemperatureUnit(context: Context): String {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_TEMP_UNIT, "C") ?: "C"
+    }
+
+    fun setTemperatureUnit(context: Context, unit: String) {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString(KEY_TEMP_UNIT, unit).apply()
+    }
 
     fun getCustomColor(context: Context): Int {
         val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)

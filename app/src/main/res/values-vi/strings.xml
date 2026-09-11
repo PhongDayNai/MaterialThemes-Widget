@@ -261,4 +261,26 @@
     <string name="preset_expr_custom_2">Phong cách riêng</string>
     <string name="preset_expr_custom_3">Sắc màu tự do</string>
     <string name="preset_expr_custom_4">Dấu ấn cá nhân</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_screen_title">Cài đặt</string>
+    <string name="settings_section_general">Chung</string>
+    <string name="settings_section_about">Thông tin &amp; Hỗ trợ</string>
+    <string name="settings_language_title">Ngôn ngữ</string>
+    <string name="settings_language_desc">Chọn ngôn ngữ hiển thị ứng dụng</string>
+    <string name="settings_language_dialog_title">Chọn ngôn ngữ</string>
+    <string name="settings_language_en">English</string>
+    <string name="settings_language_vi">Tiếng Việt</string>
+    <string name="settings_temp_unit_title">Đơn vị nhiệt độ</string>
+    <string name="settings_temp_unit_desc">Độ C (°C) hoặc độ F (°F)</string>
+    <string name="settings_temp_celsius">Độ C (°C)</string>
+    <string name="settings_temp_fahrenheit">Độ F (°F)</string>
+    <string name="settings_privacy_title">Chính sách bảo mật</string>
+    <string name="settings_privacy_desc">Đọc điều khoản và chính sách quyền riêng tư</string>
+    <string name="settings_share_title">Chia sẻ ứng dụng</string>
+    <string name="settings_share_desc">Mời bạn bè cùng trải nghiệm tiện ích Material You</string>
+    <string name="settings_share_text">Khám phá Material You Widgets - bộ tiện ích đồng hồ và thời tiết sống động tuyệt đẹp cho màn hình chính!</string>
+    <string name="settings_version_title">Phiên bản ứng dụng</string>
+    <string name="settings_version_desc">1.0.0 (Thiết kế Material You)</string>
+    <string name="toast_coming_soon">Tính năng đang được phát triển</string>
 </resources>

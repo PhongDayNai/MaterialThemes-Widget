@@ -262,4 +262,26 @@
     <string name="preset_expr_custom_2">Custom Glow</string>
     <string name="preset_expr_custom_3">Free Spectrum</string>
     <string name="preset_expr_custom_4">Personal Touch</string>
+
+    <!-- Settings Screen -->
+    <string name="settings_screen_title">Settings</string>
+    <string name="settings_section_general">General</string>
+    <string name="settings_section_about">About &amp; Support</string>
+    <string name="settings_language_title">Language</string>
+    <string name="settings_language_desc">Select app display language</string>
+    <string name="settings_language_dialog_title">Choose Language</string>
+    <string name="settings_language_en">English</string>
+    <string name="settings_language_vi">Tiếng Việt</string>
+    <string name="settings_temp_unit_title">Temperature Unit</string>
+    <string name="settings_temp_unit_desc">Celsius (°C) or Fahrenheit (°F)</string>
+    <string name="settings_temp_celsius">Celsius (°C)</string>
+    <string name="settings_temp_fahrenheit">Fahrenheit (°F)</string>
+    <string name="settings_privacy_title">Privacy Policy</string>
+    <string name="settings_privacy_desc">Read privacy terms &amp; conditions</string>
+    <string name="settings_share_title">Share App</string>
+    <string name="settings_share_desc">Invite friends to explore Material You widgets</string>
+    <string name="settings_share_text">Check out Material You Widgets - dynamic, organic clock and weather widgets for your home screen!</string>
+    <string name="settings_version_title">App Version</string>
+    <string name="settings_version_desc">1.0.0 (Material You Edition)</string>
+    <string name="toast_coming_soon">Feature coming soon</string>
 </resources>

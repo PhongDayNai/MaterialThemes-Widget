@@ -375,7 +375,10 @@ class MainActivity : AppCompatActivity() {
         }
 
         btnHomeSettings.setOnClickListener {
-            android.widget.Toast.makeText(this, getString(R.string.home_settings_title), android.widget.Toast.LENGTH_SHORT).show()
+            com.iatb.materialthemes.ui.SharedAmbientBackgroundHolder.saveSnapshot(ambientBgView.getOrbsSnapshot())
+            startActivity(Intent(this, com.iatb.materialthemes.ui.SettingsActivity::class.java))
+            @Suppress("DEPRECATION")
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         }
     }
 
