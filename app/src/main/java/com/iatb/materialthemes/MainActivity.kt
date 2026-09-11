@@ -17,6 +17,7 @@ import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
@@ -49,12 +50,19 @@ import com.iatb.materialthemes.widget.WidgetUpdateScheduler
 
 class MainActivity : AppCompatActivity() {
 
+    companion object {
+        const val EXTRA_FROM_SPLASH = "extra_from_splash"
+    }
+
     private lateinit var viewModel: MainViewModel
     private lateinit var previewContainer: FrameLayout
     private lateinit var tvFloatingStatus: TextView
 
     private lateinit var cardHomeEdit: com.iatb.materialthemes.ui.GlassBlurCardView
     private lateinit var cardHomePresets: com.iatb.materialthemes.ui.GlassBlurCardView
+    private lateinit var ambientBgView: com.iatb.materialthemes.ui.AmbientMeshBackgroundView
+    private var isFirstResume: Boolean = true
+    private var isFromSplash: Boolean = false
 
     private var previewAnimator: ValueAnimator? = null
     private var wallpaperColorsListener: WallpaperManager.OnColorsChangedListener? = null
@@ -92,9 +100,30 @@ class MainActivity : AppCompatActivity() {
         viewModel = ViewModelProvider(this)[MainViewModel::class.java]
         viewModel.initFromPreferences(this)
 
+        isFromSplash = intent.getBooleanExtra(EXTRA_FROM_SPLASH, false)
+
         initViews()
+
+        if (isFromSplash) {
+            val snapshot = com.iatb.materialthemes.ui.SplashBackgroundTransitionHolder.consumeSnapshot()
+            if (snapshot != null) {
+                ambientBgView.setOrbs(snapshot)
+            }
+        }
+
+        playHomeScreenEntranceAnimation()
+
         setupListeners()
         observeViewModel()
+
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                finishAffinity()
+                finishAndRemoveTask()
+                android.os.Process.killProcess(android.os.Process.myPid())
+                kotlin.system.exitProcess(0)
+            }
+        })
 
         val hasLocation = checkLocationPermission()
         WeatherRepository.refreshWeather(this, force = hasLocation) { success ->
@@ -112,6 +141,41 @@ class MainActivity : AppCompatActivity() {
         viewModel.initFromPreferences(this)
         updateFloatingStatusBadge()
         updatePreview(animate = false)
+
+        val existingOrbs = com.iatb.materialthemes.ui.SharedAmbientBackgroundHolder.getSnapshot()
+        if (existingOrbs != null) {
+            ambientBgView.setOrbs(existingOrbs)
+        }
+
+        if (!isFirstResume || isFromSplash) {
+            val shouldAnimateFromSplash = isFromSplash
+            isFromSplash = false
+            isFirstResume = false
+
+            val duration = if (shouldAnimateFromSplash) 1200L else 950L
+            ambientBgView.post {
+                ambientBgView.transitionToNewConstellation(
+                    durationMs = duration,
+                    onUpdate = {
+                        cardHomeEdit.refreshBlur()
+                        cardHomePresets.refreshBlur()
+                    },
+                    onComplete = {
+                        cardHomeEdit.refreshBlur()
+                        cardHomePresets.refreshBlur()
+                        com.iatb.materialthemes.ui.SharedAmbientBackgroundHolder.saveSnapshot(ambientBgView.getOrbsSnapshot())
+                    }
+                )
+            }
+        } else {
+            isFirstResume = false
+            com.iatb.materialthemes.ui.SharedAmbientBackgroundHolder.saveSnapshot(ambientBgView.getOrbsSnapshot())
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        com.iatb.materialthemes.ui.SharedAmbientBackgroundHolder.saveSnapshot(ambientBgView.getOrbsSnapshot())
     }
 
     private fun checkLocationPermission(): Boolean {
@@ -191,7 +255,7 @@ class MainActivity : AppCompatActivity() {
                 hPad + systemBars.left,
                 systemBars.top + (12 * density).toInt(),
                 hPad + systemBars.right,
-                systemBars.bottom + (16 * density).toInt()
+                systemBars.bottom + (42 * density).toInt()
             )
             insets
         }
@@ -201,7 +265,7 @@ class MainActivity : AppCompatActivity() {
         cardHomeEdit = findViewById(R.id.card_home_edit)
         cardHomePresets = findViewById(R.id.card_home_presets)
 
-        val ambientBgView = findViewById<View>(R.id.ambient_bg_view)
+        ambientBgView = findViewById(R.id.ambient_bg_view)
         cardHomeEdit.setTargetBackgroundView(ambientBgView)
         cardHomePresets.setTargetBackgroundView(ambientBgView)
 
@@ -215,13 +279,92 @@ class MainActivity : AppCompatActivity() {
         com.iatb.materialthemes.ui.WidgetPreviewHelper.applyPressScaleEffect(cardHomePresets)
     }
 
+    private fun playHomeScreenEntranceAnimation() {
+        val density = resources.displayMetrics.density
+        val headerLayout = findViewById<View>(R.id.home_header_layout)
+        val cardPreview = findViewById<View>(R.id.card_preview)
+        val cardEdit = findViewById<View>(R.id.card_home_edit)
+        val cardPresets = findViewById<View>(R.id.card_home_presets)
+        val contentScroll = findViewById<View>(R.id.main_content_scroll)
+
+        // 1. Initial hidden and offset states
+        contentScroll.alpha = 0f
+        headerLayout.alpha = 0f
+        headerLayout.translationY = -20f * density
+
+        cardPreview.alpha = 0f
+        cardPreview.translationY = 24f * density
+        cardPreview.scaleX = 0.94f
+        cardPreview.scaleY = 0.94f
+
+        cardEdit.alpha = 0f
+        cardEdit.translationY = 24f * density
+        cardEdit.scaleX = 0.94f
+        cardEdit.scaleY = 0.94f
+
+        // Graceful offset for bottom card to ensure it stays fully unclipped during entrance
+        cardPresets.alpha = 0f
+        cardPresets.translationY = 16f * density
+        cardPresets.scaleX = 0.95f
+        cardPresets.scaleY = 0.95f
+
+        // 2. Play orchestrated staggered cascade entrance
+        contentScroll.animate()
+            .alpha(1f)
+            .setDuration(260)
+            .start()
+
+        headerLayout.animate()
+            .alpha(1f)
+            .translationY(0f)
+            .setDuration(520)
+            .setInterpolator(DecelerateInterpolator(1.5f))
+            .start()
+
+        cardPreview.animate()
+            .alpha(1f)
+            .translationY(0f)
+            .scaleX(1f)
+            .scaleY(1f)
+            .setDuration(580)
+            .setStartDelay(70)
+            .setInterpolator(DecelerateInterpolator(1.4f))
+            .start()
+
+        cardEdit.animate()
+            .alpha(1f)
+            .translationY(0f)
+            .scaleX(1f)
+            .scaleY(1f)
+            .setDuration(580)
+            .setStartDelay(150)
+            .setInterpolator(DecelerateInterpolator(1.4f))
+            .start()
+
+        cardPresets.animate()
+            .alpha(1f)
+            .translationY(0f)
+            .scaleX(1f)
+            .scaleY(1f)
+            .setDuration(580)
+            .setStartDelay(230)
+            .setInterpolator(DecelerateInterpolator(1.4f))
+            .start()
+    }
+
     private fun setupListeners() {
         cardHomeEdit.setOnClickListener {
+            com.iatb.materialthemes.ui.SharedAmbientBackgroundHolder.saveSnapshot(ambientBgView.getOrbsSnapshot())
             startActivity(Intent(this, WidgetEditActivity::class.java))
+            @Suppress("DEPRECATION")
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         }
 
         cardHomePresets.setOnClickListener {
+            com.iatb.materialthemes.ui.SharedAmbientBackgroundHolder.saveSnapshot(ambientBgView.getOrbsSnapshot())
             startActivity(Intent(this, WidgetPresetsActivity::class.java))
+            @Suppress("DEPRECATION")
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         }
 
         previewContainer.setOnClickListener {

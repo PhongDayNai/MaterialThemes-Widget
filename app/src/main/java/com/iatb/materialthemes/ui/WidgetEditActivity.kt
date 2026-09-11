@@ -53,6 +53,7 @@ import kotlin.math.abs
 class WidgetEditActivity : AppCompatActivity() {
 
     private lateinit var viewModel: MainViewModel
+    private lateinit var ambientBgView: AmbientMeshBackgroundView
 
     // Preview
     private lateinit var cardPreview: MaterialCardView
@@ -159,12 +160,28 @@ class WidgetEditActivity : AppCompatActivity() {
         viewModel.initFromPreferences(this)
 
         initViews()
+
+        val snapshot = SharedAmbientBackgroundHolder.getSnapshot()
+        if (snapshot != null) {
+            ambientBgView.setOrbs(snapshot)
+        }
+        ambientBgView.post {
+            ambientBgView.transitionToNewConstellation(durationMs = 950L) {
+                SharedAmbientBackgroundHolder.saveSnapshot(ambientBgView.getOrbsSnapshot())
+            }
+        }
+
         setupListeners()
         setupVisualColorSwatches()
         setupBackNavigation()
         observeViewModel()
         syncUiWithViewModel()
         animateScreenEntrance()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        SharedAmbientBackgroundHolder.saveSnapshot(ambientBgView.getOrbsSnapshot())
     }
 
     private fun initViews() {
@@ -183,8 +200,10 @@ class WidgetEditActivity : AppCompatActivity() {
             insets
         }
 
+        ambientBgView = findViewById(R.id.ambient_bg_view)
+
         val btnBack = findViewById<ImageButton>(R.id.btn_back)
-        val btnDone = findViewById<MaterialButton>(R.id.btn_done)
+        val btnDone = findViewById<ImageButton>(R.id.btn_done)
         val btnSavePresetTop = findViewById<ImageButton>(R.id.btn_save_preset_top)
         val btnPinTop = findViewById<ImageButton>(R.id.btn_pin_top)
 
@@ -197,10 +216,10 @@ class WidgetEditActivity : AppCompatActivity() {
             if (panelToolDetail.visibility == View.VISIBLE) {
                 closeToolDetail()
             } else {
-                finish()
+                finishWithTransition()
             }
         }
-        btnDone.setOnClickListener { finish() }
+        btnDone.setOnClickListener { finishWithTransition() }
         btnPinTop.setOnClickListener {
             animateSelectionPop(btnPinTop)
             viewModel.saveAndApply(this)
@@ -311,14 +330,20 @@ class WidgetEditActivity : AppCompatActivity() {
         }
     }
 
+    private fun finishWithTransition() {
+        SharedAmbientBackgroundHolder.saveSnapshot(ambientBgView.getOrbsSnapshot())
+        finish()
+        @Suppress("DEPRECATION")
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+    }
+
     private fun setupBackNavigation() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (panelToolDetail.visibility == View.VISIBLE) {
                     closeToolDetail()
                 } else {
-                    isEnabled = false
-                    onBackPressedDispatcher.onBackPressed()
+                    finishWithTransition()
                 }
             }
         })

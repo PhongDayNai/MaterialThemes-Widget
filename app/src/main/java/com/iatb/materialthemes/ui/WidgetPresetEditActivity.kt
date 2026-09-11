@@ -64,6 +64,7 @@ class WidgetPresetEditActivity : AppCompatActivity() {
     private var editingPresetTitle: String? = null
 
     private lateinit var viewModel: MainViewModel
+    private lateinit var ambientBgView: AmbientMeshBackgroundView
 
     // Preview
     private lateinit var cardPreview: MaterialCardView
@@ -176,10 +177,26 @@ class WidgetPresetEditActivity : AppCompatActivity() {
         initInitialState()
 
         initViews()
+
+        val snapshot = SharedAmbientBackgroundHolder.getSnapshot()
+        if (snapshot != null) {
+            ambientBgView.setOrbs(snapshot)
+        }
+        ambientBgView.post {
+            ambientBgView.transitionToNewConstellation(durationMs = 950L) {
+                SharedAmbientBackgroundHolder.saveSnapshot(ambientBgView.getOrbsSnapshot())
+            }
+        }
+
         setupBackNavigation()
         setupListeners()
         observeViewModel()
         animateScreenEntrance()
+    }
+
+    override fun onPause() {
+        super.onPause()
+        SharedAmbientBackgroundHolder.saveSnapshot(ambientBgView.getOrbsSnapshot())
     }
 
     private fun initInitialState() {
@@ -257,11 +274,13 @@ class WidgetPresetEditActivity : AppCompatActivity() {
             btnEditPresetName.visibility = View.GONE
         }
 
+        ambientBgView = findViewById(R.id.ambient_bg_view)
+
         btnBack.setOnClickListener {
             if (panelToolDetail.visibility == View.VISIBLE) {
                 closeToolDetail()
             } else {
-                finish()
+                finishWithTransition()
             }
         }
 
@@ -372,14 +391,20 @@ class WidgetPresetEditActivity : AppCompatActivity() {
         }
     }
 
+    private fun finishWithTransition() {
+        SharedAmbientBackgroundHolder.saveSnapshot(ambientBgView.getOrbsSnapshot())
+        finish()
+        @Suppress("DEPRECATION")
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+    }
+
     private fun setupBackNavigation() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 if (panelToolDetail.visibility == View.VISIBLE) {
                     closeToolDetail()
                 } else {
-                    isEnabled = false
-                    onBackPressedDispatcher.onBackPressed()
+                    finishWithTransition()
                 }
             }
         })
@@ -1034,7 +1059,7 @@ class WidgetPresetEditActivity : AppCompatActivity() {
                 putExtra(EXTRA_PRESET_ID, id)
             }
             setResult(Activity.RESULT_OK, resultIntent)
-            finish()
+            finishWithTransition()
             return
         }
 
@@ -1122,7 +1147,7 @@ class WidgetPresetEditActivity : AppCompatActivity() {
                 putExtra(EXTRA_PRESET_ID, added.id)
             }
             setResult(Activity.RESULT_OK, resultIntent)
-            finish()
+            finishWithTransition()
         }
     }
 

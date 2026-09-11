@@ -54,6 +54,7 @@ class WidgetPresetsActivity : AppCompatActivity() {
 
     private lateinit var rvPresets: RecyclerView
     private var presetsAdapter: PresetsAdapter? = null
+    private lateinit var ambientBgView: AmbientMeshBackgroundView
 
     private lateinit var btnApplyHeader: ImageButton
     private lateinit var containerFloatingTab: LinearLayout
@@ -110,6 +111,23 @@ class WidgetPresetsActivity : AppCompatActivity() {
         appliedPresetId = WidgetPreferences.getAppliedPresetId(this)
 
         initViews()
+
+        val snapshot = SharedAmbientBackgroundHolder.getSnapshot()
+        if (snapshot != null) {
+            ambientBgView.setOrbs(snapshot)
+        }
+        ambientBgView.post {
+            ambientBgView.transitionToNewConstellation(durationMs = 950L) {
+                SharedAmbientBackgroundHolder.saveSnapshot(ambientBgView.getOrbsSnapshot())
+            }
+        }
+
+        onBackPressedDispatcher.addCallback(this, object : androidx.activity.OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                finishWithTransition()
+            }
+        })
+
         setupStickyBadgeDrag()
         setupPresetsRecyclerView()
         observeViewModel()
@@ -124,6 +142,31 @@ class WidgetPresetsActivity : AppCompatActivity() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        val snapshot = SharedAmbientBackgroundHolder.getSnapshot()
+        if (snapshot != null) {
+            ambientBgView.setOrbs(snapshot)
+        }
+        ambientBgView.post {
+            ambientBgView.transitionToNewConstellation(durationMs = 950L) {
+                SharedAmbientBackgroundHolder.saveSnapshot(ambientBgView.getOrbsSnapshot())
+            }
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        SharedAmbientBackgroundHolder.saveSnapshot(ambientBgView.getOrbsSnapshot())
+    }
+
+    private fun finishWithTransition() {
+        SharedAmbientBackgroundHolder.saveSnapshot(ambientBgView.getOrbsSnapshot())
+        finish()
+        @Suppress("DEPRECATION")
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+    }
+
     private fun initViews() {
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.presets_content_container)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -131,7 +174,8 @@ class WidgetPresetsActivity : AppCompatActivity() {
             insets
         }
 
-        findViewById<ImageButton>(R.id.btn_back_presets).setOnClickListener { finish() }
+        ambientBgView = findViewById(R.id.ambient_bg_view)
+        findViewById<ImageButton>(R.id.btn_back_presets).setOnClickListener { finishWithTransition() }
         previewContainer = findViewById(R.id.preview_container)
         rvPresets = findViewById(R.id.rv_presets_grid)
 
@@ -148,15 +192,19 @@ class WidgetPresetsActivity : AppCompatActivity() {
         // Case 1: Add Mode (Opens fresh new canvas, independent of selected preset)
         btnBadgeAdd.setOnClickListener {
             animateSelectionPop(btnBadgeAdd)
+            SharedAmbientBackgroundHolder.saveSnapshot(ambientBgView.getOrbsSnapshot())
             val intent = Intent(this, WidgetPresetEditActivity::class.java).apply {
                 putExtra(WidgetPresetEditActivity.EXTRA_IS_EDIT, false)
             }
             presetEditLauncher.launch(intent)
+            @Suppress("DEPRECATION")
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         }
 
         btnBadgeEdit.setOnClickListener {
             animateSelectionPop(btnBadgeEdit)
             val preset = selectedPreset ?: return@setOnClickListener
+            SharedAmbientBackgroundHolder.saveSnapshot(ambientBgView.getOrbsSnapshot())
             val intent = Intent(this, WidgetPresetEditActivity::class.java).apply {
                 putExtra(WidgetPresetEditActivity.EXTRA_IS_EDIT, true)
                 putExtra(WidgetPresetEditActivity.EXTRA_PRESET_ID, preset.id)
@@ -169,6 +217,8 @@ class WidgetPresetsActivity : AppCompatActivity() {
                 putExtra(WidgetPresetEditActivity.EXTRA_CONTENT_MODE, preset.contentMode.name)
             }
             presetEditLauncher.launch(intent)
+            @Suppress("DEPRECATION")
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         }
 
         btnBadgeDelete.setOnClickListener {

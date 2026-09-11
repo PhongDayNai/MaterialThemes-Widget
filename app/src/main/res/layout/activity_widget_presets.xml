@@ -10,6 +10,7 @@
 
     <!-- Random Ambient Mesh Background for Presets Screen -->
     <com.iatb.materialthemes.ui.AmbientMeshBackgroundView
+        android:id="@+id/ambient_bg_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
@@ -174,7 +175,7 @@
                     android:layout_marginEnd="2dp"
                     android:background="?attr/selectableItemBackgroundBorderless"
                     android:contentDescription="@string/badge_add_preset"
-                    android:src="@drawable/ic_auto_awesome"
+                    android:src="@drawable/ic_dashboard_customize"
                     app:tint="?attr/colorPrimary" />
 
                 <!-- Edit Selected Preset Button Container (Smooth height expand/collapse) -->
