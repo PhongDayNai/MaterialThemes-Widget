@@ -335,4 +335,22 @@
     <string name="battery_prediction_dialog_btn_settings">Open Settings</string>
     <string name="battery_prediction_dialog_btn_close">Done</string>
     <string name="badge_coming_soon">Coming Soon</string>
+
+    <!-- Day Progress Widget -->
+    <string name="day_progress_widget_name">Day Progress</string>
+    <string name="day_progress_widget_description">Displays elapsed time and percentage of the current day with organic curved indicators.</string>
+    <string name="day_progress_detail_screen_title">Day Progress Settings</string>
+    <string name="day_progress_detail_screen_subtitle">Customize appearance, colors, and preview widget</string>
+    <string name="day_progress_label_caps">DAY PROGRESS</string>
+    <string name="day_progress_summary_format">%1$dh %2$dm / %3$dh</string>
+    <string name="day_progress_quick_status_format">%1$d%% of day elapsed • %2$s</string>
+    <string name="day_progress_stats_section_title">Day Statistics</string>
+    <string name="day_progress_stat_elapsed">Elapsed Time</string>
+    <string name="day_progress_stat_timezone">Timezone</string>
+    <string name="day_progress_stat_dst">Daylight Saving (DST)</string>
+    <string name="day_progress_dst_active">Active (+1h)</string>
+    <string name="day_progress_dst_inactive">Not applied</string>
+    <string name="day_progress_pin_widget">Add Widget to Home Screen</string>
+    <string name="format_day_progress_date_short">MMM d</string>
+    <string name="format_day_progress_date_full">%1$s, %2$s</string>
 </resources>

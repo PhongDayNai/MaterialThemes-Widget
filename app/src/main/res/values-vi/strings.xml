@@ -334,4 +334,22 @@
     <string name="battery_prediction_dialog_btn_settings">Mở Cài đặt</string>
     <string name="battery_prediction_dialog_btn_close">Đã hiểu</string>
     <string name="badge_coming_soon">Sắp có</string>
+
+    <!-- Day Progress Widget -->
+    <string name="day_progress_widget_name">Tiến trình ngày</string>
+    <string name="day_progress_widget_description">Hiển thị tiến trình và phần trăm đã trôi qua của ngày với thanh tiến trình uốn cong mềm mại.</string>
+    <string name="day_progress_detail_screen_title">Cấu hình tiến trình ngày</string>
+    <string name="day_progress_detail_screen_subtitle">Tùy biến giao diện, bảng màu và xem trước tiện ích</string>
+    <string name="day_progress_label_caps">TIẾN TRÌNH NGÀY</string>
+    <string name="day_progress_summary_format">%1$d giờ %2$d phút / %3$d giờ</string>
+    <string name="day_progress_quick_status_format">Đã trôi qua %1$d%% của ngày • %2$s</string>
+    <string name="day_progress_stats_section_title">Thông tin chi tiết trong ngày</string>
+    <string name="day_progress_stat_elapsed">Thời gian đã trôi qua</string>
+    <string name="day_progress_stat_timezone">Múi giờ hệ thống</string>
+    <string name="day_progress_stat_dst">Giờ mùa hè (DST)</string>
+    <string name="day_progress_dst_active">Đang áp dụng (+1h)</string>
+    <string name="day_progress_dst_inactive">Không áp dụng</string>
+    <string name="day_progress_pin_widget">Thêm widget vào màn hình chính</string>
+    <string name="format_day_progress_date_short">d \'thg\' M</string>
+    <string name="format_day_progress_date_full">%1$s, %2$s</string>
 </resources>
