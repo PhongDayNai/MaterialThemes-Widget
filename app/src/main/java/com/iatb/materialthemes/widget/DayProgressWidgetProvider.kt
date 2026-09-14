@@ -6,6 +6,7 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -101,7 +102,7 @@ class DayProgressWidgetProvider : AppWidgetProvider() {
             appWidgetId: Int
         ): RemoteViews {
             val info = DayProgressRepository.getDayProgress(context)
-            val colors = DayProgressPreferences.resolveColors(context)
+            val colors = DayProgressPreferences.resolveDayProgressColors(context, info.sunriseMillis, info.sunsetMillis)
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 val viewMapping = mapOf(
@@ -129,17 +130,32 @@ class DayProgressWidgetProvider : AppWidgetProvider() {
             }
 
             val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
-            val minW = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 260)
-            val minH = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 60)
+            val isLandscape = context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+            val minW = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0)
+            val maxW = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, 0)
+            val minH = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0)
+            val maxH = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 0)
 
-            return if (minH < 95) {
-                buildRowRemoteViews(context, minW, minH, info, colors, appWidgetId)
-            } else if (minW <= 150 && minH <= 150) {
-                buildCompactRemoteViews(context, minW, minH, info, colors, appWidgetId)
-            } else if (minH < 180) {
-                buildCardRemoteViews(context, minW, minH, info, colors, appWidgetId)
+            val widthDp = if (isLandscape) {
+                if (maxW > 0) maxW else minW.takeIf { it > 0 } ?: 260
             } else {
-                buildTallRemoteViews(context, minW, minH, info, colors, appWidgetId)
+                if (minW > 0) minW else maxW.takeIf { it > 0 } ?: 260
+            }
+
+            val heightDp = if (isLandscape) {
+                if (minH > 0) minH else maxH.takeIf { it > 0 } ?: 60
+            } else {
+                if (maxH > 0) maxH else minH.takeIf { it > 0 } ?: 138
+            }
+
+            return if (heightDp < 95) {
+                buildRowRemoteViews(context, widthDp, heightDp, info, colors, appWidgetId)
+            } else if (widthDp <= 150 && heightDp <= 150) {
+                buildCompactRemoteViews(context, widthDp, heightDp, info, colors, appWidgetId)
+            } else if (heightDp < 180) {
+                buildCardRemoteViews(context, widthDp, heightDp, info, colors, appWidgetId)
+            } else {
+                buildTallRemoteViews(context, widthDp, heightDp, info, colors, appWidgetId)
             }
         }
 
@@ -164,7 +180,7 @@ class DayProgressWidgetProvider : AppWidgetProvider() {
             widthDp: Int,
             heightDp: Int,
             info: DayProgressInfo,
-            palette: ResolvedPaletteColors,
+            palette: DayProgressPreferences.DayProgressThemeColors,
             appWidgetId: Int = 0
         ): RemoteViews {
             val views = RemoteViews(context.packageName, R.layout.widget_day_progress_row)
@@ -173,24 +189,38 @@ class DayProgressWidgetProvider : AppWidgetProvider() {
             views.setInt(R.id.widget_day_progress_bg, "setColorFilter", palette.bgColor)
             views.setInt(R.id.widget_day_progress_bg, "setImageAlpha", Color.alpha(palette.bgColor))
 
-            views.setInt(R.id.iv_row_card_bg, "setColorFilter", palette.secondaryBgColor)
-            views.setInt(R.id.iv_row_card_bg, "setImageAlpha", Color.alpha(palette.secondaryBgColor))
+            views.setInt(R.id.iv_row_card_bg, "setColorFilter", palette.pillBgColor)
+            views.setInt(R.id.iv_row_card_bg, "setImageAlpha", Color.alpha(palette.pillBgColor))
 
             views.setTextViewText(R.id.tv_row_percentage, "${info.percentage}%")
             views.setTextColor(R.id.tv_row_percentage, palette.textColor)
 
             views.setTextViewText(R.id.tv_row_date, info.fullDateString)
-            views.setTextColor(R.id.tv_row_date, palette.textColor)
+            views.setTextColor(R.id.tv_row_date, palette.subTextColor)
 
-            // Render organic curved horizontal indicator bitmap
+            views.setImageViewResource(R.id.iv_row_phase_icon, info.phaseIconResId)
+            views.setTextViewText(R.id.tv_row_sunrise, info.sunriseFormatted)
+            views.setTextViewText(R.id.tv_row_sunset, info.sunsetFormatted)
+
+            // Render slim elegant curved horizontal wave
             val density = context.resources.displayMetrics.density
-            val curveW = ((widthDp - 100) * density).toInt().coerceAtLeast((120 * density).toInt())
+            val curveW = ((widthDp - 140) * density).toInt().coerceAtLeast((120 * density).toInt())
             val curveH = (32 * density).toInt()
-
-            val trackColor = androidx.core.graphics.ColorUtils.setAlphaComponent(palette.textColor, 36)
-            val progressColor = palette.textColor
             val curveBitmap = DayProgressIndicatorRenderer.drawCurvedHorizontalBitmap(
-                curveW, curveH, info.progress, trackColor, progressColor, strokeWidthPx = 7f * density
+                context = context,
+                widthPx = curveW,
+                heightPx = curveH,
+                progress = info.progress,
+                sunriseProgress = info.sunriseProgress,
+                sunsetProgress = info.sunsetProgress,
+                sunriseTimeStr = "",
+                sunsetTimeStr = "",
+                isDaylight = info.isDaylight,
+                trackColor = palette.textColor,
+                progressColor = palette.accentColor,
+                strokeWidthPx = 3.2f * density,
+                progressStartColor = palette.progressStartColor,
+                progressEndColor = palette.progressEndColor
             )
             views.setImageViewBitmap(R.id.iv_row_curved_progress, curveBitmap)
 
@@ -202,7 +232,7 @@ class DayProgressWidgetProvider : AppWidgetProvider() {
             widthDp: Int,
             heightDp: Int,
             info: DayProgressInfo,
-            palette: ResolvedPaletteColors,
+            palette: DayProgressPreferences.DayProgressThemeColors,
             appWidgetId: Int = 0
         ): RemoteViews {
             val views = RemoteViews(context.packageName, R.layout.widget_day_progress_compact)
@@ -215,17 +245,13 @@ class DayProgressWidgetProvider : AppWidgetProvider() {
             views.setTextColor(R.id.tv_compact_percentage, palette.textColor)
 
             views.setTextViewText(R.id.tv_compact_date, info.dateFormatted)
-            views.setTextColor(R.id.tv_compact_date, palette.textColor)
+            views.setTextColor(R.id.tv_compact_date, palette.subTextColor)
 
-            val density = context.resources.displayMetrics.density
-            val arcSize = (74 * density).toInt()
-            val trackColor = androidx.core.graphics.ColorUtils.setAlphaComponent(palette.textColor, 36)
-            val progressColor = palette.textColor
+            views.setImageViewResource(R.id.iv_compact_phase_icon, info.phaseIconResId)
+            views.setTextViewText(R.id.tv_compact_solar_summary, "${info.sunriseFormatted} • ${info.sunsetFormatted}")
 
-            val arcBitmap = DayProgressIndicatorRenderer.drawCircularArcBitmap(
-                arcSize, info.progress, trackColor, progressColor, strokeWidthPx = 6.5f * density, isFullCircle = true
-            )
-            views.setImageViewBitmap(R.id.iv_compact_circular_progress, arcBitmap)
+            // Circular XML Progress Bar
+            views.setProgressBar(R.id.pb_compact_progress, 100, info.percentage, false)
 
             return views
         }
@@ -235,7 +261,7 @@ class DayProgressWidgetProvider : AppWidgetProvider() {
             widthDp: Int,
             heightDp: Int,
             info: DayProgressInfo,
-            palette: ResolvedPaletteColors,
+            palette: DayProgressPreferences.DayProgressThemeColors,
             appWidgetId: Int = 0
         ): RemoteViews {
             val views = RemoteViews(context.packageName, R.layout.widget_day_progress_card)
@@ -244,34 +270,50 @@ class DayProgressWidgetProvider : AppWidgetProvider() {
             views.setInt(R.id.widget_day_progress_bg, "setColorFilter", palette.bgColor)
             views.setInt(R.id.widget_day_progress_bg, "setImageAlpha", Color.alpha(palette.bgColor))
 
-            views.setInt(R.id.iv_card_bg, "setColorFilter", palette.secondaryBgColor)
-            views.setInt(R.id.iv_card_bg, "setImageAlpha", Color.alpha(palette.secondaryBgColor))
+            views.setInt(R.id.iv_card_bg, "setColorFilter", palette.pillBgColor)
+            views.setInt(R.id.iv_card_bg, "setImageAlpha", Color.alpha(palette.pillBgColor))
 
             views.setTextViewText(R.id.tv_card_day_of_week, info.dayOfWeek)
             views.setTextColor(R.id.tv_card_day_of_week, palette.textColor)
 
             views.setTextViewText(R.id.tv_card_date, info.dateFormatted)
-            views.setTextColor(R.id.tv_card_date, palette.textColor)
+            views.setTextColor(R.id.tv_card_date, palette.subTextColor)
+
+            views.setTextViewText(R.id.tv_card_phase, info.phaseTitle)
+            views.setImageViewResource(R.id.iv_card_phase_icon, info.phaseIconResId)
 
             views.setTextViewText(R.id.tv_card_percentage, "${info.percentage}%")
             views.setTextColor(R.id.tv_card_percentage, palette.textColor)
+            views.setTextColor(R.id.tv_card_label, palette.subTextColor)
 
-            views.setTextViewText(R.id.tv_card_time_summary, info.timeFormatted)
-            views.setTextColor(R.id.tv_card_time_summary, palette.textColor)
-
-            views.setTextColor(R.id.tv_card_label, palette.textColor)
-
-            // Render curved horizontal indicator
+            // Render slim elegant curved horizontal wave with milestone labels directly under nodes
             val density = context.resources.displayMetrics.density
-            val curveW = ((widthDp - 40) * density).toInt().coerceAtLeast((180 * density).toInt())
-            val curveH = (46 * density).toInt()
-            val trackColor = androidx.core.graphics.ColorUtils.setAlphaComponent(palette.textColor, 36)
-            val progressColor = palette.textColor
-
+            val curveW = ((widthDp - 36) * density).toInt().coerceAtLeast((220 * density).toInt())
+            val curveH = (58 * density).toInt()
             val curveBitmap = DayProgressIndicatorRenderer.drawCurvedHorizontalBitmap(
-                curveW, curveH, info.progress, trackColor, progressColor, strokeWidthPx = 8f * density
+                context = context,
+                widthPx = curveW,
+                heightPx = curveH,
+                progress = info.progress,
+                sunriseProgress = info.sunriseProgress,
+                sunsetProgress = info.sunsetProgress,
+                sunriseTimeStr = info.sunriseFormatted,
+                sunsetTimeStr = info.sunsetFormatted,
+                isDaylight = info.isDaylight,
+                trackColor = palette.textColor,
+                progressColor = palette.accentColor,
+                strokeWidthPx = 3.6f * density,
+                progressStartColor = palette.progressStartColor,
+                progressEndColor = palette.progressEndColor
             )
             views.setImageViewBitmap(R.id.iv_card_curved_progress, curveBitmap)
+
+            // Center Summary
+            views.setTextViewText(R.id.tv_card_center_summary, DayProgressRepository.formatElapsedSummary(context, info))
+
+            // Bottom Chips: Remaining Time & Daylight Duration
+            views.setTextViewText(R.id.tv_card_time_remaining, info.remainingTimeText)
+            views.setTextViewText(R.id.tv_card_daylight, info.daylightDurationText)
 
             return views
         }
@@ -281,7 +323,7 @@ class DayProgressWidgetProvider : AppWidgetProvider() {
             widthDp: Int,
             heightDp: Int,
             info: DayProgressInfo,
-            palette: ResolvedPaletteColors,
+            palette: DayProgressPreferences.DayProgressThemeColors,
             appWidgetId: Int = 0
         ): RemoteViews {
             val views = RemoteViews(context.packageName, R.layout.widget_day_progress_tall)
@@ -290,30 +332,47 @@ class DayProgressWidgetProvider : AppWidgetProvider() {
             views.setInt(R.id.widget_day_progress_bg, "setColorFilter", palette.bgColor)
             views.setInt(R.id.widget_day_progress_bg, "setImageAlpha", Color.alpha(palette.bgColor))
 
-            views.setInt(R.id.iv_tall_bg, "setColorFilter", palette.secondaryBgColor)
-            views.setInt(R.id.iv_tall_bg, "setImageAlpha", Color.alpha(palette.secondaryBgColor))
-
-            views.setTextViewText(R.id.tv_tall_percentage, "${info.percentage}%")
-            views.setTextColor(R.id.tv_tall_percentage, palette.textColor)
-
-            views.setTextColor(R.id.tv_tall_label, palette.textColor)
-
-            views.setTextViewText(R.id.tv_tall_time, info.timeFormatted)
-            views.setTextColor(R.id.tv_tall_time, palette.textColor)
+            views.setInt(R.id.iv_tall_bg, "setColorFilter", palette.pillBgColor)
+            views.setInt(R.id.iv_tall_bg, "setImageAlpha", Color.alpha(palette.pillBgColor))
 
             views.setTextViewText(R.id.tv_tall_date, info.fullDateString)
             views.setTextColor(R.id.tv_tall_date, palette.textColor)
 
-            val density = context.resources.displayMetrics.density
-            val curveW = ((widthDp - 50) * density).toInt().coerceAtLeast((200 * density).toInt())
-            val curveH = (52 * density).toInt()
-            val trackColor = androidx.core.graphics.ColorUtils.setAlphaComponent(palette.textColor, 36)
-            val progressColor = palette.textColor
+            views.setTextViewText(R.id.tv_tall_phase, info.phaseTitle)
+            views.setImageViewResource(R.id.iv_tall_phase_icon, info.phaseIconResId)
 
+            views.setTextViewText(R.id.tv_tall_percentage, "${info.percentage}%")
+            views.setTextColor(R.id.tv_tall_percentage, palette.textColor)
+
+            views.setTextViewText(R.id.tv_tall_summary, "${DayProgressRepository.formatElapsedSummary(context, info)} • ${info.remainingTimeText}")
+            views.setTextColor(R.id.tv_tall_summary, palette.subTextColor)
+
+            // Render slim elegant curved horizontal wave with milestone labels directly under nodes
+            val density = context.resources.displayMetrics.density
+            val curveW = ((widthDp - 40) * density).toInt().coerceAtLeast((240 * density).toInt())
+            val curveH = (62 * density).toInt()
             val curveBitmap = DayProgressIndicatorRenderer.drawCurvedHorizontalBitmap(
-                curveW, curveH, info.progress, trackColor, progressColor, strokeWidthPx = 9f * density
+                context = context,
+                widthPx = curveW,
+                heightPx = curveH,
+                progress = info.progress,
+                sunriseProgress = info.sunriseProgress,
+                sunsetProgress = info.sunsetProgress,
+                sunriseTimeStr = info.sunriseFormatted,
+                sunsetTimeStr = info.sunsetFormatted,
+                isDaylight = info.isDaylight,
+                trackColor = palette.textColor,
+                progressColor = palette.accentColor,
+                strokeWidthPx = 3.8f * density,
+                progressStartColor = palette.progressStartColor,
+                progressEndColor = palette.progressEndColor
             )
             views.setImageViewBitmap(R.id.iv_tall_curved_progress, curveBitmap)
+
+            // Bottom 3 Solar Cards
+            views.setTextViewText(R.id.tv_tall_sunrise, info.sunriseFormatted)
+            views.setTextViewText(R.id.tv_tall_daylight_duration, info.daylightDurationText)
+            views.setTextViewText(R.id.tv_tall_sunset, info.sunsetFormatted)
 
             return views
         }

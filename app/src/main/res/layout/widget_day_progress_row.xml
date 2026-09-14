@@ -8,7 +8,7 @@
     android:clipToPadding="false"
     android:padding="0dp">
 
-    <!-- Outer Widget Background Card -->
+    <!-- Outer Distinct Card Background with Edge Outline -->
     <ImageView
         android:id="@+id/widget_day_progress_bg"
         android:layout_width="match_parent"
@@ -43,22 +43,38 @@
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <!-- Left Text Block: Percentage and Date -->
+            <!-- Left Text Block: Percentage, Date, Phase Icon -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:gravity="start|center_vertical"
                 android:orientation="vertical">
 
-                <TextView
-                    android:id="@+id/tv_row_percentage"
+                <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:includeFontPadding="false"
-                    android:text="64%"
-                    android:textColor="#FFFFFF"
-                    android:textSize="22sp"
-                    android:textStyle="bold" />
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <TextView
+                        android:id="@+id/tv_row_percentage"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:includeFontPadding="false"
+                        android:text="68%"
+                        android:textColor="#FFFFFF"
+                        android:textSize="22sp"
+                        android:textStyle="bold" />
+
+                    <ImageView
+                        android:id="@+id/iv_row_phase_icon"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:layout_marginStart="6dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_weather_sunny"
+                        android:tint="#FFA726" />
+                </LinearLayout>
 
                 <TextView
                     android:id="@+id/tv_row_date"
@@ -68,20 +84,88 @@
                     android:ellipsize="end"
                     android:includeFontPadding="false"
                     android:maxLines="1"
-                    android:text="Tue, Sep 14"
+                    android:text="Thứ Hai, 14 thg 9"
                     android:textColor="#B3FFFFFF"
                     android:textSize="11sp" />
             </LinearLayout>
 
-            <!-- Curved Horizontal Progress Indicator -->
+            <!-- Elegant Curved Horizontal Wave Progress Indicator -->
             <ImageView
                 android:id="@+id/iv_row_curved_progress"
                 android:layout_width="0dp"
-                android:layout_height="36dp"
-                android:layout_marginStart="16dp"
+                android:layout_height="32dp"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="12dp"
                 android:layout_weight="1"
                 android:contentDescription="@null"
-                android:scaleType="fitXY" />
+                android:scaleType="fitCenter" />
+
+            <!-- Right Mini Solar Info Badges -->
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="end|center_vertical"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_day_progress_chip"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="6dp"
+                    android:paddingTop="2dp"
+                    android:paddingEnd="6dp"
+                    android:paddingBottom="2dp">
+
+                    <ImageView
+                        android:layout_width="10dp"
+                        android:layout_height="10dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_sunrise" />
+
+                    <TextView
+                        android:id="@+id/tv_row_sunrise"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="3dp"
+                        android:includeFontPadding="false"
+                        android:text="05:43"
+                        android:textColor="#FFB74D"
+                        android:textSize="9sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="3dp"
+                    android:background="@drawable/bg_day_progress_chip"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="6dp"
+                    android:paddingTop="2dp"
+                    android:paddingEnd="6dp"
+                    android:paddingBottom="2dp">
+
+                    <ImageView
+                        android:layout_width="10dp"
+                        android:layout_height="10dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_sunset" />
+
+                    <TextView
+                        android:id="@+id/tv_row_sunset"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="3dp"
+                        android:includeFontPadding="false"
+                        android:text="18:03"
+                        android:textColor="#FF8A65"
+                        android:textSize="9sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+            </LinearLayout>
 
         </LinearLayout>
     </FrameLayout>

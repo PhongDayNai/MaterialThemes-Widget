@@ -8,7 +8,7 @@
     android:clipToPadding="false"
     android:padding="0dp">
 
-    <!-- Outer Background Card -->
+    <!-- Outer Distinct Card Background with Edge Outline -->
     <ImageView
         android:id="@+id/widget_day_progress_bg"
         android:layout_width="match_parent"
@@ -17,16 +17,16 @@
         android:scaleType="fitXY"
         android:src="@drawable/bg_day_progress_card" />
 
-    <!-- Content Container with Margins -->
+    <!-- Content Container with Margins to avoid clipping -->
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp">
+        android:layout_marginStart="6dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginEnd="6dp"
+        android:layout_marginBottom="6dp">
 
-        <!-- Inner Pill Background -->
+        <!-- Inner Pill Background Layer -->
         <ImageView
             android:id="@+id/iv_card_bg"
             android:layout_width="match_parent"
@@ -38,13 +38,13 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginStart="16dp"
-            android:layout_marginTop="14dp"
-            android:layout_marginEnd="16dp"
-            android:layout_marginBottom="14dp"
+            android:layout_marginStart="14dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="14dp"
+            android:layout_marginBottom="12dp"
             android:orientation="vertical">
 
-            <!-- Top Header: Day, Date & Percentage -->
+            <!-- Top Header: Day, Date, Phase Chip & Percentage -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -57,82 +57,208 @@
                     android:layout_weight="1"
                     android:orientation="vertical">
 
-                    <TextView
-                        android:id="@+id/tv_card_day_of_week"
+                    <LinearLayout
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:ellipsize="end"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:id="@+id/tv_card_day_of_week"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:ellipsize="end"
+                            android:includeFontPadding="false"
+                            android:maxLines="1"
+                            android:text="Thứ Hai"
+                            android:textColor="#FFFFFF"
+                            android:textSize="16sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tv_card_date"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="6dp"
+                            android:ellipsize="end"
+                            android:includeFontPadding="false"
+                            android:maxLines="1"
+                            android:text="14 thg 9"
+                            android:textColor="#B3FFFFFF"
+                            android:textSize="13sp" />
+                    </LinearLayout>
+
+                    <!-- Phase Badge -->
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:background="@drawable/bg_day_progress_chip"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingStart="8dp"
+                        android:paddingTop="2dp"
+                        android:paddingEnd="8dp"
+                        android:paddingBottom="2dp">
+
+                        <ImageView
+                            android:id="@+id/iv_card_phase_icon"
+                            android:layout_width="12dp"
+                            android:layout_height="12dp"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_weather_sunny"
+                            android:tint="#FFA726" />
+
+                        <TextView
+                            android:id="@+id/tv_card_phase"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginStart="4dp"
+                            android:includeFontPadding="false"
+                            android:text="Ban ngày"
+                            android:textColor="#E0FFFFFF"
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="end|center_vertical"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tv_card_percentage"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
                         android:includeFontPadding="false"
-                        android:maxLines="1"
-                        android:text="Tuesday"
+                        android:text="68%"
                         android:textColor="#FFFFFF"
-                        android:textSize="17sp"
+                        android:textSize="28sp"
                         android:textStyle="bold" />
 
                     <TextView
-                        android:id="@+id/tv_card_date"
+                        android:id="@+id/tv_card_label"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="2dp"
-                        android:ellipsize="end"
                         android:includeFontPadding="false"
-                        android:maxLines="1"
-                        android:text="Sep 14"
-                        android:textColor="#B3FFFFFF"
-                        android:textSize="12sp" />
+                        android:letterSpacing="0.08"
+                        android:text="@string/day_progress_passed_label"
+                        android:textColor="#80FFFFFF"
+                        android:textSize="9sp"
+                        android:textStyle="bold" />
                 </LinearLayout>
-
-                <TextView
-                    android:id="@+id/tv_card_percentage"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:includeFontPadding="false"
-                    android:text="64%"
-                    android:textColor="#FFFFFF"
-                    android:textSize="28sp"
-                    android:textStyle="bold" />
             </LinearLayout>
 
-            <!-- Curved Horizontal Progress Indicator -->
-            <ImageView
-                android:id="@+id/iv_card_curved_progress"
+            <!-- Middle Section: Horizon Solar Progress Bar with Milestones -->
+            <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="10dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
                 android:layout_weight="1"
-                android:contentDescription="@null"
-                android:scaleType="fitXY" />
+                android:gravity="center_vertical"
+                android:orientation="vertical">
 
-            <!-- Bottom Sub-info -->
+                <!-- Elegant Curved Horizontal Wave Progress Indicator with Milestone Labels directly under nodes -->
+                <ImageView
+                    android:id="@+id/iv_card_curved_progress"
+                    android:layout_width="match_parent"
+                    android:layout_height="58dp"
+                    android:contentDescription="@null"
+                    android:scaleType="fitCenter" />
+
+                <!-- Center Summary -->
+                <TextView
+                    android:id="@+id/tv_card_center_summary"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_horizontal"
+                    android:layout_marginTop="2dp"
+                    android:includeFontPadding="false"
+                    android:text="16h 29m / 24h"
+                    android:textColor="#80FFFFFF"
+                    android:textSize="9sp" />
+            </LinearLayout>
+
+            <!-- Bottom Information Row: Remaining Time & Daylight Duration Chips -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
-                <TextView
-                    android:id="@+id/tv_card_time_summary"
+                <!-- Remaining Time Chip -->
+                <LinearLayout
+                    android:id="@+id/chip_card_remaining"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:ellipsize="end"
-                    android:includeFontPadding="false"
-                    android:maxLines="1"
-                    android:text="18:24"
-                    android:textColor="#B3FFFFFF"
-                    android:textSize="12sp" />
+                    android:background="@drawable/bg_day_progress_chip"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingStart="8dp"
+                    android:paddingTop="5dp"
+                    android:paddingEnd="8dp"
+                    android:paddingBottom="5dp">
 
-                <TextView
-                    android:id="@+id/tv_card_label"
-                    android:layout_width="wrap_content"
+                    <ImageView
+                        android:layout_width="13dp"
+                        android:layout_height="13dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_schedule"
+                        android:tint="#E0FFFFFF" />
+
+                    <TextView
+                        android:id="@+id/tv_card_time_remaining"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="5dp"
+                        android:ellipsize="end"
+                        android:includeFontPadding="false"
+                        android:maxLines="1"
+                        android:text="Còn 7 giờ 31 phút"
+                        android:textColor="#E0FFFFFF"
+                        android:textSize="10sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
+
+                <!-- Daylight Duration Chip -->
+                <LinearLayout
+                    android:id="@+id/chip_card_daylight"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:includeFontPadding="false"
-                    android:letterSpacing="0.08"
-                    android:text="@string/day_progress_label_caps"
-                    android:textColor="#80FFFFFF"
-                    android:textSize="10sp"
-                    android:textStyle="bold" />
+                    android:layout_marginStart="8dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_day_progress_chip"
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:paddingStart="8dp"
+                    android:paddingTop="5dp"
+                    android:paddingEnd="8dp"
+                    android:paddingBottom="5dp">
+
+                    <ImageView
+                        android:layout_width="13dp"
+                        android:layout_height="13dp"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_weather_sunny"
+                        android:tint="#FFA726" />
+
+                    <TextView
+                        android:id="@+id/tv_card_daylight"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="5dp"
+                        android:ellipsize="end"
+                        android:includeFontPadding="false"
+                        android:maxLines="1"
+                        android:text="12 giờ 14 phút nắng"
+                        android:textColor="#E0FFFFFF"
+                        android:textSize="10sp"
+                        android:textStyle="bold" />
+                </LinearLayout>
             </LinearLayout>
         </LinearLayout>
     </FrameLayout>
