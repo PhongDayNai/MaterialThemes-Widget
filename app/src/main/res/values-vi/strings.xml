@@ -323,5 +323,15 @@
     <string name="battery_detail_screen_title">Cấu hình tiện ích pin</string>
     <string name="battery_detail_screen_subtitle">Tùy biến giao diện, màu sắc và thiết bị kết nối</string>
     <string name="utilities_section_widgets">Danh sách tiện ích</string>
+    <string name="battery_prediction_section_title">Dự đoán thời lượng pin</string>
+    <string name="battery_prediction_title">Dự đoán thời gian sử dụng OS</string>
+    <string name="battery_prediction_desc">Ước tính thời gian sử dụng pin còn lại từ thống kê hệ thống Android OS.</string>
+    <string name="battery_prediction_granted_title">Đã bật dự đoán hệ thống</string>
+    <string name="battery_prediction_granted_desc">Hệ thống Android OS đang cung cấp dự đoán thời gian sử dụng pin còn lại.</string>
+    <string name="battery_prediction_grant_btn">Kích hoạt</string>
+    <string name="battery_prediction_dialog_title">Kích hoạt dự đoán thời gian pin</string>
+    <string name="battery_prediction_dialog_message">Để đọc thời gian dùng pin còn lại, Android yêu cầu Quyền truy cập mức sử dụng hoặc quyền BATTERY_STATS.\n\n• Nhấn Mở cài đặt để cấp quyền Truy cập mức sử dụng\n• Hoặc chạy lệnh ADB:\nadb shell pm grant %s android.permission.BATTERY_STATS</string>
+    <string name="battery_prediction_dialog_btn_settings">Mở Cài đặt</string>
+    <string name="battery_prediction_dialog_btn_close">Đã hiểu</string>
     <string name="badge_coming_soon">Sắp có</string>
 </resources>

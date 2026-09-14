@@ -324,5 +324,15 @@
     <string name="battery_detail_screen_title">Battery Widget Settings</string>
     <string name="battery_detail_screen_subtitle">Customize appearance, colors, and connected devices</string>
     <string name="utilities_section_widgets">Available Utilities</string>
+    <string name="battery_prediction_section_title">Battery Life Prediction</string>
+    <string name="battery_prediction_title">OS Usage Time Prediction</string>
+    <string name="battery_prediction_desc">Estimate remaining battery usage time from Android system stats.</string>
+    <string name="battery_prediction_granted_title">System Prediction Active</string>
+    <string name="battery_prediction_granted_desc">Android OS is providing real-time battery time remaining estimates.</string>
+    <string name="battery_prediction_grant_btn">Enable</string>
+    <string name="battery_prediction_dialog_title">Enable Battery Prediction</string>
+    <string name="battery_prediction_dialog_message">To predict battery time remaining, Android requires Usage Access or BATTERY_STATS permission.\n\n• Tap Open Settings to grant Usage Access\n• Or run ADB command:\nadb shell pm grant %s android.permission.BATTERY_STATS</string>
+    <string name="battery_prediction_dialog_btn_settings">Open Settings</string>
+    <string name="battery_prediction_dialog_btn_close">Done</string>
     <string name="badge_coming_soon">Coming Soon</string>
 </resources>
