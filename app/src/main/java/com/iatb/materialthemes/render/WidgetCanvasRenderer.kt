@@ -20,6 +20,7 @@ import com.iatb.materialthemes.data.DynamicThemeExtractor
 import com.iatb.materialthemes.data.ResolvedPaletteColors
 import com.iatb.materialthemes.data.WeatherData
 import com.iatb.materialthemes.data.WeatherRepository
+import com.iatb.materialthemes.data.DeviceStatusHelper
 import com.iatb.materialthemes.data.WidgetContentMode
 import com.iatb.materialthemes.data.WidgetPreferences
 import java.text.SimpleDateFormat
@@ -380,7 +381,8 @@ object WidgetCanvasRenderer {
                     drawFittedSingleLineText(canvas, dayStr, subLeftCx, cy - safeInnerH * 0.18f, maxSizePx = rightH * 0.20f, maxWidth = subColW, textColor = palette.textColor, isBold = true, contentAngleDeg = cardContentAngle)
                     drawFittedSingleLineText(canvas, dateStr, subLeftCx, cy + safeInnerH * 0.16f, maxSizePx = rightH * 0.15f, maxWidth = subColW, textColor = (0xCCFFFFFF.toInt() and palette.textColor), contentAngleDeg = cardContentAngle)
 
-                    drawFittedSingleLineText(canvas, context.getString(R.string.sample_next_alarm), subRightCx, cy, maxSizePx = rightH * 0.15f, maxWidth = subColW, textColor = palette.textColor, isBold = true, contentAngleDeg = cardContentAngle)
+                    val statusStr = DeviceStatusHelper.getAlarmOrBatteryStatus(context)
+                    drawFittedSingleLineText(canvas, statusStr, subRightCx, cy, maxSizePx = rightH * 0.15f, maxWidth = subColW, textColor = palette.textColor, isBold = true, contentAngleDeg = cardContentAngle)
                 }
                 WidgetContentMode.COMBO -> {
                     val dateStr = formatLocalizedDayAndFullDate()
@@ -445,7 +447,8 @@ object WidgetCanvasRenderer {
 
                     drawFittedSingleLineText(canvas, dayStr, rightCx, cy - safeInnerH * 0.26f, maxSizePx = rightH * 0.18f, maxWidth = safeInnerW, textColor = palette.textColor, isBold = true, contentAngleDeg = cardContentAngle)
                     drawFittedSingleLineText(canvas, dateStr, rightCx, cy + safeInnerH * 0.04f, maxSizePx = rightH * 0.14f, maxWidth = safeInnerW, textColor = (0xCCFFFFFF.toInt() and palette.textColor), contentAngleDeg = cardContentAngle)
-                    drawFittedSingleLineText(canvas, context.getString(R.string.sample_next_alarm), rightCx, cy + safeInnerH * 0.30f, maxSizePx = rightH * 0.12f, maxWidth = safeInnerW, textColor = (0xBBFFFFFF.toInt() and palette.textColor), contentAngleDeg = cardContentAngle)
+                    val statusStr = DeviceStatusHelper.getAlarmOrBatteryStatus(context)
+                    drawFittedSingleLineText(canvas, statusStr, rightCx, cy + safeInnerH * 0.30f, maxSizePx = rightH * 0.12f, maxWidth = safeInnerW, textColor = (0xBBFFFFFF.toInt() and palette.textColor), contentAngleDeg = cardContentAngle)
                 }
                 WidgetContentMode.COMBO -> {
                     val dateStr = formatLocalizedDayAndFullDate()
@@ -605,12 +608,14 @@ object WidgetCanvasRenderer {
                             drawFittedSingleLineText(canvas, weather.windLabel, cx, cy + pillHeight * 0.18f, maxSizePx = pillHeight * 0.18f, maxWidth = safeW, textColor = (0xCCFFFFFF.toInt() and palette.textColor), contentAngleDeg = contentAngle)
                         }
                         WidgetContentMode.CLOCK -> {
+                            val statusStr = DeviceStatusHelper.getAlarmOrBatteryStatus(context)
                             val dateStr = formatLocalizedDateWithYear()
-                            drawFittedSingleLineText(canvas, context.getString(R.string.sample_next_alarm), cx, cy - pillHeight * 0.16f, maxSizePx = pillHeight * 0.18f, maxWidth = safeW, textColor = palette.textColor, isBold = true, contentAngleDeg = contentAngle)
+                            drawFittedSingleLineText(canvas, statusStr, cx, cy - pillHeight * 0.16f, maxSizePx = pillHeight * 0.18f, maxWidth = safeW, textColor = palette.textColor, isBold = true, contentAngleDeg = contentAngle)
                             drawFittedSingleLineText(canvas, dateStr, cx, cy + pillHeight * 0.18f, maxSizePx = pillHeight * 0.18f, maxWidth = safeW, textColor = (0xCCFFFFFF.toInt() and palette.textColor), contentAngleDeg = contentAngle)
                         }
                         WidgetContentMode.COMBO -> {
-                            drawFittedSingleLineText(canvas, context.getString(R.string.sample_next_alarm), cx, cy - pillHeight * 0.16f, maxSizePx = pillHeight * 0.18f, maxWidth = safeW, textColor = palette.textColor, isBold = true, contentAngleDeg = contentAngle)
+                            val statusStr = DeviceStatusHelper.getAlarmOrBatteryStatus(context)
+                            drawFittedSingleLineText(canvas, statusStr, cx, cy - pillHeight * 0.16f, maxSizePx = pillHeight * 0.18f, maxWidth = safeW, textColor = palette.textColor, isBold = true, contentAngleDeg = contentAngle)
                             drawFittedSingleLineText(canvas, weather.conditionLabel, cx, cy + pillHeight * 0.18f, maxSizePx = pillHeight * 0.16f, maxWidth = safeW, textColor = (0xCCFFFFFF.toInt() and palette.textColor), contentAngleDeg = contentAngle)
                         }
                     }
@@ -735,10 +740,10 @@ object WidgetCanvasRenderer {
                 WidgetContentMode.CLOCK -> {
                     val dayStr = formatDayOfWeek()
                     val dateStr = formatLocalizedFullDate()
-                    val alarmStr = context.getString(R.string.sample_next_alarm)
+                    val statusStr = DeviceStatusHelper.getAlarmOrBatteryStatus(context)
                     drawFittedSingleLineText(canvas, dayStr, p2cx, p2cy - pillThickness * 0.22f, maxSizePx = pillThickness * 0.20f, maxWidth = p2SafeW, textColor = palette.textColor, isBold = true, contentAngleDeg = p2ContentAngle)
                     drawFittedSingleLineText(canvas, dateStr, p2cx, p2cy + pillThickness * 0.02f, maxSizePx = pillThickness * 0.16f, maxWidth = p2SafeW, textColor = (0xCCFFFFFF.toInt() and palette.textColor), contentAngleDeg = p2ContentAngle)
-                    drawFittedSingleLineText(canvas, alarmStr, p2cx, p2cy + pillThickness * 0.25f, maxSizePx = pillThickness * 0.14f, maxWidth = p2SafeW, textColor = (0xBBFFFFFF.toInt() and palette.textColor), contentAngleDeg = p2ContentAngle)
+                    drawFittedSingleLineText(canvas, statusStr, p2cx, p2cy + pillThickness * 0.25f, maxSizePx = pillThickness * 0.14f, maxWidth = p2SafeW, textColor = (0xBBFFFFFF.toInt() and palette.textColor), contentAngleDeg = p2ContentAngle)
                 }
                 WidgetContentMode.COMBO -> {
                     val dateStr = formatLocalizedDayAndFullDate()

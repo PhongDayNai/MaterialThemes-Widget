@@ -123,6 +123,9 @@
     <string name="weather_snow">Snow</string>
     <string name="weather_fog">Fog</string>
     <string name="sample_next_alarm">Alarm: 07:00 AM</string>
+    <string name="status_next_alarm">Alarm: %s</string>
+    <string name="status_battery_level">Battery: %d%%</string>
+    <string name="status_battery_default">Battery</string>
     <string name="sample_date_display">Wed, Sep 9</string>
     <string name="sample_temp_range_slash">31° / 23°</string>
     <string name="format_clock_date_short">EEE, d MMM</string>

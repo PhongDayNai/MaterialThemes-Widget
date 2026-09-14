@@ -122,6 +122,9 @@
     <string name="weather_snow">Có tuyết</string>
     <string name="weather_fog">Sương mù</string>
     <string name="sample_next_alarm">Báo thức: 07:00</string>
+    <string name="status_next_alarm">Báo thức: %s</string>
+    <string name="status_battery_level">Pin: %d%%</string>
+    <string name="status_battery_default">Pin</string>
     <string name="sample_date_display">Th 4, 9 thg 9</string>
     <string name="sample_temp_range_slash">31° / 23°</string>
     <string name="format_clock_date_short">EEE, d \'thg\' M</string>
