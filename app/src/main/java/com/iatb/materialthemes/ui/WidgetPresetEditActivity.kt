@@ -42,6 +42,7 @@ import com.iatb.materialthemes.WidgetSize
 import com.iatb.materialthemes.data.ColorPalette
 import com.iatb.materialthemes.data.WidgetContentMode
 import com.iatb.materialthemes.data.WidgetPreferences
+import com.iatb.materialthemes.widget.ActiveWidgetManager
 import kotlin.math.abs
 
 class WidgetPresetEditActivity : AppCompatActivity() {
@@ -200,14 +201,14 @@ class WidgetPresetEditActivity : AppCompatActivity() {
     }
 
     private fun initInitialState() {
+        ActiveWidgetManager.syncActiveWidget(this)
+        val activeCategory = WidgetPreferences.getCategory(this)
+        val activeSize = WidgetPreferences.getSize(this)
+
         isEditMode = intent.getBooleanExtra(EXTRA_IS_EDIT, false)
         if (isEditMode) {
             editingPresetId = intent.getStringExtra(EXTRA_PRESET_ID)
             editingPresetTitle = intent.getStringExtra(EXTRA_PRESET_TITLE)
-
-            val initialCat = intent.getStringExtra(EXTRA_CATEGORY)?.let {
-                runCatching { WidgetCategory.valueOf(it) }.getOrNull()
-            } ?: WidgetCategory.DIAGONAL
 
             val initialPal = intent.getStringExtra(EXTRA_PALETTE)?.let {
                 runCatching { ColorPalette.valueOf(it) }.getOrNull()
@@ -216,30 +217,26 @@ class WidgetPresetEditActivity : AppCompatActivity() {
             val initialTrans = intent.getIntExtra(EXTRA_TRANSPARENCY, 100)
             val initialAngle = intent.getFloatExtra(EXTRA_ANGLE, -45f)
 
-            val initialSize = intent.getStringExtra(EXTRA_SIZE)?.let {
-                runCatching { WidgetSize.valueOf(it) }.getOrNull()
-            } ?: WidgetSize.SIZE_2X2
-
             val initialContent = intent.getStringExtra(EXTRA_CONTENT_MODE)?.let {
                 runCatching { WidgetContentMode.valueOf(it) }.getOrNull()
             } ?: WidgetContentMode.WEATHER
 
-            viewModel.setCategory(initialCat)
+            viewModel.setCategory(activeCategory)
+            viewModel.setSize(activeSize)
             viewModel.setColorPalette(initialPal)
             viewModel.setTransparency(initialTrans)
             viewModel.setRotationAngle(initialAngle)
-            viewModel.setSize(initialSize)
             viewModel.setContentMode(initialContent)
         } else {
-            // Case 1: Add Mode (Brand-new, independent preset canvas)
+            // Case 1: Add Mode (Brand-new preset canvas using active widget shape & size)
             editingPresetId = null
             editingPresetTitle = null
 
-            viewModel.setCategory(WidgetCategory.DIAGONAL)
+            viewModel.setCategory(activeCategory)
+            viewModel.setSize(activeSize)
             viewModel.setColorPalette(ColorPalette.DYNAMIC)
             viewModel.setTransparency(100)
             viewModel.setRotationAngle(-45f)
-            viewModel.setSize(WidgetSize.SIZE_2X2)
             viewModel.setContentMode(WidgetContentMode.WEATHER)
         }
     }
@@ -312,6 +309,10 @@ class WidgetPresetEditActivity : AppCompatActivity() {
         detailContainerAngle = findViewById(R.id.detail_container_angle)
         detailContainerContent = findViewById(R.id.detail_container_content)
         detailContainerTransparency = findViewById(R.id.detail_container_transparency)
+
+        findViewById<View>(R.id.section_shapes)?.visibility = View.GONE
+        btnToolSize.visibility = View.GONE
+        detailContainerSize.visibility = View.GONE
 
         // Shapes
         cardShapeDiagonal = findViewById(R.id.card_shape_diagonal)
@@ -884,6 +885,7 @@ class WidgetPresetEditActivity : AppCompatActivity() {
 
         btnToolAngle.visibility = targetAngleVis
         btnToolContent.visibility = targetContentVis
+        btnToolSize.visibility = View.GONE
         layoutSizeSecondary.visibility = targetSecondaryVis
 
         if (isDiagonal && animate && visibilityChanged) {

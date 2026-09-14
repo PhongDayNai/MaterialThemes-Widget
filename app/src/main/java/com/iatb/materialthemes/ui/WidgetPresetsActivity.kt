@@ -44,6 +44,8 @@ import com.iatb.materialthemes.data.DynamicThemeExtractor
 import com.iatb.materialthemes.data.QuickPreset
 import com.iatb.materialthemes.data.WidgetContentMode
 import com.iatb.materialthemes.data.WidgetPreferences
+import com.iatb.materialthemes.widget.ActiveWidgetManager
+import com.iatb.materialthemes.widget.WidgetAnimationManager
 import kotlin.math.abs
 
 class WidgetPresetsActivity : AppCompatActivity() {
@@ -70,9 +72,11 @@ class WidgetPresetsActivity : AppCompatActivity() {
 
     // Reference to the actual configuration applied to home screen widgets
     private var appliedCategory: WidgetCategory = WidgetCategory.DIAGONAL
+    private var appliedSize: WidgetSize = WidgetSize.SIZE_2X2
     private var appliedPalette: ColorPalette = ColorPalette.DYNAMIC
     private var appliedTransparency: Int = 100
     private var appliedAngle: Float = -45f
+    private var appliedContentMode: WidgetContentMode = WidgetContentMode.WEATHER
     private var appliedPresetId: String? = null
 
     // Currently selected preset in this screen
@@ -100,14 +104,17 @@ class WidgetPresetsActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_widget_presets)
 
+        ActiveWidgetManager.syncActiveWidget(this)
         viewModel = ViewModelProvider(this)[MainViewModel::class.java]
         viewModel.initFromPreferences(this)
 
         // Capture actual applied configuration from Preferences
         appliedCategory = WidgetPreferences.getCategory(this)
+        appliedSize = WidgetPreferences.getSize(this)
         appliedPalette = WidgetPreferences.getColorPalette(this)
         appliedTransparency = WidgetPreferences.getTransparency(this)
         appliedAngle = WidgetPreferences.getRotationAngle(this)
+        appliedContentMode = WidgetPreferences.getContentMode(this)
         appliedPresetId = WidgetPreferences.getAppliedPresetId(this)
 
         initViews()
@@ -144,6 +151,18 @@ class WidgetPresetsActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        ActiveWidgetManager.syncActiveWidget(this)
+        appliedCategory = WidgetPreferences.getCategory(this)
+        appliedSize = WidgetPreferences.getSize(this)
+        appliedPalette = WidgetPreferences.getColorPalette(this)
+        appliedTransparency = WidgetPreferences.getTransparency(this)
+        appliedAngle = WidgetPreferences.getRotationAngle(this)
+        appliedContentMode = WidgetPreferences.getContentMode(this)
+        appliedPresetId = WidgetPreferences.getAppliedPresetId(this)
+
+        viewModel.setCategory(appliedCategory)
+        viewModel.setSize(appliedSize)
+
         val snapshot = SharedAmbientBackgroundHolder.getSnapshot()
         if (snapshot != null) {
             ambientBgView.setOrbs(snapshot)
@@ -153,6 +172,7 @@ class WidgetPresetsActivity : AppCompatActivity() {
                 SharedAmbientBackgroundHolder.saveSnapshot(ambientBgView.getOrbsSnapshot())
             }
         }
+        presetsAdapter?.notifyDataSetChanged()
     }
 
     override fun onPause() {
@@ -209,11 +229,11 @@ class WidgetPresetsActivity : AppCompatActivity() {
                 putExtra(WidgetPresetEditActivity.EXTRA_IS_EDIT, true)
                 putExtra(WidgetPresetEditActivity.EXTRA_PRESET_ID, preset.id)
                 putExtra(WidgetPresetEditActivity.EXTRA_PRESET_TITLE, preset.getLocalizedTitle(this@WidgetPresetsActivity))
-                putExtra(WidgetPresetEditActivity.EXTRA_CATEGORY, preset.category.name)
+                putExtra(WidgetPresetEditActivity.EXTRA_CATEGORY, appliedCategory.name)
                 putExtra(WidgetPresetEditActivity.EXTRA_PALETTE, preset.palette.name)
                 putExtra(WidgetPresetEditActivity.EXTRA_TRANSPARENCY, preset.transparency)
                 putExtra(WidgetPresetEditActivity.EXTRA_ANGLE, preset.rotationAngle)
-                putExtra(WidgetPresetEditActivity.EXTRA_SIZE, preset.size.name)
+                putExtra(WidgetPresetEditActivity.EXTRA_SIZE, appliedSize.name)
                 putExtra(WidgetPresetEditActivity.EXTRA_CONTENT_MODE, preset.contentMode.name)
             }
             presetEditLauncher.launch(intent)
@@ -233,18 +253,20 @@ class WidgetPresetsActivity : AppCompatActivity() {
 
             viewModel.setColorPalette(preset.palette)
             viewModel.setTransparency(preset.transparency)
-            viewModel.setCategory(preset.category)
-            viewModel.setSize(preset.size)
             viewModel.setContentMode(preset.contentMode)
-            if (preset.category == WidgetCategory.DIAGONAL) {
+            if (appliedCategory == WidgetCategory.DIAGONAL) {
                 viewModel.setRotationAngle(preset.rotationAngle)
             }
             viewModel.saveAndApply(this)
 
-            appliedCategory = preset.category
+            WidgetAnimationManager.triggerEnterAnimation(this)
+
             appliedPalette = preset.palette
             appliedTransparency = preset.transparency
-            appliedAngle = preset.rotationAngle
+            appliedContentMode = preset.contentMode
+            if (appliedCategory == WidgetCategory.DIAGONAL) {
+                appliedAngle = preset.rotationAngle
+            }
             appliedPresetId = preset.id
             WidgetPreferences.setAppliedPresetId(this, appliedPresetId)
 
@@ -348,48 +370,47 @@ class WidgetPresetsActivity : AppCompatActivity() {
 
         // Default selection matching currently applied settings
         if (selectedPreset == null) {
-            val matching = if (appliedPresetId != null) {
-                list.firstOrNull { it.id == appliedPresetId }
-            } else {
-                list.firstOrNull { isPresetMatchingApplied(it) }
-            } ?: list.firstOrNull()
+            val matching = list.firstOrNull { isPresetApplied(it) }
             if (matching != null) {
-                if (appliedPresetId == null && isPresetMatchingApplied(matching)) {
-                    appliedPresetId = matching.id
-                    WidgetPreferences.setAppliedPresetId(this, matching.id)
-                }
                 selectPreset(matching, animate = false)
+            } else {
+                updatePreview(animate = false)
+                btnApplyHeader.visibility = View.GONE
+                hideEditButton(animate = false)
+                hideDeleteButton(animate = false)
             }
         }
     }
 
     private fun isPresetApplied(preset: QuickPreset): Boolean {
-        if (appliedPresetId != null) {
-            return preset.id == appliedPresetId
+        if (!isPresetMatchingApplied(preset)) {
+            return false
         }
-        return isPresetMatchingApplied(preset)
+        return if (appliedPresetId != null) {
+            preset.id == appliedPresetId
+        } else {
+            true
+        }
     }
 
     private fun isPresetMatchingApplied(preset: QuickPreset): Boolean {
-        val catMatch = preset.category == appliedCategory
         val palMatch = preset.palette == appliedPalette
         val transMatch = preset.transparency == appliedTransparency
+        val contentMatch = preset.contentMode == appliedContentMode
         val angleMatch = if (appliedCategory == WidgetCategory.DIAGONAL) {
             abs(preset.rotationAngle - appliedAngle) < 0.5f
         } else {
             true
         }
-        return catMatch && palMatch && transMatch && angleMatch
+        return palMatch && transMatch && contentMatch && angleMatch
     }
 
     private fun selectPreset(preset: QuickPreset, animate: Boolean) {
         selectedPreset = preset
         viewModel.setColorPalette(preset.palette)
         viewModel.setTransparency(preset.transparency)
-        viewModel.setCategory(preset.category)
-        viewModel.setSize(preset.size)
         viewModel.setContentMode(preset.contentMode)
-        if (preset.category == WidgetCategory.DIAGONAL) {
+        if (appliedCategory == WidgetCategory.DIAGONAL) {
             viewModel.setRotationAngle(preset.rotationAngle)
         }
         presetsAdapter?.notifyDataSetChanged()
@@ -783,21 +804,22 @@ class WidgetPresetsActivity : AppCompatActivity() {
             holder.ivPalettePreview.setImageDrawable(layerDrawable)
 
             // Selection state based on active selectedPreset
-            val isSelected = selectedPreset?.id == preset.id ||
-                    (selectedPreset == null && isPresetApplied(preset))
+            val isSelected = selectedPreset?.id == preset.id
+            val isApplied = isPresetApplied(preset)
 
             val primaryColor = getThemeColor(androidx.appcompat.R.attr.colorPrimary, 0xFF006874.toInt())
             val outlineColor = getThemeColor(com.google.android.material.R.attr.colorOutline, 0xFF6F797A.toInt())
             val surfaceVariant = getThemeColor(com.google.android.material.R.attr.colorSurfaceVariant, 0xFFDBE4E6.toInt())
             val surfaceColor = getThemeColor(com.google.android.material.R.attr.colorSurface, 0xFFF8FDFF.toInt())
 
+            // Badge check container shows ONLY when preset is actually applied on home screen
+            holder.badgeCheckContainer.visibility = if (isApplied) View.VISIBLE else View.GONE
+
             if (isSelected) {
-                holder.badgeCheckContainer.visibility = View.VISIBLE
                 holder.card.strokeColor = primaryColor
                 holder.card.strokeWidth = (2 * density).toInt()
                 holder.card.setCardBackgroundColor(surfaceVariant)
             } else {
-                holder.badgeCheckContainer.visibility = View.GONE
                 holder.card.strokeColor = outlineColor
                 holder.card.strokeWidth = (1 * density).toInt()
                 holder.card.setCardBackgroundColor(surfaceColor)
