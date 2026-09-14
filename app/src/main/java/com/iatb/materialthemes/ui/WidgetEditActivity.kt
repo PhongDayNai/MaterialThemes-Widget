@@ -11,11 +11,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.DecelerateInterpolator
 import android.view.animation.OvershootInterpolator
+import android.content.DialogInterface
+import android.text.InputFilter
+import android.widget.EditText
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
@@ -1204,6 +1208,8 @@ class WidgetEditActivity : AppCompatActivity() {
         val palette = viewModel.palette.value ?: ColorPalette.DYNAMIC
         val transparency = viewModel.transparency.value ?: 100
         val angle = viewModel.angle.value ?: -45f
+        val size = viewModel.size.value ?: WidgetSize.SIZE_2X2
+        val contentMode = viewModel.contentMode.value ?: WidgetContentMode.WEATHER
 
         // 1. Check if identical configuration already exists
         val duplicateConfig = WidgetPreferences.findDuplicatePreset(
@@ -1211,58 +1217,41 @@ class WidgetEditActivity : AppCompatActivity() {
         )
         if (duplicateConfig != null) {
             val existingTitle = duplicateConfig.getLocalizedTitle(this)
-            MaterialAlertDialogBuilder(this)
-                .setTitle(R.string.preset_duplicate_title)
-                .setMessage(getString(R.string.preset_duplicate_config_message, existingTitle))
-                .setPositiveButton(R.string.btn_done, null)
-                .show()
+            PresetDialogHelper.showAlertInfoDialog(
+                context = this,
+                iconRes = R.drawable.ic_collections_bookmark,
+                titleRes = R.string.preset_duplicate_title,
+                message = getString(R.string.preset_duplicate_config_message, existingTitle),
+                buttonTextRes = R.string.btn_done
+            )
             return
         }
 
-        // 2. Configuration is unique; prompt user for preset name with duplicate name validation
-        val input = android.widget.EditText(this).apply {
-            hint = getString(R.string.dialog_add_preset_hint)
-            setSingleLine()
-        }
-        val container = FrameLayout(this).apply {
-            val pad = (20 * resources.displayMetrics.density).toInt()
-            setPadding(pad, pad / 2, pad, pad / 2)
-            addView(input)
-        }
-
-        val dialog = MaterialAlertDialogBuilder(this)
-            .setTitle(R.string.dialog_add_preset_title)
-            .setView(container)
-            .setPositiveButton(R.string.dialog_btn_add, null)
-            .setNegativeButton(R.string.dialog_btn_cancel, null)
-            .create()
-
-        dialog.show()
-
-        // Intercept positive click to prevent auto-dismissal on validation error
-        dialog.getButton(android.content.DialogInterface.BUTTON_POSITIVE).setOnClickListener {
-            val name = input.text.toString().trim()
-            if (name.isEmpty()) {
-                input.error = getString(R.string.preset_name_empty_warning)
-                input.requestFocus()
-                return@setOnClickListener
+        // 2. Configuration is unique; prompt user with styled Material 3 preset dialog
+        val suggestions = PresetSuggestionHelper.getPresetNameSuggestions(this, category, palette)
+        PresetDialogHelper.showPresetNameDialog(
+            context = this,
+            iconRes = R.drawable.ic_bookmark_add,
+            titleRes = R.string.dialog_add_preset_title,
+            subtitleRes = R.string.dialog_add_preset_subtitle,
+            initialName = null,
+            suggestions = suggestions,
+            palette = palette,
+            confirmButtonTextRes = R.string.dialog_btn_add,
+            validateDuplicate = { name -> WidgetPreferences.isPresetTitleTaken(this, name) },
+            onConfirmed = { name ->
+                WidgetPreferences.addQuickPreset(
+                    context = this,
+                    title = name,
+                    palette = palette,
+                    transparency = transparency,
+                    angle = angle,
+                    category = category,
+                    size = size,
+                    contentMode = contentMode
+                )
+                Toast.makeText(this, R.string.preset_added_toast, Toast.LENGTH_SHORT).show()
             }
-            if (WidgetPreferences.isPresetTitleTaken(this, name)) {
-                input.error = getString(R.string.preset_duplicate_name_warning, name)
-                input.requestFocus()
-                return@setOnClickListener
-            }
-
-            WidgetPreferences.addQuickPreset(
-                context = this,
-                title = name,
-                palette = palette,
-                transparency = transparency,
-                angle = angle,
-                category = category
-            )
-            android.widget.Toast.makeText(this, R.string.preset_added_toast, android.widget.Toast.LENGTH_SHORT).show()
-            dialog.dismiss()
-        }
+        )
     }
 }

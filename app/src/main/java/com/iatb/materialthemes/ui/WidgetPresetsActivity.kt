@@ -638,10 +638,14 @@ class WidgetPresetsActivity : AppCompatActivity() {
         val preset = selectedPreset ?: return
         val presetTitle = preset.getLocalizedTitle(this)
 
-        MaterialAlertDialogBuilder(this)
-            .setTitle(R.string.dialog_delete_preset_title)
-            .setMessage(getString(R.string.dialog_delete_preset_message, presetTitle))
-            .setPositiveButton(R.string.action_delete) { _, _ ->
+        PresetDialogHelper.showConfirmDialog(
+            context = this,
+            iconRes = R.drawable.ic_delete,
+            titleRes = R.string.dialog_delete_preset_title,
+            message = getString(R.string.dialog_delete_preset_message, presetTitle),
+            positiveButtonTextRes = R.string.action_delete,
+            isDestructive = true,
+            onConfirmed = {
                 WidgetPreferences.deleteQuickPreset(this, preset.id)
                 Toast.makeText(this, R.string.preset_deleted_toast, Toast.LENGTH_SHORT).show()
                 refreshPresetsList()
@@ -660,8 +664,7 @@ class WidgetPresetsActivity : AppCompatActivity() {
                     hideDeleteButton(animate = true)
                 }
             }
-            .setNegativeButton(R.string.dialog_btn_cancel, null)
-            .show()
+        )
     }
 
     private fun observeViewModel() {
