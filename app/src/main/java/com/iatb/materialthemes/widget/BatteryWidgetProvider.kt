@@ -29,11 +29,13 @@ class BatteryWidgetProvider : AppWidgetProvider() {
         when (intent.action) {
             Intent.ACTION_POWER_CONNECTED -> {
                 com.iatb.materialthemes.data.DynamicThemeExtractor.invalidateCache()
-                updateAllWidgets(context, forceCharging = true)
+                updateAllWidgets(context, forceCharging = true, batteryIntent = intent)
+                WidgetUpdateScheduler.scheduleNextMinuteTick(context)
             }
             Intent.ACTION_POWER_DISCONNECTED -> {
                 com.iatb.materialthemes.data.DynamicThemeExtractor.invalidateCache()
-                updateAllWidgets(context, forceCharging = false)
+                updateAllWidgets(context, forceCharging = false, batteryIntent = intent)
+                WidgetUpdateScheduler.scheduleNextMinuteTick(context)
             }
             Intent.ACTION_BATTERY_CHANGED -> {
                 val plugged = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1)
@@ -46,7 +48,22 @@ class BatteryWidgetProvider : AppWidgetProvider() {
                     status == BatteryManager.BATTERY_STATUS_CHARGING || status == BatteryManager.BATTERY_STATUS_FULL
                 } else null
                 com.iatb.materialthemes.data.DynamicThemeExtractor.invalidateCache()
-                updateAllWidgets(context, forceCharging = isCharging)
+                updateAllWidgets(context, forceCharging = isCharging, batteryIntent = intent)
+                WidgetUpdateScheduler.scheduleNextMinuteTick(context)
+            }
+            "android.bluetooth.device.action.BATTERY_LEVEL_CHANGED" -> {
+                val device = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE, BluetoothDevice::class.java)
+                } else {
+                    @Suppress("DEPRECATION")
+                    intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                }
+                val level = intent.getIntExtra("android.bluetooth.device.extra.BATTERY_LEVEL", -1)
+                if (device != null && level in 0..100) {
+                    BatteryRepository.updateCachedBatteryLevel(device.address, level)
+                }
+                com.iatb.materialthemes.data.DynamicThemeExtractor.invalidateCache()
+                updateAllWidgets(context)
                 WidgetUpdateScheduler.scheduleNextMinuteTick(context)
             }
             Intent.ACTION_USER_PRESENT,
@@ -57,7 +74,6 @@ class BatteryWidgetProvider : AppWidgetProvider() {
             Intent.ACTION_CONFIGURATION_CHANGED,
             BluetoothDevice.ACTION_ACL_CONNECTED,
             BluetoothDevice.ACTION_ACL_DISCONNECTED,
-            "android.bluetooth.device.action.BATTERY_LEVEL_CHANGED",
             WidgetUpdateScheduler.ACTION_WIDGET_TICK,
             ACTION_UPDATE_BATTERY_WIDGET -> {
                 com.iatb.materialthemes.data.DynamicThemeExtractor.invalidateCache()
@@ -96,7 +112,11 @@ class BatteryWidgetProvider : AppWidgetProvider() {
     companion object {
         const val ACTION_UPDATE_BATTERY_WIDGET = "com.iatb.materialthemes.action.UPDATE_BATTERY_WIDGET"
 
-        fun updateAllWidgets(context: Context, forceCharging: Boolean? = null) {
+        fun updateAllWidgets(
+            context: Context,
+            forceCharging: Boolean? = null,
+            batteryIntent: Intent? = null
+        ) {
             val appWidgetManager = AppWidgetManager.getInstance(context) ?: return
             val component = ComponentName(context, BatteryWidgetProvider::class.java)
             val ids = try {
@@ -105,7 +125,7 @@ class BatteryWidgetProvider : AppWidgetProvider() {
                 IntArray(0)
             }
             for (id in ids) {
-                updateAppWidget(context, appWidgetManager, id, forceCharging)
+                updateAppWidget(context, appWidgetManager, id, forceCharging, batteryIntent)
             }
         }
 
@@ -113,9 +133,10 @@ class BatteryWidgetProvider : AppWidgetProvider() {
             context: Context,
             appWidgetManager: AppWidgetManager,
             appWidgetId: Int,
-            forceCharging: Boolean? = null
+            forceCharging: Boolean? = null,
+            batteryIntent: Intent? = null
         ) {
-            val remoteViews = buildRemoteViews(context, appWidgetManager, appWidgetId, forceCharging)
+            val remoteViews = buildRemoteViews(context, appWidgetManager, appWidgetId, forceCharging, batteryIntent)
             appWidgetManager.updateAppWidget(appWidgetId, remoteViews)
         }
 
@@ -123,9 +144,10 @@ class BatteryWidgetProvider : AppWidgetProvider() {
             context: Context,
             appWidgetManager: AppWidgetManager,
             appWidgetId: Int,
-            forceCharging: Boolean? = null
+            forceCharging: Boolean? = null,
+            batteryIntent: Intent? = null
         ): RemoteViews {
-            val devices = BatteryRepository.getBatteryDevices(context, forceCharging)
+            val devices = BatteryRepository.getBatteryDevices(context, forceCharging, batteryIntent)
             val colors = BatteryPreferences.resolveColors(context)
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
