@@ -300,4 +300,31 @@
     <string name="settings_version_title">App Version</string>
     <string name="settings_version_desc">1.0.0 (Material You Edition)</string>
     <string name="toast_coming_soon">Feature coming soon</string>
+
+    <!-- Battery Widget -->
+    <string name="battery_widget_name">Battery &amp; Devices</string>
+    <string name="battery_widget_description">Shows phone battery level, charging time, and connected Bluetooth accessories.</string>
+    <string name="battery_title_phone">Phone</string>
+    <string name="battery_status_charging">Charging</string>
+    <string name="battery_status_full">Fully charged</string>
+    <string name="battery_status_discharging">On battery</string>
+    <string name="battery_time_remaining_charge">%1$s to full</string>
+    <string name="battery_time_remaining_usage">%1$s left</string>
+    <string name="battery_time_hours_mins">%1$dh %2$dm</string>
+    <string name="battery_time_mins">%1$dm</string>
+    <string name="battery_section_sync_title">Follow Clock &amp; Weather</string>
+    <string name="battery_section_sync_desc">Match color style with Clock &amp; Weather widgets</string>
+    <string name="battery_bluetooth_permission_title">Bluetooth Accessories</string>
+    <string name="battery_bluetooth_permission_desc">Allow access to show battery levels of connected Bluetooth headphones, watches, and speakers.</string>
+    <string name="battery_bluetooth_grant_btn">Grant Permission</string>
+    <string name="battery_bluetooth_granted">Bluetooth Connected</string>
+    <string name="battery_bluetooth_no_devices">No accessories connected</string>
+    <string name="battery_preview_title">Live Preview</string>
+    <string name="battery_pin_widget">Add Widget to Home Screen</string>
+    <string name="battery_detail_screen_title">Battery Widget Settings</string>
+    <string name="battery_detail_screen_subtitle">Customize appearance, colors, and connected devices</string>
+    <string name="utilities_section_widgets">Available Utilities</string>
+    <string name="badge_coming_soon">Coming Soon</string>
+    <string name="preview_size_x1">Compact (x1)</string>
+    <string name="preview_size_x2">Expanded (x2)</string>
 </resources>

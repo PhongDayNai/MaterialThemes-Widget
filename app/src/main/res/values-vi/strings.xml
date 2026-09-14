@@ -299,4 +299,31 @@
     <string name="settings_version_title">Phiên bản ứng dụng</string>
     <string name="settings_version_desc">1.0.0 (Thiết kế Material You)</string>
     <string name="toast_coming_soon">Tính năng đang được phát triển</string>
+
+    <!-- Battery Widget -->
+    <string name="battery_widget_name">Pin &amp; Thiết bị</string>
+    <string name="battery_widget_description">Hiển thị mức pin điện thoại, thời gian sạc và các thiết bị Bluetooth đã kết nối.</string>
+    <string name="battery_title_phone">Điện thoại</string>
+    <string name="battery_status_charging">Đang sạc</string>
+    <string name="battery_status_full">Đã sạc đầy</string>
+    <string name="battery_status_discharging">Đang dùng pin</string>
+    <string name="battery_time_remaining_charge">%1$s để sạc đầy</string>
+    <string name="battery_time_remaining_usage">Còn khoảng %1$s</string>
+    <string name="battery_time_hours_mins">%1$d giờ %2$d phút</string>
+    <string name="battery_time_mins">%1$d phút</string>
+    <string name="battery_section_sync_title">Đồng bộ Đồng hồ &amp; Thời tiết</string>
+    <string name="battery_section_sync_desc">Áp dụng bộ màu đang dùng của widget Đồng hồ &amp; Thời tiết</string>
+    <string name="battery_bluetooth_permission_title">Phụ kiện Bluetooth</string>
+    <string name="battery_bluetooth_permission_desc">Cấp quyền để hiển thị phần trăm pin của tai nghe, đồng hồ và loa Bluetooth kết nối.</string>
+    <string name="battery_bluetooth_grant_btn">Cấp quyền</string>
+    <string name="battery_bluetooth_granted">Đã kết nối Bluetooth</string>
+    <string name="battery_bluetooth_no_devices">Chưa có phụ kiện kết nối</string>
+    <string name="battery_preview_title">Xem trước trực tiếp</string>
+    <string name="battery_pin_widget">Thêm widget vào màn hình chính</string>
+    <string name="battery_detail_screen_title">Cấu hình Widget Pin</string>
+    <string name="battery_detail_screen_subtitle">Tùy biến giao diện, màu sắc và thiết bị kết nối</string>
+    <string name="utilities_section_widgets">Danh sách tiện ích</string>
+    <string name="badge_coming_soon">Sắp có</string>
+    <string name="preview_size_x1">Gọn (x1)</string>
+    <string name="preview_size_x2">Mở rộng (x2)</string>
 </resources>
