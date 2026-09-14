@@ -226,7 +226,126 @@
                 </LinearLayout>
             </com.iatb.materialthemes.ui.GlassBlurCardView>
 
-            <!-- UTILITY ITEM 2: UPCOMING UTILITIES (COMING SOON) -->
+            <!-- UTILITY ITEM 2: DAY PROGRESS WIDGET -->
+            <com.iatb.materialthemes.ui.GlassBlurCardView
+                android:id="@+id/card_utility_day_progress"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
+                android:clickable="true"
+                android:focusable="true">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="20dp"
+                    android:paddingTop="20dp"
+                    android:paddingEnd="20dp"
+                    android:paddingBottom="20dp">
+
+                    <FrameLayout
+                        android:id="@+id/fl_day_progress_icon_container"
+                        android:layout_width="56dp"
+                        android:layout_height="56dp">
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/shape_circle"
+                            android:backgroundTint="#24FFFFFF" />
+
+                        <com.google.android.material.progressindicator.CircularProgressIndicator
+                            android:id="@+id/progress_day_progress_icon"
+                            android:layout_width="56dp"
+                            android:layout_height="56dp"
+                            android:layout_gravity="center"
+                            android:max="100"
+                            android:progress="64"
+                            app:indicatorColor="#80D8FF"
+                            app:indicatorSize="56dp"
+                            app:trackColor="#1AFFFFFF"
+                            app:trackCornerRadius="2dp"
+                            app:trackThickness="4dp" />
+
+                        <ImageView
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_schedule"
+                            app:tint="#FFFFFF" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="18dp"
+                        android:layout_marginEnd="12dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/day_progress_widget_name"
+                                android:textColor="#FFFFFF"
+                                android:textSize="18sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/tv_day_progress_percent_badge"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="8dp"
+                                android:background="@drawable/shape_drag_handle"
+                                android:backgroundTint="#3380D8FF"
+                                android:paddingStart="8dp"
+                                android:paddingTop="2dp"
+                                android:paddingEnd="8dp"
+                                android:paddingBottom="2dp"
+                                android:textColor="#80D8FF"
+                                android:textSize="12sp"
+                                android:textStyle="bold" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/tv_day_progress_quick_status"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="4dp"
+                            android:ellipsize="end"
+                            android:maxLines="2"
+                            android:text="@string/day_progress_widget_description"
+                            android:textColor="#C0FFFFFF"
+                            android:textSize="13sp" />
+                    </LinearLayout>
+
+                    <FrameLayout
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:background="@drawable/shape_circle"
+                        android:backgroundTint="#20FFFFFF">
+
+                        <ImageView
+                            android:layout_width="20dp"
+                            android:layout_height="20dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_chevron_right"
+                            app:tint="#FFFFFF" />
+                    </FrameLayout>
+                </LinearLayout>
+            </com.iatb.materialthemes.ui.GlassBlurCardView>
+
+            <!-- UTILITY ITEM 3: UPCOMING UTILITIES (COMING SOON) -->
             <com.iatb.materialthemes.ui.GlassBlurCardView
                 android:id="@+id/card_utility_coming_soon"
                 android:layout_width="match_parent"

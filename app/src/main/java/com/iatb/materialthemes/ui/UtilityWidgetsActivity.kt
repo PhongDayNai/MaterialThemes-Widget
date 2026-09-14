@@ -30,6 +30,7 @@ class UtilityWidgetsActivity : AppCompatActivity() {
     private lateinit var ambientBgView: AmbientMeshBackgroundView
     private lateinit var btnBack: View
     private lateinit var cardUtilityBattery: GlassBlurCardView
+    private lateinit var cardUtilityDayProgress: GlassBlurCardView
     private lateinit var cardUtilityComingSoon: GlassBlurCardView
     private lateinit var flBatteryIconContainer: FrameLayout
     private lateinit var progressBatteryIcon: com.google.android.material.progressindicator.CircularProgressIndicator
@@ -37,8 +38,16 @@ class UtilityWidgetsActivity : AppCompatActivity() {
     private lateinit var tvBatteryPercentBadge: TextView
     private lateinit var tvBatteryQuickStatus: TextView
 
+    private lateinit var progressDayProgressIcon: com.google.android.material.progressindicator.CircularProgressIndicator
+    private lateinit var tvDayProgressPercentBadge: TextView
+    private lateinit var tvDayProgressQuickStatus: TextView
+
     private val batteryReceiver = object : BroadcastReceiver() {
         override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == Intent.ACTION_TIME_TICK || intent.action == Intent.ACTION_TIME_CHANGED || intent.action == Intent.ACTION_TIMEZONE_CHANGED) {
+                updateDayProgressStatus()
+            }
+
             if (intent.action == "android.bluetooth.device.action.BATTERY_LEVEL_CHANGED") {
                 val device = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                     intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE, BluetoothDevice::class.java)
@@ -82,10 +91,12 @@ class UtilityWidgetsActivity : AppCompatActivity() {
                 durationMs = 950L,
                 onUpdate = {
                     cardUtilityBattery.refreshBlur()
+                    cardUtilityDayProgress.refreshBlur()
                     cardUtilityComingSoon.refreshBlur()
                 },
                 onComplete = {
                     cardUtilityBattery.refreshBlur()
+                    cardUtilityDayProgress.refreshBlur()
                     cardUtilityComingSoon.refreshBlur()
                     SharedAmbientBackgroundHolder.saveSnapshot(ambientBgView.getOrbsSnapshot())
                 }
@@ -110,6 +121,7 @@ class UtilityWidgetsActivity : AppCompatActivity() {
         ambientBgView = findViewById(R.id.ambient_bg_view)
         btnBack = findViewById(R.id.btn_back)
         cardUtilityBattery = findViewById(R.id.card_utility_battery)
+        cardUtilityDayProgress = findViewById(R.id.card_utility_day_progress)
         cardUtilityComingSoon = findViewById(R.id.card_utility_coming_soon)
         flBatteryIconContainer = findViewById(R.id.fl_battery_icon_container)
         progressBatteryIcon = findViewById(R.id.progress_battery_icon)
@@ -117,16 +129,23 @@ class UtilityWidgetsActivity : AppCompatActivity() {
         tvBatteryPercentBadge = findViewById(R.id.tv_battery_percent_badge)
         tvBatteryQuickStatus = findViewById(R.id.tv_battery_quick_status)
 
+        progressDayProgressIcon = findViewById(R.id.progress_day_progress_icon)
+        tvDayProgressPercentBadge = findViewById(R.id.tv_day_progress_percent_badge)
+        tvDayProgressQuickStatus = findViewById(R.id.tv_day_progress_quick_status)
+
         cardUtilityBattery.setTargetBackgroundView(ambientBgView)
+        cardUtilityDayProgress.setTargetBackgroundView(ambientBgView)
         cardUtilityComingSoon.setTargetBackgroundView(ambientBgView)
 
         findViewById<androidx.core.widget.NestedScrollView>(R.id.scroll_content).setOnScrollChangeListener { _, _, _, _, _ ->
             cardUtilityBattery.refreshBlur()
+            cardUtilityDayProgress.refreshBlur()
             cardUtilityComingSoon.refreshBlur()
         }
 
         WidgetPreviewHelper.applyPressScaleEffect(btnBack)
         WidgetPreviewHelper.applyPressScaleEffect(cardUtilityBattery)
+        WidgetPreviewHelper.applyPressScaleEffect(cardUtilityDayProgress)
         WidgetPreviewHelper.applyPressScaleEffect(cardUtilityComingSoon)
     }
 
@@ -143,9 +162,28 @@ class UtilityWidgetsActivity : AppCompatActivity() {
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         }
 
+        cardUtilityDayProgress.setOnClickListener {
+            SharedAmbientBackgroundHolder.saveSnapshot(ambientBgView.getOrbsSnapshot())
+            val intent = Intent(this, DayProgressWidgetDetailActivity::class.java)
+            startActivity(intent)
+            @Suppress("DEPRECATION")
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
+        }
+
         cardUtilityComingSoon.setOnClickListener {
             Toast.makeText(this, R.string.toast_coming_soon, Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun updateDayProgressStatus() {
+        val info = com.iatb.materialthemes.data.DayProgressRepository.getDayProgress(this)
+        tvDayProgressPercentBadge.text = "${info.percentage}%"
+        progressDayProgressIcon.setProgressCompat(info.percentage, true)
+        tvDayProgressQuickStatus.text = getString(
+            R.string.day_progress_quick_status_format,
+            info.percentage,
+            info.fullDateString
+        )
     }
 
     private fun updateBatteryStatus(forceCharging: Boolean? = null, batteryIntent: Intent? = null) {
@@ -215,8 +253,10 @@ class UtilityWidgetsActivity : AppCompatActivity() {
     override fun onResume() {
         super.onResume()
         cardUtilityBattery.refreshBlur()
+        cardUtilityDayProgress.refreshBlur()
         cardUtilityComingSoon.refreshBlur()
         updateBatteryStatus()
+        updateDayProgressStatus()
 
         val filter = IntentFilter().apply {
             addAction(Intent.ACTION_BATTERY_CHANGED)
@@ -226,6 +266,9 @@ class UtilityWidgetsActivity : AppCompatActivity() {
             addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED)
             addAction("android.bluetooth.device.action.BATTERY_LEVEL_CHANGED")
             addAction(BluetoothAdapter.ACTION_STATE_CHANGED)
+            addAction(Intent.ACTION_TIME_TICK)
+            addAction(Intent.ACTION_TIME_CHANGED)
+            addAction(Intent.ACTION_TIMEZONE_CHANGED)
         }
         try {
             ContextCompat.registerReceiver(this, batteryReceiver, filter, ContextCompat.RECEIVER_EXPORTED)

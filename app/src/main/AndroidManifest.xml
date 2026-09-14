@@ -111,6 +111,11 @@
             android:exported="true"
             android:theme="@style/Theme.MaterialThemes" />
 
+        <activity
+            android:name=".ui.DayProgressWidgetDetailActivity"
+            android:exported="true"
+            android:theme="@style/Theme.MaterialThemes" />
+
         <!-- Widget Quick Configure Bottom Sheet Activity -->
         <activity
             android:name=".widget.WidgetConfigureActivity"
@@ -205,6 +210,28 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/battery_widget_info" />
+        </receiver>
+
+        <!-- Day Progress Widget Provider -->
+        <receiver
+            android:name=".widget.DayProgressWidgetProvider"
+            android:exported="true"
+            android:label="@string/day_progress_widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.intent.action.USER_PRESENT" />
+                <action android:name="android.intent.action.TIME_TICK" />
+                <action android:name="android.intent.action.TIME_CHANGED" />
+                <action android:name="android.intent.action.TIMEZONE_CHANGED" />
+                <action android:name="android.intent.action.WALLPAPER_CHANGED" />
+                <action android:name="android.intent.action.CONFIGURATION_CHANGED" />
+                <action android:name="com.iatb.materialthemes.action.DAY_PROGRESS_TICK" />
+                <action android:name="com.iatb.materialthemes.action.UPDATE_DAY_PROGRESS_WIDGET" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/day_progress_widget_info" />
         </receiver>
     </application>
 
