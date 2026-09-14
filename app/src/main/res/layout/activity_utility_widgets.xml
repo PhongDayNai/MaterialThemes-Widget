@@ -122,18 +122,40 @@
                     android:paddingBottom="20dp">
 
                     <FrameLayout
+                        android:id="@+id/fl_battery_icon_container"
                         android:layout_width="56dp"
-                        android:layout_height="56dp"
-                        android:background="@drawable/shape_circle"
-                        android:backgroundTint="?attr/colorPrimary">
+                        android:layout_height="56dp">
+
+                        <!-- Inner circular disc -->
+                        <View
+                            android:id="@+id/view_battery_icon_bg"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@drawable/shape_circle"
+                            android:backgroundTint="#24FFFFFF" />
+
+                        <!-- Circular progress indicator with 10% steps -->
+                        <com.google.android.material.progressindicator.CircularProgressIndicator
+                            android:id="@+id/progress_battery_icon"
+                            android:layout_width="56dp"
+                            android:layout_height="56dp"
+                            android:layout_gravity="center"
+                            android:max="100"
+                            android:progress="80"
+                            app:indicatorColor="?attr/colorPrimary"
+                            app:indicatorSize="56dp"
+                            app:trackColor="#1AFFFFFF"
+                            app:trackCornerRadius="2dp"
+                            app:trackThickness="4dp" />
 
                         <ImageView
-                            android:layout_width="28dp"
-                            android:layout_height="28dp"
+                            android:id="@+id/iv_battery_icon"
+                            android:layout_width="24dp"
+                            android:layout_height="24dp"
                             android:layout_gravity="center"
                             android:contentDescription="@null"
                             android:src="@drawable/ic_battery_std"
-                            app:tint="?attr/colorOnPrimary" />
+                            app:tint="#FFFFFF" />
                     </FrameLayout>
 
                     <LinearLayout
@@ -144,13 +166,36 @@
                         android:layout_weight="1"
                         android:orientation="vertical">
 
-                        <TextView
+                        <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/battery_widget_name"
-                            android:textColor="#FFFFFF"
-                            android:textSize="18sp"
-                            android:textStyle="bold" />
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="@string/battery_widget_name"
+                                android:textColor="#FFFFFF"
+                                android:textSize="18sp"
+                                android:textStyle="bold" />
+
+                            <TextView
+                                android:id="@+id/tv_battery_percent_badge"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="8dp"
+                                android:background="@drawable/shape_drag_handle"
+                                android:backgroundTint="#334CAF50"
+                                android:paddingStart="8dp"
+                                android:paddingTop="2dp"
+                                android:paddingEnd="8dp"
+                                android:paddingBottom="2dp"
+                                android:textColor="#4CAF50"
+                                android:textSize="12sp"
+                                android:textStyle="bold"
+                                android:visibility="gone" />
+                        </LinearLayout>
 
                         <TextView
                             android:id="@+id/tv_battery_quick_status"

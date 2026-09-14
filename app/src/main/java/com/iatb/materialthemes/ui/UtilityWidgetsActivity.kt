@@ -1,13 +1,24 @@
 package com.iatb.materialthemes.ui
 
+import android.bluetooth.BluetoothAdapter
+import android.bluetooth.BluetoothDevice
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.Intent
+import android.content.IntentFilter
+import android.content.res.ColorStateList
+import android.graphics.Color
+import android.os.Build
 import android.os.Bundle
 import android.view.View
+import android.widget.FrameLayout
+import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.iatb.materialthemes.R
@@ -20,7 +31,35 @@ class UtilityWidgetsActivity : AppCompatActivity() {
     private lateinit var btnBack: View
     private lateinit var cardUtilityBattery: GlassBlurCardView
     private lateinit var cardUtilityComingSoon: GlassBlurCardView
+    private lateinit var flBatteryIconContainer: FrameLayout
+    private lateinit var progressBatteryIcon: com.google.android.material.progressindicator.CircularProgressIndicator
+    private lateinit var ivBatteryIcon: ImageView
+    private lateinit var tvBatteryPercentBadge: TextView
     private lateinit var tvBatteryQuickStatus: TextView
+
+    private val batteryReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context, intent: Intent) {
+            if (intent.action == "android.bluetooth.device.action.BATTERY_LEVEL_CHANGED") {
+                val device = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE, BluetoothDevice::class.java)
+                } else {
+                    @Suppress("DEPRECATION")
+                    intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                }
+                val level = intent.getIntExtra("android.bluetooth.device.extra.BATTERY_LEVEL", -1)
+                if (device != null && level in 0..100) {
+                    BatteryRepository.updateCachedBatteryLevel(device.address, level)
+                }
+            }
+
+            val forceCharging = when (intent.action) {
+                Intent.ACTION_POWER_CONNECTED -> true
+                Intent.ACTION_POWER_DISCONNECTED -> false
+                else -> null
+            }
+            updateBatteryStatus(forceCharging = forceCharging, batteryIntent = intent)
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,6 +111,10 @@ class UtilityWidgetsActivity : AppCompatActivity() {
         btnBack = findViewById(R.id.btn_back)
         cardUtilityBattery = findViewById(R.id.card_utility_battery)
         cardUtilityComingSoon = findViewById(R.id.card_utility_coming_soon)
+        flBatteryIconContainer = findViewById(R.id.fl_battery_icon_container)
+        progressBatteryIcon = findViewById(R.id.progress_battery_icon)
+        ivBatteryIcon = findViewById(R.id.iv_battery_icon)
+        tvBatteryPercentBadge = findViewById(R.id.tv_battery_percent_badge)
         tvBatteryQuickStatus = findViewById(R.id.tv_battery_quick_status)
 
         cardUtilityBattery.setTargetBackgroundView(ambientBgView)
@@ -105,22 +148,50 @@ class UtilityWidgetsActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateBatteryStatus() {
-        val devices = BatteryRepository.getBatteryDevices(this)
+    private fun updateBatteryStatus(forceCharging: Boolean? = null, batteryIntent: Intent? = null) {
+        val devices = BatteryRepository.getBatteryDevices(this, forceCharging, batteryIntent)
         val phone = devices.firstOrNull { it.type == BatteryDeviceType.PHONE }
-        val btCount = devices.count { it.type != BatteryDeviceType.PHONE }
+        val btDevices = devices.filter { it.type != BatteryDeviceType.PHONE }
 
         if (phone != null) {
+            tvBatteryPercentBadge.visibility = View.VISIBLE
+            tvBatteryPercentBadge.text = "${phone.levelPercent}%"
+
+            val exactProgress = phone.levelPercent.coerceIn(0, 100)
+            progressBatteryIcon.setProgressCompat(exactProgress, true)
+
+            val primaryColor = ContextCompat.getColor(this, R.color.md_theme_light_primary)
+            if (phone.isCharging) {
+                ivBatteryIcon.setImageResource(R.drawable.ic_bolt)
+                progressBatteryIcon.setIndicatorColor(Color.parseColor("#4CAF50"))
+                tvBatteryPercentBadge.backgroundTintList = ColorStateList.valueOf(0x334CAF50)
+                tvBatteryPercentBadge.setTextColor(Color.parseColor("#4CAF50"))
+            } else {
+                ivBatteryIcon.setImageResource(R.drawable.ic_battery_std)
+                if (phone.levelPercent <= 20) {
+                    progressBatteryIcon.setIndicatorColor(Color.parseColor("#FF5252"))
+                    tvBatteryPercentBadge.backgroundTintList = ColorStateList.valueOf(0x33FF5252)
+                    tvBatteryPercentBadge.setTextColor(Color.parseColor("#FF5252"))
+                } else {
+                    progressBatteryIcon.setIndicatorColor(primaryColor)
+                    tvBatteryPercentBadge.backgroundTintList = ColorStateList.valueOf(0x24FFFFFF)
+                    tvBatteryPercentBadge.setTextColor(Color.WHITE)
+                }
+            }
+
             val baseStatus = phone.statusText ?: if (phone.isCharging) {
                 getString(R.string.battery_status_charging)
             } else {
                 getString(R.string.battery_status_discharging)
             }
 
-            val fullStatus = if (btCount > 0) {
-                "${phone.levelPercent}% • $baseStatus • $btCount ${getString(R.string.battery_bluetooth_permission_title)}"
+            val fullStatus = if (btDevices.isNotEmpty()) {
+                val btSummary = btDevices.joinToString(" • ") { dev ->
+                    if (dev.levelPercent >= 0) "${dev.name} ${dev.levelPercent}%" else dev.name
+                }
+                "$baseStatus • $btSummary"
             } else {
-                "${phone.levelPercent}% • $baseStatus"
+                baseStatus
             }
             tvBatteryQuickStatus.text = fullStatus
         }
@@ -146,10 +217,26 @@ class UtilityWidgetsActivity : AppCompatActivity() {
         cardUtilityBattery.refreshBlur()
         cardUtilityComingSoon.refreshBlur()
         updateBatteryStatus()
+
+        val filter = IntentFilter().apply {
+            addAction(Intent.ACTION_BATTERY_CHANGED)
+            addAction(Intent.ACTION_POWER_CONNECTED)
+            addAction(Intent.ACTION_POWER_DISCONNECTED)
+            addAction(BluetoothDevice.ACTION_ACL_CONNECTED)
+            addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED)
+            addAction("android.bluetooth.device.action.BATTERY_LEVEL_CHANGED")
+            addAction(BluetoothAdapter.ACTION_STATE_CHANGED)
+        }
+        try {
+            ContextCompat.registerReceiver(this, batteryReceiver, filter, ContextCompat.RECEIVER_EXPORTED)
+        } catch (_: Exception) {
+            try { registerReceiver(batteryReceiver, filter) } catch (_: Exception) {}
+        }
     }
 
     override fun onPause() {
         super.onPause()
+        runCatching { unregisterReceiver(batteryReceiver) }
         SharedAmbientBackgroundHolder.saveSnapshot(ambientBgView.getOrbsSnapshot())
     }
 }
