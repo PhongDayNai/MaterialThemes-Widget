@@ -173,10 +173,20 @@
     <string name="preset_crimson">Crimson Velvet</string>
 
     <!-- Home Navigation Buttons -->
+    <string name="btn_home_clock_weather_title">Clock &amp; Weather</string>
+    <string name="btn_home_clock_weather_subtitle">Material You widgets with customizable shapes, dynamic colors, and style presets</string>
+    <string name="btn_home_utilities_title">Multi-purpose Widgets</string>
+    <string name="btn_home_utilities_subtitle">Explore upcoming versatile widgets for your home screen</string>
     <string name="btn_home_edit_title">Customize Widget</string>
     <string name="btn_home_edit_subtitle">Shapes, colors, grid sizes, angle &amp; opacity</string>
     <string name="btn_home_presets_title">Preset Styles</string>
     <string name="btn_home_presets_subtitle">Curated styles with 1-tap instant application</string>
+
+    <!-- Hub Screens -->
+    <string name="clock_weather_screen_title">Clock &amp; Weather</string>
+    <string name="utilities_screen_title">Multi-purpose Widgets</string>
+    <string name="utilities_coming_soon_title">Coming Soon</string>
+    <string name="utilities_coming_soon_desc">New versatile widgets are currently in development and will be added here soon.</string>
 
     <!-- Color Picker Strings -->
     <string name="theme_custom">Custom</string>

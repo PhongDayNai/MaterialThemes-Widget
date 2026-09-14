@@ -172,10 +172,20 @@
     <string name="preset_crimson">Đỏ thẫm nổi bật</string>
 
     <!-- Home Navigation Buttons -->
+    <string name="btn_home_clock_weather_title">Đồng hồ &amp; Thời tiết</string>
+    <string name="btn_home_clock_weather_subtitle">Tiện ích Material You với các kiểu dáng tùy biến, màu sắc tương thích và bộ sưu tập phong cách</string>
+    <string name="btn_home_utilities_title">Tiện ích đa năng</string>
+    <string name="btn_home_utilities_subtitle">Khám phá các tiện ích mở rộng đa năng mới cho màn hình chính</string>
     <string name="btn_home_edit_title">Tùy biến chi tiết</string>
     <string name="btn_home_edit_subtitle">Hình khối, màu sắc, kích thước, góc xoay &amp; độ mờ</string>
     <string name="btn_home_presets_title">Bộ sưu tập phong cách</string>
     <string name="btn_home_presets_subtitle">Các mẫu thiết kế phối sẵn, chọn nhanh 1 chạm</string>
+
+    <!-- Hub Screens -->
+    <string name="clock_weather_screen_title">Đồng hồ &amp; Thời tiết</string>
+    <string name="utilities_screen_title">Tiện ích đa năng</string>
+    <string name="utilities_coming_soon_title">Sắp ra mắt</string>
+    <string name="utilities_coming_soon_desc">Các tiện ích đa năng mới đang được phát triển và sẽ sớm được bổ sung tại đây.</string>
 
     <!-- Color Picker Strings -->
     <string name="theme_custom">Tùy chọn</string>

@@ -53,8 +53,8 @@ class MainActivity : AppCompatActivity() {
     private lateinit var previewContainer: FrameLayout
     private lateinit var tvFloatingStatus: TextView
 
-    private lateinit var cardHomeEdit: com.iatb.materialthemes.ui.GlassBlurCardView
-    private lateinit var cardHomePresets: com.iatb.materialthemes.ui.GlassBlurCardView
+    private lateinit var cardHomeClockWeather: com.iatb.materialthemes.ui.GlassBlurCardView
+    private lateinit var cardHomeUtilities: com.iatb.materialthemes.ui.GlassBlurCardView
     private lateinit var btnHomeSettings: View
     private lateinit var ambientBgView: com.iatb.materialthemes.ui.AmbientMeshBackgroundView
     private var isFirstResume: Boolean = true
@@ -155,12 +155,12 @@ class MainActivity : AppCompatActivity() {
                 ambientBgView.transitionToNewConstellation(
                     durationMs = duration,
                     onUpdate = {
-                        cardHomeEdit.refreshBlur()
-                        cardHomePresets.refreshBlur()
+                        cardHomeClockWeather.refreshBlur()
+                        cardHomeUtilities.refreshBlur()
                     },
                     onComplete = {
-                        cardHomeEdit.refreshBlur()
-                        cardHomePresets.refreshBlur()
+                        cardHomeClockWeather.refreshBlur()
+                        cardHomeUtilities.refreshBlur()
                         com.iatb.materialthemes.ui.SharedAmbientBackgroundHolder.saveSnapshot(ambientBgView.getOrbsSnapshot())
                     }
                 )
@@ -260,21 +260,21 @@ class MainActivity : AppCompatActivity() {
 
         previewContainer = findViewById(R.id.preview_container)
         tvFloatingStatus = findViewById(R.id.tv_floating_status)
-        cardHomeEdit = findViewById(R.id.card_home_edit)
-        cardHomePresets = findViewById(R.id.card_home_presets)
+        cardHomeClockWeather = findViewById(R.id.card_home_clock_weather)
+        cardHomeUtilities = findViewById(R.id.card_home_utilities)
 
         ambientBgView = findViewById(R.id.ambient_bg_view)
-        cardHomeEdit.setTargetBackgroundView(ambientBgView)
-        cardHomePresets.setTargetBackgroundView(ambientBgView)
+        cardHomeClockWeather.setTargetBackgroundView(ambientBgView)
+        cardHomeUtilities.setTargetBackgroundView(ambientBgView)
 
         findViewById<androidx.core.widget.NestedScrollView>(R.id.main_content_scroll).setOnScrollChangeListener { _, _, _, _, _ ->
-            cardHomeEdit.refreshBlur()
-            cardHomePresets.refreshBlur()
+            cardHomeClockWeather.refreshBlur()
+            cardHomeUtilities.refreshBlur()
         }
 
         // Fluid press scale animations
-        com.iatb.materialthemes.ui.WidgetPreviewHelper.applyPressScaleEffect(cardHomeEdit)
-        com.iatb.materialthemes.ui.WidgetPreviewHelper.applyPressScaleEffect(cardHomePresets)
+        com.iatb.materialthemes.ui.WidgetPreviewHelper.applyPressScaleEffect(cardHomeClockWeather)
+        com.iatb.materialthemes.ui.WidgetPreviewHelper.applyPressScaleEffect(cardHomeUtilities)
         btnHomeSettings = findViewById(R.id.btn_home_settings)
         com.iatb.materialthemes.ui.WidgetPreviewHelper.applyPressScaleEffect(btnHomeSettings)
     }
@@ -283,8 +283,8 @@ class MainActivity : AppCompatActivity() {
         val density = resources.displayMetrics.density
         val headerLayout = findViewById<View>(R.id.home_header_layout)
         val cardPreview = findViewById<View>(R.id.card_preview)
-        val cardEdit = findViewById<View>(R.id.card_home_edit)
-        val cardPresets = findViewById<View>(R.id.card_home_presets)
+        val cardClockWeather = findViewById<View>(R.id.card_home_clock_weather)
+        val cardUtilities = findViewById<View>(R.id.card_home_utilities)
         val contentScroll = findViewById<View>(R.id.main_content_scroll)
 
         // 1. Initial hidden and offset states
@@ -297,16 +297,16 @@ class MainActivity : AppCompatActivity() {
         cardPreview.scaleX = 0.94f
         cardPreview.scaleY = 0.94f
 
-        cardEdit.alpha = 0f
-        cardEdit.translationY = 24f * density
-        cardEdit.scaleX = 0.94f
-        cardEdit.scaleY = 0.94f
+        cardClockWeather.alpha = 0f
+        cardClockWeather.translationY = 24f * density
+        cardClockWeather.scaleX = 0.94f
+        cardClockWeather.scaleY = 0.94f
 
         // Graceful offset for bottom card to ensure it stays fully unclipped during entrance
-        cardPresets.alpha = 0f
-        cardPresets.translationY = 16f * density
-        cardPresets.scaleX = 0.95f
-        cardPresets.scaleY = 0.95f
+        cardUtilities.alpha = 0f
+        cardUtilities.translationY = 16f * density
+        cardUtilities.scaleX = 0.95f
+        cardUtilities.scaleY = 0.95f
 
         // 2. Play orchestrated staggered cascade entrance
         contentScroll.animate()
@@ -331,7 +331,7 @@ class MainActivity : AppCompatActivity() {
             .setInterpolator(DecelerateInterpolator(1.4f))
             .start()
 
-        cardEdit.animate()
+        cardClockWeather.animate()
             .alpha(1f)
             .translationY(0f)
             .scaleX(1f)
@@ -341,7 +341,7 @@ class MainActivity : AppCompatActivity() {
             .setInterpolator(DecelerateInterpolator(1.4f))
             .start()
 
-        cardPresets.animate()
+        cardUtilities.animate()
             .alpha(1f)
             .translationY(0f)
             .scaleX(1f)
@@ -353,16 +353,16 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
-        cardHomeEdit.setOnClickListener {
+        cardHomeClockWeather.setOnClickListener {
             com.iatb.materialthemes.ui.SharedAmbientBackgroundHolder.saveSnapshot(ambientBgView.getOrbsSnapshot())
-            startActivity(Intent(this, WidgetEditActivity::class.java))
+            startActivity(Intent(this, com.iatb.materialthemes.ui.ClockWeatherWidgetsActivity::class.java))
             @Suppress("DEPRECATION")
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         }
 
-        cardHomePresets.setOnClickListener {
+        cardHomeUtilities.setOnClickListener {
             com.iatb.materialthemes.ui.SharedAmbientBackgroundHolder.saveSnapshot(ambientBgView.getOrbsSnapshot())
-            startActivity(Intent(this, WidgetPresetsActivity::class.java))
+            startActivity(Intent(this, com.iatb.materialthemes.ui.UtilityWidgetsActivity::class.java))
             @Suppress("DEPRECATION")
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out)
         }

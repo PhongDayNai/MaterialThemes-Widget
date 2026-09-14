@@ -2,21 +2,21 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main_root"
+    android:id="@+id/clock_weather_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:clipChildren="false"
     android:clipToPadding="false">
 
-    <!-- Organic Multi-Point Ambient Mesh Gradient Background (Randomized small glowing orbs on dark bg) -->
+    <!-- Ambient Mesh Gradient Background -->
     <com.iatb.materialthemes.ui.AmbientMeshBackgroundView
         android:id="@+id/ambient_bg_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <!-- Foreground Content with Smooth Scrolling -->
+    <!-- Scrollable Content -->
     <androidx.core.widget.NestedScrollView
-        android:id="@+id/main_content_scroll"
+        android:id="@+id/scroll_content"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipChildren="false"
@@ -24,7 +24,7 @@
         android:scrollbars="none">
 
         <LinearLayout
-            android:id="@+id/main_content_container"
+            android:id="@+id/clock_weather_content_container"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:clipChildren="false"
@@ -35,27 +35,29 @@
             android:paddingEnd="22dp"
             android:paddingBottom="56dp">
 
-            <!-- Top App Bar Header -->
+            <!-- Top Header with Back Button -->
             <LinearLayout
-                android:id="@+id/home_header_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_vertical"
                 android:orientation="horizontal">
 
                 <FrameLayout
-                    android:layout_width="46dp"
-                    android:layout_height="46dp"
+                    android:id="@+id/btn_back"
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
                     android:background="@drawable/shape_circle"
-                    android:backgroundTint="#26FFFFFF">
+                    android:backgroundTint="#26FFFFFF"
+                    android:clickable="true"
+                    android:focusable="true">
 
                     <ImageView
-                        android:layout_width="26dp"
-                        android:layout_height="26dp"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
                         android:layout_gravity="center"
                         android:contentDescription="@null"
-                        android:src="@drawable/ic_widgets"
-                        app:tint="#38BDF8" />
+                        android:src="@drawable/ic_arrow_back"
+                        app:tint="#FFFFFF" />
                 </FrameLayout>
 
                 <LinearLayout
@@ -67,19 +69,17 @@
                     android:orientation="vertical">
 
                     <TextView
-                        android:id="@+id/tv_app_title"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:ellipsize="end"
                         android:maxLines="1"
                         android:singleLine="true"
-                        android:text="@string/dashboard_title"
+                        android:text="@string/clock_weather_screen_title"
                         android:textColor="#FFFFFF"
                         android:textSize="22sp"
                         android:textStyle="bold" />
 
                     <TextView
-                        android:id="@+id/tv_app_subtitle"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="2dp"
@@ -89,28 +89,9 @@
                         android:textColor="#B3FFFFFF"
                         android:textSize="13sp" />
                 </LinearLayout>
-
-                <!-- Settings Button -->
-                <FrameLayout
-                    android:id="@+id/btn_home_settings"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    android:background="@drawable/shape_circle"
-                    android:backgroundTint="#26FFFFFF"
-                    android:clickable="true"
-                    android:focusable="true">
-
-                    <ImageView
-                        android:layout_width="22dp"
-                        android:layout_height="22dp"
-                        android:layout_gravity="center"
-                        android:contentDescription="@string/home_settings_title"
-                        android:src="@drawable/ic_settings"
-                        app:tint="#FFFFFF" />
-                </FrameLayout>
             </LinearLayout>
 
-            <!-- Large Live Preview Stage (Tăng lên gấp rưỡi: 300dp, NO rectangular shadow artifact) -->
+            <!-- Live Preview Stage -->
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_preview"
                 android:layout_width="match_parent"
@@ -142,7 +123,7 @@
                         android:layout_height="match_parent"
                         android:padding="16dp" />
 
-                    <!-- Floating Status Badge Pill (Glassmorphic) -->
+                    <!-- Floating Status Badge Pill -->
                     <LinearLayout
                         android:id="@+id/pill_floating_status"
                         android:layout_width="wrap_content"
@@ -174,18 +155,16 @@
                             android:textColor="#FFFFFF"
                             android:textSize="12sp"
                             android:textStyle="bold"
-                            tools:text="Thanh nghiêng • 2 × 2 • Hình nền động" />
+                            tools:text="Thanh nghiêng • 2 × 2" />
                     </LinearLayout>
                 </FrameLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- TWO LARGE ACTION CARDS (TĂNG HEIGHT GẤP ĐÔI: 180DP, REAL-TIME FROSTED BLUR, ZERO RECTANGULAR ARTIFACTS) -->
-
-            <!-- Card 1: Clock & Weather (Đồng hồ & Thời tiết) -->
+            <!-- Action Card 1: Customize Widget (Tùy biến chi tiết) -->
             <com.iatb.materialthemes.ui.GlassBlurCardView
-                android:id="@+id/card_home_clock_weather"
+                android:id="@+id/card_action_edit"
                 android:layout_width="match_parent"
-                android:layout_height="180dp"
+                android:layout_height="160dp"
                 android:layout_marginBottom="16dp"
                 android:clickable="true"
                 android:focusable="true">
@@ -200,19 +179,18 @@
                     android:paddingEnd="22dp"
                     android:paddingBottom="18dp">
 
-                    <!-- Glowing squircle icon container -->
                     <FrameLayout
-                        android:layout_width="72dp"
-                        android:layout_height="72dp"
+                        android:layout_width="68dp"
+                        android:layout_height="68dp"
                         android:background="@drawable/shape_circle"
                         android:backgroundTint="?attr/colorPrimary">
 
                         <ImageView
-                            android:layout_width="38dp"
-                            android:layout_height="38dp"
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
                             android:layout_gravity="center"
                             android:contentDescription="@null"
-                            android:src="@drawable/ic_widgets"
+                            android:src="@drawable/ic_auto_awesome"
                             app:tint="?attr/colorOnPrimary" />
                     </FrameLayout>
 
@@ -227,32 +205,32 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/btn_home_clock_weather_title"
+                            android:text="@string/btn_home_edit_title"
                             android:textColor="#FFFFFF"
-                            android:textSize="20sp"
+                            android:textSize="19sp"
                             android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="6dp"
+                            android:layout_marginTop="5dp"
                             android:ellipsize="end"
                             android:lineSpacingExtra="3dp"
                             android:maxLines="3"
-                            android:text="@string/btn_home_clock_weather_subtitle"
+                            android:text="@string/btn_home_edit_subtitle"
                             android:textColor="#D0FFFFFF"
-                            android:textSize="14sp" />
+                            android:textSize="13sp" />
                     </LinearLayout>
 
                     <FrameLayout
-                        android:layout_width="44dp"
-                        android:layout_height="44dp"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
                         android:background="@drawable/shape_circle"
                         android:backgroundTint="#26FFFFFF">
 
                         <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
                             android:layout_gravity="center"
                             android:contentDescription="@null"
                             android:src="@drawable/ic_chevron_right"
@@ -261,11 +239,11 @@
                 </LinearLayout>
             </com.iatb.materialthemes.ui.GlassBlurCardView>
 
-            <!-- Card 2: Multi-purpose Widgets (Tiện ích đa năng) -->
+            <!-- Action Card 2: Preset Styles (Bộ sưu tập phong cách) -->
             <com.iatb.materialthemes.ui.GlassBlurCardView
-                android:id="@+id/card_home_utilities"
+                android:id="@+id/card_action_presets"
                 android:layout_width="match_parent"
-                android:layout_height="180dp"
+                android:layout_height="160dp"
                 android:clickable="true"
                 android:focusable="true">
 
@@ -279,19 +257,18 @@
                     android:paddingEnd="22dp"
                     android:paddingBottom="18dp">
 
-                    <!-- Glowing squircle icon container -->
                     <FrameLayout
-                        android:layout_width="72dp"
-                        android:layout_height="72dp"
+                        android:layout_width="68dp"
+                        android:layout_height="68dp"
                         android:background="@drawable/shape_circle"
                         android:backgroundTint="?attr/colorSecondary">
 
                         <ImageView
-                            android:layout_width="38dp"
-                            android:layout_height="38dp"
+                            android:layout_width="36dp"
+                            android:layout_height="36dp"
                             android:layout_gravity="center"
                             android:contentDescription="@null"
-                            android:src="@drawable/ic_dashboard_customize"
+                            android:src="@drawable/ic_collections_bookmark"
                             app:tint="?attr/colorOnSecondary" />
                     </FrameLayout>
 
@@ -306,32 +283,32 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="@string/btn_home_utilities_title"
+                            android:text="@string/btn_home_presets_title"
                             android:textColor="#FFFFFF"
-                            android:textSize="20sp"
+                            android:textSize="19sp"
                             android:textStyle="bold" />
 
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="6dp"
+                            android:layout_marginTop="5dp"
                             android:ellipsize="end"
                             android:lineSpacingExtra="3dp"
                             android:maxLines="3"
-                            android:text="@string/btn_home_utilities_subtitle"
+                            android:text="@string/btn_home_presets_subtitle"
                             android:textColor="#D0FFFFFF"
-                            android:textSize="14sp" />
+                            android:textSize="13sp" />
                     </LinearLayout>
 
                     <FrameLayout
-                        android:layout_width="44dp"
-                        android:layout_height="44dp"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
                         android:background="@drawable/shape_circle"
                         android:backgroundTint="#26FFFFFF">
 
                         <ImageView
-                            android:layout_width="24dp"
-                            android:layout_height="24dp"
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
                             android:layout_gravity="center"
                             android:contentDescription="@null"
                             android:src="@drawable/ic_chevron_right"
@@ -340,7 +317,7 @@
                 </LinearLayout>
             </com.iatb.materialthemes.ui.GlassBlurCardView>
 
-
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
+
 </FrameLayout>
