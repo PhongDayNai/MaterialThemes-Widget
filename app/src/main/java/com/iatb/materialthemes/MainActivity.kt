@@ -37,6 +37,7 @@ import com.iatb.materialthemes.render.ShapeWidgetCanvasRenderer
 import com.iatb.materialthemes.render.WidgetCanvasRenderer
 import com.iatb.materialthemes.ui.WidgetEditActivity
 import com.iatb.materialthemes.ui.WidgetPresetsActivity
+import com.iatb.materialthemes.widget.ActiveWidgetManager
 import com.iatb.materialthemes.widget.Diagonal4x3WidgetProvider
 import com.iatb.materialthemes.widget.DiagonalWideWidgetProvider
 import com.iatb.materialthemes.widget.DiagonalWidgetProvider
@@ -98,6 +99,7 @@ class MainActivity : AppCompatActivity() {
         enableEdgeToEdge()
         setContentView(R.layout.activity_main)
 
+        ActiveWidgetManager.syncActiveWidget(this)
         viewModel = ViewModelProvider(this)[MainViewModel::class.java]
         viewModel.initFromPreferences(this)
 
@@ -139,6 +141,7 @@ class MainActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
+        ActiveWidgetManager.syncActiveWidget(this)
         viewModel.initFromPreferences(this)
         updateFloatingStatusBadge()
         updatePreview(animate = false)

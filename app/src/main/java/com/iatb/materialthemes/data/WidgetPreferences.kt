@@ -168,6 +168,46 @@ object WidgetPreferences {
         prefs.edit().putLong(KEY_LAST_ANIM_TIMESTAMP, timestamp).apply()
     }
 
+    private const val KEY_LAST_ACTIVE_WIDGET_ID = "last_active_widget_id"
+    private const val KEY_HAS_ACTIVE_HOME_SCREEN_WIDGET = "has_active_home_screen_widget"
+
+    fun getLastActiveWidgetId(context: Context): Int {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        return prefs.getInt(KEY_LAST_ACTIVE_WIDGET_ID, android.appwidget.AppWidgetManager.INVALID_APPWIDGET_ID)
+    }
+
+    fun setLastActiveWidgetId(context: Context, id: Int) {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putInt(KEY_LAST_ACTIVE_WIDGET_ID, id).apply()
+    }
+
+    fun getWidgetSavedSize(context: Context, appWidgetId: Int): WidgetSize? {
+        if (appWidgetId == android.appwidget.AppWidgetManager.INVALID_APPWIDGET_ID) return null
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val name = prefs.getString("widget_size_$appWidgetId", null) ?: return null
+        return try {
+            WidgetSize.valueOf(name)
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    fun setWidgetSavedSize(context: Context, appWidgetId: Int, size: WidgetSize) {
+        if (appWidgetId == android.appwidget.AppWidgetManager.INVALID_APPWIDGET_ID) return
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putString("widget_size_$appWidgetId", size.name).apply()
+    }
+
+    fun hasActiveHomeScreenWidget(context: Context): Boolean {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        return prefs.getBoolean(KEY_HAS_ACTIVE_HOME_SCREEN_WIDGET, false)
+    }
+
+    fun setHasActiveHomeScreenWidget(context: Context, has: Boolean) {
+        val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        prefs.edit().putBoolean(KEY_HAS_ACTIVE_HOME_SCREEN_WIDGET, has).apply()
+    }
+
     private const val KEY_APPLIED_PRESET_ID = "applied_preset_id"
 
     fun getAppliedPresetId(context: Context): String? {
@@ -235,15 +275,16 @@ object WidgetPreferences {
         palette: ColorPalette,
         transparency: Int,
         angle: Float,
-        category: WidgetCategory,
+        category: WidgetCategory = WidgetCategory.DIAGONAL,
+        contentMode: WidgetContentMode = WidgetContentMode.WEATHER,
         excludeId: String? = null
     ): QuickPreset? {
         val presets = getQuickPresets(context)
         return presets.firstOrNull { preset ->
             (excludeId == null || preset.id != excludeId) &&
-            preset.category == category &&
             preset.palette == palette &&
             preset.transparency == transparency &&
+            preset.contentMode == contentMode &&
             (if (category == WidgetCategory.DIAGONAL) kotlin.math.abs(preset.rotationAngle - angle) < 0.5f else true)
         }
     }
@@ -264,10 +305,10 @@ object WidgetPreferences {
         title: String,
         palette: ColorPalette,
         transparency: Int,
-        angle: Float,
+        angle: Float = -45f,
+        contentMode: WidgetContentMode = WidgetContentMode.WEATHER,
         category: WidgetCategory = WidgetCategory.DIAGONAL,
-        size: WidgetSize = WidgetSize.SIZE_2X2,
-        contentMode: WidgetContentMode = WidgetContentMode.WEATHER
+        size: WidgetSize = WidgetSize.SIZE_2X2
     ): QuickPreset {
         val current = getQuickPresets(context).toMutableList()
         val newPreset = QuickPreset(
@@ -293,10 +334,10 @@ object WidgetPreferences {
         title: String,
         palette: ColorPalette,
         transparency: Int,
-        angle: Float,
+        angle: Float = -45f,
+        contentMode: WidgetContentMode = WidgetContentMode.WEATHER,
         category: WidgetCategory = WidgetCategory.DIAGONAL,
-        size: WidgetSize = WidgetSize.SIZE_2X2,
-        contentMode: WidgetContentMode = WidgetContentMode.WEATHER
+        size: WidgetSize = WidgetSize.SIZE_2X2
     ) {
         val current = getQuickPresets(context).map { preset ->
             if (preset.id == id) {
@@ -305,8 +346,6 @@ object WidgetPreferences {
                     palette = palette,
                     transparency = transparency,
                     rotationAngle = angle,
-                    category = category,
-                    size = size,
                     contentMode = contentMode
                 )
             } else {

@@ -115,6 +115,10 @@ class WidgetConfigureActivity : AppCompatActivity() {
             WidgetCategory.DIAGONAL -> getString(R.string.category_diagonal)
         }
         tvTitle.text = categoryName
+
+        if (appWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+            ActiveWidgetManager.recordActiveWidget(this, appWidgetId, currentCategory, currentSize)
+        }
     }
 
     private fun setupQuickPresetsRecyclerView() {
@@ -220,6 +224,8 @@ class WidgetConfigureActivity : AppCompatActivity() {
     private fun applyPresetInstantly(preset: QuickPreset) {
         WidgetPreferences.setColorPalette(this, preset.palette)
         WidgetPreferences.setTransparency(this, preset.transparency)
+        WidgetPreferences.setContentMode(this, preset.contentMode)
+        WidgetPreferences.setAppliedPresetId(this, preset.id)
         if (currentCategory == WidgetCategory.DIAGONAL) {
             WidgetPreferences.setRotationAngle(this, preset.rotationAngle)
         }
@@ -231,8 +237,10 @@ class WidgetConfigureActivity : AppCompatActivity() {
         Diagonal4x3WidgetProvider.updateAllWidgets4x3(this)
         OrganicWidgetProvider.updateAllWidgets(this)
         OrganicWideWidgetProvider.updateAllWidgets(this)
+        Organic4x3WidgetProvider.updateAllWidgets(this)
         ScallopWidgetProvider.updateAllWidgets(this)
         ScallopWideWidgetProvider.updateAllWidgets(this)
+        Scallop4x3WidgetProvider.updateAllWidgets(this)
 
         // Cập nhật Live Preview trên màn hình ngay lập tức
         updateLivePreviewImage()
@@ -290,6 +298,7 @@ class WidgetConfigureActivity : AppCompatActivity() {
             val currentPalette = WidgetPreferences.getColorPalette(this@WidgetConfigureActivity)
             val currentTransparency = WidgetPreferences.getTransparency(this@WidgetConfigureActivity)
             val currentAngle = WidgetPreferences.getRotationAngle(this@WidgetConfigureActivity)
+            val currentContentMode = WidgetPreferences.getContentMode(this@WidgetConfigureActivity)
 
             holder.tvName.text = preset.getLocalizedTitle(this@WidgetConfigureActivity)
             val paletteName = getString(preset.palette.labelResId)
@@ -323,6 +332,7 @@ class WidgetConfigureActivity : AppCompatActivity() {
 
             val isSelected = (preset.palette == currentPalette) &&
                     (preset.transparency == currentTransparency) &&
+                    (preset.contentMode == currentContentMode) &&
                     (currentCategory != WidgetCategory.DIAGONAL || preset.rotationAngle.toInt() == currentAngle.toInt())
 
             val primaryColor = getThemeColor(androidx.appcompat.R.attr.colorPrimary, 0xFF006874.toInt())

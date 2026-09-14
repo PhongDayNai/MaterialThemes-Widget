@@ -13,6 +13,17 @@ class WidgetClickRouterActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         try {
+            val widgetId = intent.getIntExtra(EXTRA_APPWIDGET_ID, android.appwidget.AppWidgetManager.INVALID_APPWIDGET_ID)
+            val catName = intent.getStringExtra(EXTRA_CATEGORY)
+            val sizeName = intent.getStringExtra(EXTRA_SIZE)
+            if (catName != null && sizeName != null) {
+                try {
+                    val cat = com.iatb.materialthemes.WidgetCategory.valueOf(catName)
+                    val sz = com.iatb.materialthemes.WidgetSize.valueOf(sizeName)
+                    ActiveWidgetManager.recordActiveWidget(this, widgetId, cat, sz)
+                } catch (_: Exception) {}
+            }
+
             val target = intent.getStringExtra(EXTRA_TARGET) ?: TARGET_CLOCK
             val location = intent.getStringExtra(EXTRA_LOCATION).orEmpty()
 
@@ -133,6 +144,9 @@ class WidgetClickRouterActivity : Activity() {
 
         const val EXTRA_TARGET = "extra_target"
         const val EXTRA_LOCATION = "extra_location"
+        const val EXTRA_APPWIDGET_ID = "extra_appwidget_id"
+        const val EXTRA_CATEGORY = "extra_category"
+        const val EXTRA_SIZE = "extra_size"
 
         const val TARGET_CLOCK = "target_clock"
         const val TARGET_WEATHER = "target_weather"
@@ -142,17 +156,28 @@ class WidgetClickRouterActivity : Activity() {
             context: Context,
             target: String,
             locationName: String = "",
-            requestCode: Int = 0
+            requestCode: Int = 0,
+            appWidgetId: Int = android.appwidget.AppWidgetManager.INVALID_APPWIDGET_ID,
+            category: com.iatb.materialthemes.WidgetCategory? = null,
+            size: com.iatb.materialthemes.WidgetSize? = null
         ): PendingIntent {
             val intent = Intent(context, WidgetClickRouterActivity::class.java).apply {
-                action = "$ACTION_CLICK_ZONE.$target"
+                action = "$ACTION_CLICK_ZONE.$target.$appWidgetId"
                 putExtra(EXTRA_TARGET, target)
                 putExtra(EXTRA_LOCATION, locationName)
+                putExtra(EXTRA_APPWIDGET_ID, appWidgetId)
+                if (category != null) putExtra(EXTRA_CATEGORY, category.name)
+                if (size != null) putExtra(EXTRA_SIZE, size.name)
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            }
+            val finalRequestCode = if (appWidgetId != android.appwidget.AppWidgetManager.INVALID_APPWIDGET_ID) {
+                appWidgetId * 10 + (requestCode % 10)
+            } else {
+                requestCode
             }
             return PendingIntent.getActivity(
                 context,
-                requestCode,
+                finalRequestCode,
                 intent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )

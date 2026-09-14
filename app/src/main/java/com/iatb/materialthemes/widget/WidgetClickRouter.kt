@@ -23,25 +23,35 @@ object WidgetClickRouter {
         category: WidgetCategory,
         size: WidgetSize,
         mode: WidgetContentMode = WidgetContentMode.COMBO,
-        locationName: String = ""
+        locationName: String = "",
+        appWidgetId: Int = android.appwidget.AppWidgetManager.INVALID_APPWIDGET_ID
     ) {
         val clockIntent = WidgetClickRouterActivity.createPendingIntent(
-            context,
-            WidgetClickRouterActivity.TARGET_CLOCK,
-            locationName,
-            requestCode = 101
+            context = context,
+            target = WidgetClickRouterActivity.TARGET_CLOCK,
+            locationName = locationName,
+            requestCode = 101,
+            appWidgetId = appWidgetId,
+            category = category,
+            size = size
         )
         val weatherIntent = WidgetClickRouterActivity.createPendingIntent(
-            context,
-            WidgetClickRouterActivity.TARGET_WEATHER,
-            locationName,
-            requestCode = 102
+            context = context,
+            target = WidgetClickRouterActivity.TARGET_WEATHER,
+            locationName = locationName,
+            requestCode = 102,
+            appWidgetId = appWidgetId,
+            category = category,
+            size = size
         )
         val locationIntent = WidgetClickRouterActivity.createPendingIntent(
-            context,
-            WidgetClickRouterActivity.TARGET_LOCATION,
-            locationName,
-            requestCode = 103
+            context = context,
+            target = WidgetClickRouterActivity.TARGET_LOCATION,
+            locationName = locationName,
+            requestCode = 103,
+            appWidgetId = appWidgetId,
+            category = category,
+            size = size
         )
 
         when (size) {
