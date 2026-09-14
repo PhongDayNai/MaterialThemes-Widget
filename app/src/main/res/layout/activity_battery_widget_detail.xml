@@ -633,6 +633,84 @@
                 </LinearLayout>
             </com.iatb.materialthemes.ui.GlassBlurCardView>
 
+            <!-- BATTERY PREDICTION & USAGE STATS CARD -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:layout_marginBottom="10dp"
+                android:letterSpacing="0.04"
+                android:text="@string/battery_prediction_section_title"
+                android:textColor="#E0FFFFFF"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <com.iatb.materialthemes.ui.GlassBlurCardView
+                android:id="@+id/card_battery_prediction"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:padding="16dp">
+
+                    <FrameLayout
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:background="@drawable/shape_circle"
+                        android:backgroundTint="#26FFFFFF">
+
+                        <ImageView
+                            android:layout_width="22dp"
+                            android:layout_height="22dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_auto_awesome"
+                            app:tint="#FFFFFF" />
+                    </FrameLayout>
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="14dp"
+                        android:layout_marginEnd="10dp"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tv_prediction_status_title"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/battery_prediction_title"
+                            android:textColor="#FFFFFF"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/tv_prediction_status_desc"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="3dp"
+                            android:text="@string/battery_prediction_desc"
+                            android:textColor="#B3FFFFFF"
+                            android:textSize="12sp" />
+                    </LinearLayout>
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_grant_prediction"
+                        style="@style/Widget.Material3.Button.TonalButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/battery_prediction_grant_btn"
+                        android:textSize="12sp"
+                        android:visibility="visible" />
+                </LinearLayout>
+            </com.iatb.materialthemes.ui.GlassBlurCardView>
+
             <!-- PIN WIDGET ACTION BUTTON -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btn_pin_battery_widget"

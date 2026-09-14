@@ -2,7 +2,9 @@ package com.iatb.materialthemes.ui
 
 import android.Manifest
 import android.appwidget.AppWidgetManager
+import android.bluetooth.BluetoothDevice
 import android.content.ComponentName
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
@@ -76,6 +78,10 @@ class BatteryWidgetDetailActivity : AppCompatActivity() {
     private lateinit var tvBluetoothStatusTitle: TextView
     private lateinit var tvBluetoothStatusDesc: TextView
     private lateinit var btnGrantBluetooth: MaterialButton
+    private lateinit var cardBatteryPrediction: GlassBlurCardView
+    private lateinit var tvPredictionStatusTitle: TextView
+    private lateinit var tvPredictionStatusDesc: TextView
+    private lateinit var btnGrantPrediction: MaterialButton
     private lateinit var btnPinBatteryWidget: MaterialButton
 
     private val bluetoothPermissionLauncher = registerForActivityResult(
@@ -88,7 +94,26 @@ class BatteryWidgetDetailActivity : AppCompatActivity() {
 
     private val batteryReceiver = object : android.content.BroadcastReceiver() {
         override fun onReceive(context: android.content.Context, intent: android.content.Intent) {
-            updatePreview()
+            if (intent.action == "android.bluetooth.device.action.BATTERY_LEVEL_CHANGED") {
+                val device = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE, BluetoothDevice::class.java)
+                } else {
+                    @Suppress("DEPRECATION")
+                    intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE)
+                }
+                val level = intent.getIntExtra("android.bluetooth.device.extra.BATTERY_LEVEL", -1)
+                if (device != null && level in 0..100) {
+                    BatteryRepository.updateCachedBatteryLevel(device.address, level)
+                }
+            }
+
+            val forceCharging = when (intent.action) {
+                Intent.ACTION_POWER_CONNECTED -> true
+                Intent.ACTION_POWER_DISCONNECTED -> false
+                else -> null
+            }
+            updatePreview(forceCharging = forceCharging, batteryIntent = intent)
+            updateBluetoothCard()
         }
     }
 
@@ -104,6 +129,7 @@ class BatteryWidgetDetailActivity : AppCompatActivity() {
         setupListeners()
         updateSyncAndPaletteUi()
         updateBluetoothCard()
+        updatePredictionCard()
         updatePreview()
     }
 
@@ -119,11 +145,13 @@ class BatteryWidgetDetailActivity : AppCompatActivity() {
                     cardPreview.refreshBlur()
                     cardColorConfig.refreshBlur()
                     cardBluetooth.refreshBlur()
+                    cardBatteryPrediction.refreshBlur()
                 },
                 onComplete = {
                     cardPreview.refreshBlur()
                     cardColorConfig.refreshBlur()
                     cardBluetooth.refreshBlur()
+                    cardBatteryPrediction.refreshBlur()
                     SharedAmbientBackgroundHolder.saveSnapshot(ambientBgView.getOrbsSnapshot())
                 }
             )
@@ -149,16 +177,23 @@ class BatteryWidgetDetailActivity : AppCompatActivity() {
         cardPreview = findViewById(R.id.card_preview)
         cardColorConfig = findViewById(R.id.card_color_config)
         cardBluetooth = findViewById(R.id.card_bluetooth)
+        cardBatteryPrediction = findViewById(R.id.card_battery_prediction)
 
         cardPreview.setTargetBackgroundView(ambientBgView)
         cardColorConfig.setTargetBackgroundView(ambientBgView)
         cardBluetooth.setTargetBackgroundView(ambientBgView)
+        cardBatteryPrediction.setTargetBackgroundView(ambientBgView)
 
         findViewById<androidx.core.widget.NestedScrollView>(R.id.scroll_content).setOnScrollChangeListener { _, _, _, _, _ ->
             cardPreview.refreshBlur()
             cardColorConfig.refreshBlur()
             cardBluetooth.refreshBlur()
+            cardBatteryPrediction.refreshBlur()
         }
+
+        tvPredictionStatusTitle = findViewById(R.id.tv_prediction_status_title)
+        tvPredictionStatusDesc = findViewById(R.id.tv_prediction_status_desc)
+        btnGrantPrediction = findViewById(R.id.btn_grant_prediction)
 
         containerBatteryPreview = findViewById(R.id.container_battery_preview)
         switchFollowClockWeather = findViewById(R.id.switch_follow_clock_weather)
@@ -282,6 +317,10 @@ class BatteryWidgetDetailActivity : AppCompatActivity() {
             }
         }
 
+        btnGrantPrediction.setOnClickListener {
+            showBatteryPredictionDialog()
+        }
+
         btnPinBatteryWidget.setOnClickListener {
             pinBatteryWidget()
         }
@@ -372,7 +411,40 @@ class BatteryWidgetDetailActivity : AppCompatActivity() {
         }
     }
 
-    private fun updatePreview() {
+    private fun updatePredictionCard() {
+        val hasPermission = BatteryRepository.hasBatteryStatsPermission(this)
+        if (hasPermission) {
+            btnGrantPrediction.visibility = View.GONE
+            tvPredictionStatusTitle.text = getString(R.string.battery_prediction_granted_title)
+            tvPredictionStatusDesc.text = getString(R.string.battery_prediction_granted_desc)
+        } else {
+            btnGrantPrediction.visibility = View.VISIBLE
+            tvPredictionStatusTitle.text = getString(R.string.battery_prediction_title)
+            tvPredictionStatusDesc.text = getString(R.string.battery_prediction_desc)
+        }
+    }
+
+    private fun showBatteryPredictionDialog() {
+        com.google.android.material.dialog.MaterialAlertDialogBuilder(this)
+            .setTitle(R.string.battery_prediction_dialog_title)
+            .setMessage(getString(R.string.battery_prediction_dialog_message, packageName))
+            .setPositiveButton(R.string.battery_prediction_dialog_btn_settings) { _, _ ->
+                val intent = Intent(android.provider.Settings.ACTION_USAGE_ACCESS_SETTINGS).apply {
+                    data = android.net.Uri.parse("package:$packageName")
+                }
+                try {
+                    startActivity(intent)
+                } catch (_: Exception) {
+                    try {
+                        startActivity(Intent(android.provider.Settings.ACTION_USAGE_ACCESS_SETTINGS))
+                    } catch (_: Exception) {}
+                }
+            }
+            .setNegativeButton(R.string.battery_prediction_dialog_btn_close, null)
+            .show()
+    }
+
+    private fun updatePreview(forceCharging: Boolean? = null, batteryIntent: Intent? = null) {
         val appWidgetManager = AppWidgetManager.getInstance(this)
         val widgetIds = appWidgetManager.getAppWidgetIds(ComponentName(this, BatteryWidgetProvider::class.java))
 
@@ -390,7 +462,7 @@ class BatteryWidgetDetailActivity : AppCompatActivity() {
         val minW = options?.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0) ?: 0
         val minH = options?.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0) ?: 0
 
-        val devices = BatteryRepository.getBatteryDevices(this)
+        val devices = BatteryRepository.getBatteryDevices(this, forceCharging, batteryIntent)
         val palette = BatteryPreferences.resolveColors(this)
         val density = resources.displayMetrics.density
 
@@ -475,7 +547,9 @@ class BatteryWidgetDetailActivity : AppCompatActivity() {
         cardPreview.refreshBlur()
         cardColorConfig.refreshBlur()
         cardBluetooth.refreshBlur()
+        cardBatteryPrediction.refreshBlur()
         updateBluetoothCard()
+        updatePredictionCard()
         updateSyncAndPaletteUi()
         updatePreview()
 
@@ -486,6 +560,7 @@ class BatteryWidgetDetailActivity : AppCompatActivity() {
             addAction(android.bluetooth.BluetoothDevice.ACTION_ACL_CONNECTED)
             addAction(android.bluetooth.BluetoothDevice.ACTION_ACL_DISCONNECTED)
             addAction("android.bluetooth.device.action.BATTERY_LEVEL_CHANGED")
+            addAction(android.bluetooth.BluetoothAdapter.ACTION_STATE_CHANGED)
         }
         try {
             ContextCompat.registerReceiver(this, batteryReceiver, filter, ContextCompat.RECEIVER_EXPORTED)
