@@ -79,32 +79,58 @@ object DayProgressPreferences {
         }
     }
 
-    fun resolveColors(context: Context): ResolvedPaletteColors {
-        val palette = getEffectivePalette(context)
-        val customColor = getEffectiveCustomColor(context)
-        val transparency = getEffectiveTransparency(context)
+    data class DayProgressThemeColors(
+        val bgColor: Int,
+        val pillBgColor: Int,
+        val chipBgColor: Int,
+        val textColor: Int,
+        val subTextColor: Int,
+        val progressStartColor: Int,
+        val progressEndColor: Int,
+        val accentColor: Int
+    )
 
-        val rawColors = when (palette) {
-            ColorPalette.DYNAMIC -> DynamicThemeExtractor.getDynamicPalette(context)
-            ColorPalette.CUSTOM -> DynamicThemeExtractor.createHarmoniousTonesFromColor(customColor)
-            else -> ResolvedPaletteColors(
-                bgColor = palette.bgColor,
-                secondaryBgColor = palette.secondaryBgColor,
-                tertiaryBgColor = palette.tertiaryBgColor,
-                textColor = palette.textColor
+    fun resolveDayProgressColors(
+        context: Context,
+        sunriseMillis: Long = 0L,
+        sunsetMillis: Long = 0L
+    ): DayProgressThemeColors {
+        val transparency = getTransparency(context)
+        val alphaInt = ((transparency.coerceIn(0, 100) / 100f) * 255).toInt()
+
+        fun applyAlpha(color: Int): Int {
+            return Color.argb(
+                ((Color.alpha(color) / 255f) * (alphaInt / 255f) * 255).toInt().coerceIn(0, 255),
+                Color.red(color),
+                Color.green(color),
+                Color.blue(color)
             )
         }
 
-        val alphaInt = ((transparency.coerceIn(0, 100) / 100f) * 255).toInt()
-        fun applyBgAlpha(color: Int): Int {
-            return Color.argb(alphaInt, Color.red(color), Color.green(color), Color.blue(color))
-        }
+        val seasonal = SeasonTimePaletteResolver.resolveSeasonalPalette(
+            nowMillis = System.currentTimeMillis(),
+            sunriseMillis = sunriseMillis,
+            sunsetMillis = sunsetMillis
+        )
+        return DayProgressThemeColors(
+            bgColor = applyAlpha(seasonal.cardBgColor),
+            pillBgColor = applyAlpha(seasonal.pillBgColor),
+            chipBgColor = applyAlpha(seasonal.chipBgColor),
+            textColor = seasonal.textColor,
+            subTextColor = seasonal.subTextColor,
+            progressStartColor = seasonal.progressStartColor,
+            progressEndColor = seasonal.progressEndColor,
+            accentColor = seasonal.accentColor
+        )
+    }
 
+    fun resolveColors(context: Context): ResolvedPaletteColors {
+        val themed = resolveDayProgressColors(context)
         return ResolvedPaletteColors(
-            bgColor = applyBgAlpha(rawColors.bgColor),
-            secondaryBgColor = applyBgAlpha(rawColors.secondaryBgColor),
-            tertiaryBgColor = applyBgAlpha(rawColors.tertiaryBgColor),
-            textColor = rawColors.textColor
+            bgColor = themed.bgColor,
+            secondaryBgColor = themed.pillBgColor,
+            tertiaryBgColor = themed.chipBgColor,
+            textColor = themed.textColor
         )
     }
 }

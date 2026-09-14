@@ -1,0 +1,29 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+  <!-- Horizon line -->
+  <path
+      android:strokeColor="#FFFFFF"
+      android:strokeWidth="1.8"
+      android:strokeLineCap="round"
+      android:pathData="M3,18 L21,18" />
+  <!-- Rising Sun Half Disc -->
+  <path
+      android:fillColor="#FFA726"
+      android:pathData="M12,18 A5,5 0 0,1 7,18 Z" />
+  <!-- Rising Rays -->
+  <path
+      android:strokeColor="#FFA726"
+      android:strokeWidth="1.8"
+      android:strokeLineCap="round"
+      android:pathData="M12,6 L12,9 M6.34,8.34 L8.46,10.46 M17.66,8.34 L15.54,10.46 M4,14 L7,14 M20,14 L17,14" />
+  <!-- Up Arrow in center -->
+  <path
+      android:strokeColor="#FFFFFF"
+      android:strokeWidth="1.6"
+      android:strokeLineCap="round"
+      android:strokeLineJoin="round"
+      android:pathData="M12,12 L12,16 M9.5,14 L12,11.5 L14.5,14" />
+</vector>
