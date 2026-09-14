@@ -319,12 +319,10 @@
     <string name="battery_bluetooth_grant_btn">Grant Permission</string>
     <string name="battery_bluetooth_granted">Bluetooth Connected</string>
     <string name="battery_bluetooth_no_devices">No accessories connected</string>
-    <string name="battery_preview_title">Live Preview</string>
+    <string name="battery_preview_title">Preview</string>
     <string name="battery_pin_widget">Add Widget to Home Screen</string>
     <string name="battery_detail_screen_title">Battery Widget Settings</string>
     <string name="battery_detail_screen_subtitle">Customize appearance, colors, and connected devices</string>
     <string name="utilities_section_widgets">Available Utilities</string>
     <string name="badge_coming_soon">Coming Soon</string>
-    <string name="preview_size_x1">Compact (x1)</string>
-    <string name="preview_size_x2">Expanded (x2)</string>
 </resources>

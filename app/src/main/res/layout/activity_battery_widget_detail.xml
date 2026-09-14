@@ -90,68 +90,17 @@
                 </LinearLayout>
             </LinearLayout>
 
-            <!-- LIVE PREVIEW HEADER & SIZE SELECTOR -->
-            <LinearLayout
+            <!-- LIVE PREVIEW HEADER -->
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
                 android:layout_marginBottom="10dp"
-                android:gravity="center_vertical"
-                android:orientation="horizontal">
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:letterSpacing="0.04"
-                    android:text="@string/battery_preview_title"
-                    android:textColor="#E0FFFFFF"
-                    android:textSize="14sp"
-                    android:textStyle="bold" />
-
-                <!-- Size Toggle Pills -->
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="32dp"
-                    android:background="@drawable/shape_drag_handle"
-                    android:backgroundTint="#24FFFFFF"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal"
-                    android:padding="2dp">
-
-                    <TextView
-                        android:id="@+id/btn_preview_x1"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:background="@drawable/shape_drag_handle"
-                        android:backgroundTint="#33FFFFFF"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:gravity="center"
-                        android:paddingStart="12dp"
-                        android:paddingEnd="12dp"
-                        android:text="@string/preview_size_x1"
-                        android:textColor="#FFFFFF"
-                        android:textSize="11sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:id="@+id/btn_preview_x2"
-                        android:layout_width="wrap_content"
-                        android:layout_height="match_parent"
-                        android:background="@drawable/shape_drag_handle"
-                        android:backgroundTint="@android:color/transparent"
-                        android:clickable="true"
-                        android:focusable="true"
-                        android:gravity="center"
-                        android:paddingStart="12dp"
-                        android:paddingEnd="12dp"
-                        android:text="@string/preview_size_x2"
-                        android:textColor="#80FFFFFF"
-                        android:textSize="11sp"
-                        android:textStyle="bold" />
-                </LinearLayout>
-            </LinearLayout>
+                android:letterSpacing="0.04"
+                android:text="@string/battery_preview_title"
+                android:textColor="#E0FFFFFF"
+                android:textSize="14sp"
+                android:textStyle="bold" />
 
             <com.iatb.materialthemes.ui.GlassBlurCardView
                 android:id="@+id/card_preview"

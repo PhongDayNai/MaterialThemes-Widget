@@ -318,12 +318,10 @@
     <string name="battery_bluetooth_grant_btn">Cấp quyền</string>
     <string name="battery_bluetooth_granted">Đã kết nối Bluetooth</string>
     <string name="battery_bluetooth_no_devices">Chưa có phụ kiện kết nối</string>
-    <string name="battery_preview_title">Xem trước trực tiếp</string>
+    <string name="battery_preview_title">Xem trước</string>
     <string name="battery_pin_widget">Thêm widget vào màn hình chính</string>
-    <string name="battery_detail_screen_title">Cấu hình Widget Pin</string>
+    <string name="battery_detail_screen_title">Cấu hình tiện ích pin</string>
     <string name="battery_detail_screen_subtitle">Tùy biến giao diện, màu sắc và thiết bị kết nối</string>
     <string name="utilities_section_widgets">Danh sách tiện ích</string>
     <string name="badge_coming_soon">Sắp có</string>
-    <string name="preview_size_x1">Gọn (x1)</string>
-    <string name="preview_size_x2">Mở rộng (x2)</string>
 </resources>

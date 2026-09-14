@@ -8,9 +8,13 @@ import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
 import android.os.Build
 import android.os.Bundle
+import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.RemoteViews
 import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
@@ -43,10 +47,6 @@ class BatteryWidgetDetailActivity : AppCompatActivity() {
     private lateinit var switchFollowClockWeather: MaterialSwitch
     private lateinit var tvSyncStatusDesc: TextView
     private lateinit var layoutPalettePicker: LinearLayout
-
-    private lateinit var btnPreviewX1: TextView
-    private lateinit var btnPreviewX2: TextView
-    private var isPreviewX1: Boolean = false
 
     private lateinit var swatchDynamic: MaterialCardView
     private lateinit var swatchCustom: MaterialCardView
@@ -160,9 +160,6 @@ class BatteryWidgetDetailActivity : AppCompatActivity() {
             cardBluetooth.refreshBlur()
         }
 
-        btnPreviewX1 = findViewById(R.id.btn_preview_x1)
-        btnPreviewX2 = findViewById(R.id.btn_preview_x2)
-
         containerBatteryPreview = findViewById(R.id.container_battery_preview)
         switchFollowClockWeather = findViewById(R.id.switch_follow_clock_weather)
         tvSyncStatusDesc = findViewById(R.id.tv_sync_status_desc)
@@ -237,25 +234,9 @@ class BatteryWidgetDetailActivity : AppCompatActivity() {
             updatePreview()
         }
 
-        btnPreviewX1.setOnClickListener {
-            if (!isPreviewX1) {
-                isPreviewX1 = true
-                updatePreviewSizeToggles()
-                updatePreview()
-            }
-        }
-
-        btnPreviewX2.setOnClickListener {
-            if (isPreviewX1) {
-                isPreviewX1 = false
-                updatePreviewSizeToggles()
-                updatePreview()
-            }
-        }
-
         switchFollowClockWeather.setOnCheckedChangeListener { _, isChecked ->
             BatteryPreferences.setFollowClockWeather(this, isChecked)
-            updateSyncAndPaletteUi()
+            updateSyncAndPaletteUi(animate = true)
             updatePreview()
             BatteryWidgetProvider.updateAllWidgets(this)
         }
@@ -298,8 +279,6 @@ class BatteryWidgetDetailActivity : AppCompatActivity() {
         btnGrantBluetooth.setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 bluetoothPermissionLauncher.launch(Manifest.permission.BLUETOOTH_CONNECT)
-            } else {
-                bluetoothPermissionLauncher.launch(Manifest.permission.BLUETOOTH)
             }
         }
 
@@ -308,35 +287,44 @@ class BatteryWidgetDetailActivity : AppCompatActivity() {
         }
     }
 
-    private fun updatePreviewSizeToggles() {
-        if (isPreviewX1) {
-            btnPreviewX1.setBackgroundResource(R.drawable.shape_drag_handle)
-            btnPreviewX1.backgroundTintList = ContextCompat.getColorStateList(this, android.R.color.white)?.withAlpha(50)
-            btnPreviewX1.setTextColor(Color.WHITE)
 
-            btnPreviewX2.background = null
-            btnPreviewX2.setTextColor(Color.argb(130, 255, 255, 255))
-        } else {
-            btnPreviewX2.setBackgroundResource(R.drawable.shape_drag_handle)
-            btnPreviewX2.backgroundTintList = ContextCompat.getColorStateList(this, android.R.color.white)?.withAlpha(50)
-            btnPreviewX2.setTextColor(Color.WHITE)
-
-            btnPreviewX1.background = null
-            btnPreviewX1.setTextColor(Color.argb(130, 255, 255, 255))
-        }
-    }
 
     private fun selectPalette(palette: ColorPalette) {
         BatteryPreferences.setColorPalette(this, palette)
-        updateSyncAndPaletteUi()
+        updateSyncAndPaletteUi(animate = false)
         updatePreview()
         BatteryWidgetProvider.updateAllWidgets(this)
     }
 
-    private fun updateSyncAndPaletteUi() {
+    private fun updateSyncAndPaletteUi(animate: Boolean = false) {
         val isFollow = BatteryPreferences.isFollowClockWeather(this)
         switchFollowClockWeather.isChecked = isFollow
-        layoutPalettePicker.visibility = if (isFollow) View.GONE else View.VISIBLE
+
+        val targetVisibility = if (isFollow) View.GONE else View.VISIBLE
+        if (layoutPalettePicker.visibility != targetVisibility) {
+            if (animate) {
+                val container = findViewById<ViewGroup>(R.id.battery_detail_content_container)
+                val transition = android.transition.TransitionSet().apply {
+                    ordering = android.transition.TransitionSet.ORDERING_TOGETHER
+                    addTransition(android.transition.ChangeBounds())
+                    addTransition(android.transition.Fade())
+                    duration = 280L
+                    interpolator = android.view.animation.DecelerateInterpolator(1.4f)
+                    addListener(object : android.transition.Transition.TransitionListener {
+                        override fun onTransitionStart(transition: android.transition.Transition?) {}
+                        override fun onTransitionEnd(transition: android.transition.Transition?) {
+                            cardColorConfig.refreshBlur()
+                            cardBluetooth.refreshBlur()
+                        }
+                        override fun onTransitionCancel(transition: android.transition.Transition?) {}
+                        override fun onTransitionPause(transition: android.transition.Transition?) {}
+                        override fun onTransitionResume(transition: android.transition.Transition?) {}
+                    })
+                }
+                android.transition.TransitionManager.beginDelayedTransition(container, transition)
+            }
+            layoutPalettePicker.visibility = targetVisibility
+        }
 
         if (isFollow) {
             val syncedTrans = WidgetPreferences.getTransparency(this)
@@ -385,20 +373,60 @@ class BatteryWidgetDetailActivity : AppCompatActivity() {
     }
 
     private fun updatePreview() {
+        val appWidgetManager = AppWidgetManager.getInstance(this)
+        val widgetIds = appWidgetManager.getAppWidgetIds(ComponentName(this, BatteryWidgetProvider::class.java))
+
+        val passedId = intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
+        val activeWidgetId = if (passedId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+            passedId
+        } else {
+            widgetIds.lastOrNull() ?: AppWidgetManager.INVALID_APPWIDGET_ID
+        }
+
+        val options = if (activeWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+            appWidgetManager.getAppWidgetOptions(activeWidgetId)
+        } else null
+
+        val minW = options?.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0) ?: 0
+        val minH = options?.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0) ?: 0
+
         val devices = BatteryRepository.getBatteryDevices(this)
         val palette = BatteryPreferences.resolveColors(this)
-
         val density = resources.displayMetrics.density
-        val targetHeightDp = if (isPreviewX1) 68 else if (devices.size >= 3) 220 else 156
-        containerBatteryPreview.layoutParams = containerBatteryPreview.layoutParams.apply {
-            height = (targetHeightDp * density).toInt()
+
+        val previewRemoteViews: RemoteViews
+        val targetHeightDp: Int
+        val isRow = minH == 0 || minH < 95
+
+        if (isRow) {
+            targetHeightDp = if (minH > 0) minH.coerceIn(54, 80) else 68
+            val actualW = if (minW > 0) minW else 300
+            previewRemoteViews = BatteryWidgetProvider.buildRowRemoteViews(this, actualW, targetHeightDp, devices, palette, activeWidgetId)
+        } else if (minH < 180) {
+            targetHeightDp = minH.coerceIn(120, 160)
+            val actualW = if (minW > 0) minW else 300
+            previewRemoteViews = BatteryWidgetProvider.buildCardRemoteViews(this, actualW, targetHeightDp, devices, palette, activeWidgetId)
+        } else {
+            targetHeightDp = minH.coerceIn(180, 280)
+            val actualW = if (minW > 0) minW else 300
+            previewRemoteViews = BatteryWidgetProvider.buildTallRemoteViews(this, actualW, targetHeightDp, devices, palette, activeWidgetId)
         }
 
-        val previewRemoteViews = if (isPreviewX1) {
-            BatteryWidgetProvider.buildRowRemoteViews(this, 320, 68, devices, palette)
+        val lp = (containerBatteryPreview.layoutParams as? LinearLayout.LayoutParams)
+            ?: LinearLayout.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                (targetHeightDp * density).toInt()
+            )
+        lp.height = (targetHeightDp * density).toInt()
+        if (minW in 1..230) {
+            // Narrow 2x1 cell: center exactly at the launcher's physical cell width
+            lp.width = (minW * density).toInt()
+            lp.gravity = Gravity.CENTER_HORIZONTAL
         } else {
-            BatteryWidgetProvider.buildCardRemoteViews(this, 320, if (devices.size >= 3) 220 else 148, devices, palette)
+            lp.width = ViewGroup.LayoutParams.MATCH_PARENT
+            lp.gravity = Gravity.CENTER_HORIZONTAL
         }
+        containerBatteryPreview.layoutParams = lp
 
         try {
             val inflatedView = previewRemoteViews.apply(applicationContext, containerBatteryPreview)
@@ -416,11 +444,7 @@ class BatteryWidgetDetailActivity : AppCompatActivity() {
             val componentName = ComponentName(this, BatteryWidgetProvider::class.java)
             val devices = BatteryRepository.getBatteryDevices(this)
             val palette = BatteryPreferences.resolveColors(this)
-            val previewViews = if (isPreviewX1) {
-                BatteryWidgetProvider.buildRowRemoteViews(this, 300, 68, devices, palette)
-            } else {
-                BatteryWidgetProvider.buildCardRemoteViews(this, 300, 130, devices, palette)
-            }
+            val previewViews = BatteryWidgetProvider.buildRowRemoteViews(this, 300, 68, devices, palette)
 
             val extras = Bundle().apply {
                 putParcelable(AppWidgetManager.EXTRA_APPWIDGET_PREVIEW, previewViews)

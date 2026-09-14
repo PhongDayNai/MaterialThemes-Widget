@@ -131,21 +131,21 @@ class BatteryWidgetProvider : AppWidgetProvider() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 val viewMapping = mapOf(
                     // Height x1: ~54dp to 80dp
-                    SizeF(130f, 60f) to buildRowRemoteViews(context, 130, 60, devices, colors),
-                    SizeF(220f, 60f) to buildRowRemoteViews(context, 220, 60, devices, colors),
-                    SizeF(300f, 60f) to buildRowRemoteViews(context, 300, 60, devices, colors),
-                    SizeF(380f, 60f) to buildRowRemoteViews(context, 380, 60, devices, colors),
+                    SizeF(130f, 60f) to buildRowRemoteViews(context, 130, 60, devices, colors, appWidgetId),
+                    SizeF(220f, 60f) to buildRowRemoteViews(context, 220, 60, devices, colors, appWidgetId),
+                    SizeF(300f, 60f) to buildRowRemoteViews(context, 300, 60, devices, colors, appWidgetId),
+                    SizeF(380f, 60f) to buildRowRemoteViews(context, 380, 60, devices, colors, appWidgetId),
 
                     // Height x2: ~110dp to 170dp
-                    SizeF(130f, 130f) to buildCardRemoteViews(context, 130, 130, devices, colors),
-                    SizeF(220f, 130f) to buildCardRemoteViews(context, 220, 130, devices, colors),
-                    SizeF(300f, 130f) to buildCardRemoteViews(context, 300, 130, devices, colors),
-                    SizeF(380f, 130f) to buildCardRemoteViews(context, 380, 130, devices, colors),
+                    SizeF(130f, 130f) to buildCardRemoteViews(context, 130, 130, devices, colors, appWidgetId),
+                    SizeF(220f, 130f) to buildCardRemoteViews(context, 220, 130, devices, colors, appWidgetId),
+                    SizeF(300f, 130f) to buildCardRemoteViews(context, 300, 130, devices, colors, appWidgetId),
+                    SizeF(380f, 130f) to buildCardRemoteViews(context, 380, 130, devices, colors, appWidgetId),
 
                     // Height x3/x4: ~180dp+
-                    SizeF(200f, 220f) to buildTallRemoteViews(context, 200, 220, devices, colors),
-                    SizeF(300f, 220f) to buildTallRemoteViews(context, 300, 220, devices, colors),
-                    SizeF(380f, 220f) to buildTallRemoteViews(context, 380, 220, devices, colors)
+                    SizeF(200f, 220f) to buildTallRemoteViews(context, 200, 220, devices, colors, appWidgetId),
+                    SizeF(300f, 220f) to buildTallRemoteViews(context, 300, 220, devices, colors, appWidgetId),
+                    SizeF(380f, 220f) to buildTallRemoteViews(context, 380, 220, devices, colors, appWidgetId)
                 )
                 return RemoteViews(viewMapping)
             }
@@ -155,21 +155,24 @@ class BatteryWidgetProvider : AppWidgetProvider() {
             val minH = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 60)
 
             return if (minH < 95) {
-                buildRowRemoteViews(context, minW, minH, devices, colors)
+                buildRowRemoteViews(context, minW, minH, devices, colors, appWidgetId)
             } else if (minH < 180) {
-                buildCardRemoteViews(context, minW, minH, devices, colors)
+                buildCardRemoteViews(context, minW, minH, devices, colors, appWidgetId)
             } else {
-                buildTallRemoteViews(context, minW, minH, devices, colors)
+                buildTallRemoteViews(context, minW, minH, devices, colors, appWidgetId)
             }
         }
 
-        private fun attachClickIntent(context: Context, views: RemoteViews) {
+        private fun attachClickIntent(context: Context, views: RemoteViews, appWidgetId: Int = 0) {
             val clickIntent = Intent(context, BatteryWidgetDetailActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+                if (appWidgetId != 0) {
+                    putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId)
+                }
             }
             val pendingIntent = PendingIntent.getActivity(
                 context,
-                0,
+                appWidgetId,
                 clickIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
             )
@@ -181,10 +184,11 @@ class BatteryWidgetProvider : AppWidgetProvider() {
             widthDp: Int,
             heightDp: Int,
             devices: List<BatteryDeviceItem>,
-            palette: ResolvedPaletteColors
+            palette: ResolvedPaletteColors,
+            appWidgetId: Int = 0
         ): RemoteViews {
             val views = RemoteViews(context.packageName, R.layout.widget_battery_row)
-            attachClickIntent(context, views)
+            attachClickIntent(context, views, appWidgetId)
 
             // Background & Opacity
             views.setInt(R.id.widget_battery_bg, "setColorFilter", palette.bgColor)
@@ -346,10 +350,11 @@ class BatteryWidgetProvider : AppWidgetProvider() {
             widthDp: Int,
             heightDp: Int,
             devices: List<BatteryDeviceItem>,
-            palette: ResolvedPaletteColors
+            palette: ResolvedPaletteColors,
+            appWidgetId: Int = 0
         ): RemoteViews {
             val views = RemoteViews(context.packageName, R.layout.widget_battery_card)
-            attachClickIntent(context, views)
+            attachClickIntent(context, views, appWidgetId)
 
             views.setInt(R.id.widget_battery_bg, "setColorFilter", palette.bgColor)
             views.setInt(R.id.widget_battery_bg, "setImageAlpha", Color.alpha(palette.bgColor))
@@ -531,10 +536,11 @@ class BatteryWidgetProvider : AppWidgetProvider() {
             widthDp: Int,
             heightDp: Int,
             devices: List<BatteryDeviceItem>,
-            palette: ResolvedPaletteColors
+            palette: ResolvedPaletteColors,
+            appWidgetId: Int = 0
         ): RemoteViews {
             val views = RemoteViews(context.packageName, R.layout.widget_battery_tall)
-            attachClickIntent(context, views)
+            attachClickIntent(context, views, appWidgetId)
 
             views.setInt(R.id.widget_battery_bg, "setColorFilter", palette.bgColor)
             views.setInt(R.id.widget_battery_bg, "setImageAlpha", Color.alpha(palette.bgColor))
