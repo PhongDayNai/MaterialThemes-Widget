@@ -74,8 +74,6 @@ class ScallopWidgetProvider : AppWidgetProvider() {
             for (id in ids) {
                 updateAppWidget(context, appWidgetManager, id, animProgress)
             }
-            ScallopWideWidgetProvider.updateAllWidgets(context, animProgress)
-            Scallop4x3WidgetProvider.updateAllWidgets(context, animProgress)
         }
 
         fun updateAppWidget(

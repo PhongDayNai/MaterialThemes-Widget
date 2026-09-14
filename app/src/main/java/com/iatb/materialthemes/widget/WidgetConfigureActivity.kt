@@ -234,13 +234,8 @@ class WidgetConfigureActivity : AppCompatActivity() {
 
         // Cập nhật launcher widgets ngay lập tức
         DiagonalWidgetProvider.updateAllWidgets(this)
-        Diagonal4x3WidgetProvider.updateAllWidgets4x3(this)
         OrganicWidgetProvider.updateAllWidgets(this)
-        OrganicWideWidgetProvider.updateAllWidgets(this)
-        Organic4x3WidgetProvider.updateAllWidgets(this)
         ScallopWidgetProvider.updateAllWidgets(this)
-        ScallopWideWidgetProvider.updateAllWidgets(this)
-        Scallop4x3WidgetProvider.updateAllWidgets(this)
 
         // Cập nhật Live Preview trên màn hình ngay lập tức
         updateLivePreviewImage()

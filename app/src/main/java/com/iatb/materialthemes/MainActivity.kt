@@ -38,15 +38,9 @@ import com.iatb.materialthemes.render.WidgetCanvasRenderer
 import com.iatb.materialthemes.ui.WidgetEditActivity
 import com.iatb.materialthemes.ui.WidgetPresetsActivity
 import com.iatb.materialthemes.widget.ActiveWidgetManager
-import com.iatb.materialthemes.widget.Diagonal4x3WidgetProvider
-import com.iatb.materialthemes.widget.DiagonalWideWidgetProvider
 import com.iatb.materialthemes.widget.DiagonalWidgetProvider
-import com.iatb.materialthemes.widget.Organic4x3WidgetProvider
 import com.iatb.materialthemes.widget.OrganicWidgetProvider
-import com.iatb.materialthemes.widget.OrganicWideWidgetProvider
-import com.iatb.materialthemes.widget.Scallop4x3WidgetProvider
 import com.iatb.materialthemes.widget.ScallopWidgetProvider
-import com.iatb.materialthemes.widget.ScallopWideWidgetProvider
 import com.iatb.materialthemes.widget.WidgetUpdateScheduler
 
 class MainActivity : AppCompatActivity() {
@@ -463,21 +457,9 @@ class MainActivity : AppCompatActivity() {
         val transparency = viewModel.transparency.value ?: 100
 
         val providerClass = when (category) {
-            WidgetCategory.DIAGONAL -> when (size) {
-                WidgetSize.SIZE_4X3, WidgetSize.SIZE_3X3 -> Diagonal4x3WidgetProvider::class.java
-                WidgetSize.SIZE_4X2, WidgetSize.SIZE_3X2 -> DiagonalWideWidgetProvider::class.java
-                else -> DiagonalWidgetProvider::class.java
-            }
-            WidgetCategory.ORGANIC -> when (size) {
-                WidgetSize.SIZE_4X3, WidgetSize.SIZE_3X3 -> Organic4x3WidgetProvider::class.java
-                WidgetSize.SIZE_4X2, WidgetSize.SIZE_3X2 -> OrganicWideWidgetProvider::class.java
-                else -> OrganicWidgetProvider::class.java
-            }
-            WidgetCategory.SCALLOP -> when (size) {
-                WidgetSize.SIZE_4X3, WidgetSize.SIZE_3X3 -> Scallop4x3WidgetProvider::class.java
-                WidgetSize.SIZE_4X2, WidgetSize.SIZE_3X2 -> ScallopWideWidgetProvider::class.java
-                else -> ScallopWidgetProvider::class.java
-            }
+            WidgetCategory.DIAGONAL -> DiagonalWidgetProvider::class.java
+            WidgetCategory.ORGANIC -> OrganicWidgetProvider::class.java
+            WidgetCategory.SCALLOP -> ScallopWidgetProvider::class.java
         }
 
         val componentName = ComponentName(this, providerClass)

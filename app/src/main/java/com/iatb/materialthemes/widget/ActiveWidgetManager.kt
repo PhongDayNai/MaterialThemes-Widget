@@ -27,14 +27,8 @@ object ActiveWidgetManager {
 
     private val REGISTERED_PROVIDERS = listOf(
         ProviderRegistration(DiagonalWidgetProvider::class.java, WidgetCategory.DIAGONAL, WidgetSize.SIZE_2X2),
-        ProviderRegistration(DiagonalWideWidgetProvider::class.java, WidgetCategory.DIAGONAL, WidgetSize.SIZE_4X2),
-        ProviderRegistration(Diagonal4x3WidgetProvider::class.java, WidgetCategory.DIAGONAL, WidgetSize.SIZE_4X3),
         ProviderRegistration(OrganicWidgetProvider::class.java, WidgetCategory.ORGANIC, WidgetSize.SIZE_2X2),
-        ProviderRegistration(OrganicWideWidgetProvider::class.java, WidgetCategory.ORGANIC, WidgetSize.SIZE_4X2),
-        ProviderRegistration(Organic4x3WidgetProvider::class.java, WidgetCategory.ORGANIC, WidgetSize.SIZE_4X3),
-        ProviderRegistration(ScallopWidgetProvider::class.java, WidgetCategory.SCALLOP, WidgetSize.SIZE_2X2),
-        ProviderRegistration(ScallopWideWidgetProvider::class.java, WidgetCategory.SCALLOP, WidgetSize.SIZE_4X2),
-        ProviderRegistration(Scallop4x3WidgetProvider::class.java, WidgetCategory.SCALLOP, WidgetSize.SIZE_4X3)
+        ProviderRegistration(ScallopWidgetProvider::class.java, WidgetCategory.SCALLOP, WidgetSize.SIZE_2X2)
     )
 
     /**

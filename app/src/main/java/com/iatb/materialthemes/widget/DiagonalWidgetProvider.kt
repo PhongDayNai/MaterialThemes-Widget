@@ -94,8 +94,6 @@ class DiagonalWidgetProvider : AppWidgetProvider() {
             for (id in ids) {
                 updateAppWidget(context, appWidgetManager, id, animProgress)
             }
-            Diagonal4x3WidgetProvider.updateAllWidgets4x3(context, animProgress)
-            DiagonalWideWidgetProvider.updateAllWidgets(context, animProgress)
         }
 
         fun updateAppWidget(
