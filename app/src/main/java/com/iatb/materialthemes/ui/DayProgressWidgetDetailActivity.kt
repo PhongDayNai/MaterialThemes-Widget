@@ -1,34 +1,35 @@
 package com.iatb.materialthemes.ui
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
+import android.animation.ArgbEvaluator
+import android.animation.ValueAnimator
 import android.appwidget.AppWidgetManager
 import android.content.ComponentName
-import android.content.Intent
-import android.content.res.ColorStateList
+import android.content.res.Configuration
 import android.graphics.Color
-import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.widget.NestedScrollView
 import com.google.android.material.button.MaterialButton
-import com.google.android.material.card.MaterialCardView
-import com.google.android.material.materialswitch.MaterialSwitch
 import com.google.android.material.slider.Slider
 import com.iatb.materialthemes.R
-import com.iatb.materialthemes.data.ColorPalette
+import com.iatb.materialthemes.data.DayProgressInfo
 import com.iatb.materialthemes.data.DayProgressPreferences
 import com.iatb.materialthemes.data.DayProgressRepository
-import com.iatb.materialthemes.data.WidgetPreferences
+import com.iatb.materialthemes.data.DaySolarTimePhase
+import com.iatb.materialthemes.data.SeasonTimePaletteResolver
 import com.iatb.materialthemes.widget.DayProgressWidgetProvider
 
 class DayProgressWidgetDetailActivity : AppCompatActivity() {
@@ -36,27 +37,10 @@ class DayProgressWidgetDetailActivity : AppCompatActivity() {
     private lateinit var ambientBgView: AmbientMeshBackgroundView
     private lateinit var btnBack: View
     private lateinit var cardPreview: GlassBlurCardView
+    private lateinit var containerDayProgressPreview: FrameLayout
     private lateinit var flPreviewHost: FrameLayout
-    private lateinit var cardColorConfig: GlassBlurCardView
+    private lateinit var cardTransparencyConfig: GlassBlurCardView
     private lateinit var cardDayStats: GlassBlurCardView
-
-    private lateinit var switchFollowClockWeather: MaterialSwitch
-    private lateinit var tvSyncStatusDesc: TextView
-    private lateinit var layoutPalettePicker: LinearLayout
-
-    private lateinit var swatchDynamic: MaterialCardView
-    private lateinit var swatchCustom: MaterialCardView
-    private lateinit var swatchOlive: MaterialCardView
-    private lateinit var swatchTeal: MaterialCardView
-    private lateinit var swatchSlate: MaterialCardView
-    private lateinit var swatchAmber: MaterialCardView
-    private lateinit var swatchCrimson: MaterialCardView
-
-    private lateinit var discSwatchOlive: ImageView
-    private lateinit var discSwatchTeal: ImageView
-    private lateinit var discSwatchSlate: ImageView
-    private lateinit var discSwatchAmber: ImageView
-    private lateinit var discSwatchCrimson: ImageView
 
     private lateinit var sliderTransparency: Slider
     private lateinit var tvTransparencyValue: TextView
@@ -65,8 +49,14 @@ class DayProgressWidgetDetailActivity : AppCompatActivity() {
     private lateinit var tvStatElapsedValue: TextView
     private lateinit var tvStatTimezoneValue: TextView
     private lateinit var tvStatDstValue: TextView
+    private lateinit var tvStatSolarValue: TextView
+    private lateinit var tvStatDaylightValue: TextView
 
     private var activeWidgetId: Int = AppWidgetManager.INVALID_APPWIDGET_ID
+    private var simulatedPhaseIndex: Int = -1
+
+    private var lastColors: DayProgressPreferences.DayProgressThemeColors? = null
+    private var colorAnimator: ValueAnimator? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -81,11 +71,10 @@ class DayProgressWidgetDetailActivity : AppCompatActivity() {
         initViews()
         setupAmbientBackground()
         setupBackNavigation()
-        setupPaletteDiscs()
+        setupTransparency()
         setupListeners()
-        updateSyncAndPaletteUi(animate = false)
         updateDayStats()
-        renderWidgetPreview()
+        renderWidgetPreview(animate = false)
     }
 
     private fun initViews() {
@@ -105,27 +94,10 @@ class DayProgressWidgetDetailActivity : AppCompatActivity() {
         ambientBgView = findViewById(R.id.ambient_bg_view)
         btnBack = findViewById(R.id.btn_back)
         cardPreview = findViewById(R.id.card_preview)
+        containerDayProgressPreview = findViewById(R.id.container_day_progress_preview)
         flPreviewHost = findViewById(R.id.fl_preview_host)
-        cardColorConfig = findViewById(R.id.card_color_config)
+        cardTransparencyConfig = findViewById(R.id.card_transparency_config)
         cardDayStats = findViewById(R.id.card_day_stats)
-
-        switchFollowClockWeather = findViewById(R.id.switch_follow_clock_weather)
-        tvSyncStatusDesc = findViewById(R.id.tv_sync_status_desc)
-        layoutPalettePicker = findViewById(R.id.layout_palette_picker)
-
-        swatchDynamic = findViewById(R.id.swatch_dynamic)
-        swatchCustom = findViewById(R.id.swatch_custom_picker)
-        swatchOlive = findViewById(R.id.swatch_olive)
-        swatchTeal = findViewById(R.id.swatch_teal)
-        swatchSlate = findViewById(R.id.swatch_slate)
-        swatchAmber = findViewById(R.id.swatch_amber)
-        swatchCrimson = findViewById(R.id.swatch_crimson)
-
-        discSwatchOlive = findViewById(R.id.disc_swatch_olive)
-        discSwatchTeal = findViewById(R.id.disc_swatch_teal)
-        discSwatchSlate = findViewById(R.id.disc_swatch_slate)
-        discSwatchAmber = findViewById(R.id.disc_swatch_amber)
-        discSwatchCrimson = findViewById(R.id.disc_swatch_crimson)
 
         sliderTransparency = findViewById(R.id.slider_transparency)
         tvTransparencyValue = findViewById(R.id.tv_transparency_value)
@@ -134,23 +106,26 @@ class DayProgressWidgetDetailActivity : AppCompatActivity() {
         tvStatElapsedValue = findViewById(R.id.tv_stat_elapsed_value)
         tvStatTimezoneValue = findViewById(R.id.tv_stat_timezone_value)
         tvStatDstValue = findViewById(R.id.tv_stat_dst_value)
+        tvStatSolarValue = findViewById(R.id.tv_stat_solar_value)
+        tvStatDaylightValue = findViewById(R.id.tv_stat_daylight_value)
 
         cardPreview.setTargetBackgroundView(ambientBgView)
-        cardColorConfig.setTargetBackgroundView(ambientBgView)
+        cardTransparencyConfig.setTargetBackgroundView(ambientBgView)
         cardDayStats.setTargetBackgroundView(ambientBgView)
 
-        findViewById<androidx.core.widget.NestedScrollView>(R.id.scroll_content).setOnScrollChangeListener { _, _, _, _, _ ->
+        findViewById<NestedScrollView>(R.id.scroll_content).setOnScrollChangeListener { _, _, _, _, _ ->
             refreshAllBlur()
         }
 
         WidgetPreviewHelper.applyPressScaleEffect(btnBack)
         WidgetPreviewHelper.applyPressScaleEffect(btnPinWidget)
+        WidgetPreviewHelper.applyPressScaleEffect(containerDayProgressPreview)
         btnBack.setOnClickListener { finishWithTransition() }
     }
 
     private fun refreshAllBlur() {
         cardPreview.refreshBlur()
-        cardColorConfig.refreshBlur()
+        cardTransparencyConfig.refreshBlur()
         cardDayStats.refreshBlur()
     }
 
@@ -171,61 +146,27 @@ class DayProgressWidgetDetailActivity : AppCompatActivity() {
         }
     }
 
-    private fun setupPaletteDiscs() {
-        discSwatchOlive.background = createDiscDrawable(ColorPalette.OLIVE.bgColor)
-        discSwatchTeal.background = createDiscDrawable(ColorPalette.TEAL.bgColor)
-        discSwatchSlate.background = createDiscDrawable(ColorPalette.SLATE.bgColor)
-        discSwatchAmber.background = createDiscDrawable(ColorPalette.AMBER.bgColor)
-        discSwatchCrimson.background = createDiscDrawable(ColorPalette.CRIMSON.bgColor)
-    }
-
-    private fun createDiscDrawable(color: Int): GradientDrawable {
-        return GradientDrawable().apply {
-            shape = GradientDrawable.OVAL
-            setColor(color)
-        }
+    private fun setupTransparency() {
+        val currentTrans = DayProgressPreferences.getTransparency(this)
+        sliderTransparency.value = currentTrans.toFloat()
+        tvTransparencyValue.text = getString(R.string.transparency_value_format, currentTrans)
     }
 
     private fun setupListeners() {
-        switchFollowClockWeather.setOnCheckedChangeListener { _, isChecked ->
-            DayProgressPreferences.setFollowClockWeather(this, isChecked)
-            updateSyncAndPaletteUi(animate = true)
-            DayProgressWidgetProvider.updateAllWidgets(this)
-            renderWidgetPreview()
-        }
-
-        val swatchList = listOf(
-            swatchDynamic to ColorPalette.DYNAMIC,
-            swatchOlive to ColorPalette.OLIVE,
-            swatchTeal to ColorPalette.TEAL,
-            swatchSlate to ColorPalette.SLATE,
-            swatchAmber to ColorPalette.AMBER,
-            swatchCrimson to ColorPalette.CRIMSON
-        )
-        for ((card, palette) in swatchList) {
-            WidgetPreviewHelper.applyPressScaleEffect(card)
-            card.setOnClickListener {
-                selectPalette(palette)
-            }
-        }
-
-        WidgetPreviewHelper.applyPressScaleEffect(swatchCustom)
-        swatchCustom.setOnClickListener {
-            showColorPickerDialog()
-        }
-
         sliderTransparency.addOnChangeListener { _, value, fromUser ->
             val v = value.toInt()
             tvTransparencyValue.text = getString(R.string.transparency_value_format, v)
             if (fromUser) {
-                if (switchFollowClockWeather.isChecked) {
-                    WidgetPreferences.setTransparency(this, v)
-                } else {
-                    DayProgressPreferences.setTransparency(this, v)
-                }
+                DayProgressPreferences.setTransparency(this, v)
                 DayProgressWidgetProvider.updateAllWidgets(this)
-                renderWidgetPreview()
+                renderWidgetPreview(animate = true)
             }
+        }
+
+        // Tap preview to cycle solar phases and experience color transition animation
+        containerDayProgressPreview.setOnClickListener {
+            simulatedPhaseIndex = (simulatedPhaseIndex + 2) % 6 - 1
+            renderWidgetPreview(animate = true)
         }
 
         btnPinWidget.setOnClickListener {
@@ -233,111 +174,15 @@ class DayProgressWidgetDetailActivity : AppCompatActivity() {
                 val appWidgetManager = AppWidgetManager.getInstance(this)
                 val provider = ComponentName(this, DayProgressWidgetProvider::class.java)
                 if (appWidgetManager.isRequestPinAppWidgetSupported) {
-                    appWidgetManager.requestPinAppWidget(provider, null, null)
+                    val info = DayProgressRepository.getDayProgress(this)
+                    val colors = DayProgressPreferences.resolveDayProgressColors(this, info.sunriseMillis, info.sunsetMillis)
+                    val previewViews = DayProgressWidgetProvider.buildCardRemoteViews(this, 320, 138, info, colors)
+                    val extras = Bundle().apply {
+                        putParcelable(AppWidgetManager.EXTRA_APPWIDGET_PREVIEW, previewViews)
+                    }
+                    appWidgetManager.requestPinAppWidget(provider, extras, null)
                 }
             }
-        }
-    }
-
-    private fun selectPalette(palette: ColorPalette) {
-        DayProgressPreferences.setColorPalette(this, palette)
-        updateSyncAndPaletteUi(animate = false)
-        DayProgressWidgetProvider.updateAllWidgets(this)
-        renderWidgetPreview()
-    }
-
-    private fun showColorPickerDialog() {
-        val colors = intArrayOf(
-            0xFF3F51B5.toInt(), 0xFF009688.toInt(), 0xFFE91E63.toInt(), 0xFFFF9800.toInt(),
-            0xFF9C27B0.toInt(), 0xFF2196F3.toInt(), 0xFF4CAF50.toInt(), 0xFFFF5722.toInt(),
-            0xFF607D8B.toInt(), 0xFF795548.toInt(), 0xFF00BCD4.toInt(), 0xFF673AB7.toInt()
-        )
-        val builder = androidx.appcompat.app.AlertDialog.Builder(this)
-        builder.setTitle(R.string.theme_custom)
-
-        val grid = android.widget.GridLayout(this).apply {
-            columnCount = 4
-            setPadding(32, 24, 32, 24)
-        }
-
-        var dialog: androidx.appcompat.app.AlertDialog? = null
-        for (c in colors) {
-            val colorView = View(this).apply {
-                layoutParams = android.widget.GridLayout.LayoutParams().apply {
-                    width = (48 * resources.displayMetrics.density).toInt()
-                    height = (48 * resources.displayMetrics.density).toInt()
-                    setMargins(16, 16, 16, 16)
-                }
-                setBackgroundResource(R.drawable.shape_circle)
-                backgroundTintList = ColorStateList.valueOf(c)
-                setOnClickListener {
-                    DayProgressPreferences.setCustomColor(this@DayProgressWidgetDetailActivity, c)
-                    selectPalette(ColorPalette.CUSTOM)
-                    dialog?.dismiss()
-                }
-            }
-            grid.addView(colorView)
-        }
-        builder.setView(grid)
-        builder.setNegativeButton(android.R.string.cancel, null)
-        dialog = builder.create()
-        dialog.show()
-    }
-
-    private fun updateSyncAndPaletteUi(animate: Boolean = false) {
-        val isFollow = DayProgressPreferences.isFollowClockWeather(this)
-        switchFollowClockWeather.isChecked = isFollow
-
-        val targetVisibility = if (isFollow) View.GONE else View.VISIBLE
-        if (layoutPalettePicker.visibility != targetVisibility) {
-            if (animate) {
-                val container = findViewById<ViewGroup>(R.id.day_progress_detail_content_container)
-                val transition = android.transition.TransitionSet().apply {
-                    ordering = android.transition.TransitionSet.ORDERING_TOGETHER
-                    addTransition(android.transition.ChangeBounds())
-                    addTransition(android.transition.Fade())
-                    duration = 280L
-                    interpolator = android.view.animation.DecelerateInterpolator(1.4f)
-                    addListener(object : android.transition.Transition.TransitionListener {
-                        override fun onTransitionStart(transition: android.transition.Transition?) {}
-                        override fun onTransitionEnd(transition: android.transition.Transition?) {
-                            cardColorConfig.refreshBlur()
-                            cardDayStats.refreshBlur()
-                        }
-                        override fun onTransitionCancel(transition: android.transition.Transition?) {}
-                        override fun onTransitionPause(transition: android.transition.Transition?) {}
-                        override fun onTransitionResume(transition: android.transition.Transition?) {}
-                    })
-                }
-                android.transition.TransitionManager.beginDelayedTransition(container, transition)
-            }
-            layoutPalettePicker.visibility = targetVisibility
-        }
-
-        if (isFollow) {
-            val syncedTrans = WidgetPreferences.getTransparency(this)
-            tvSyncStatusDesc.text = "${getString(R.string.battery_section_sync_desc)} (${getString(R.string.transparency_value_format, syncedTrans)})"
-        } else {
-            tvSyncStatusDesc.text = getString(R.string.battery_section_sync_desc)
-            val currentTrans = DayProgressPreferences.getTransparency(this)
-            sliderTransparency.value = currentTrans.toFloat()
-            tvTransparencyValue.text = getString(R.string.transparency_value_format, currentTrans)
-        }
-
-        val activePalette = DayProgressPreferences.getColorPalette(this)
-        val swatches = listOf(
-            swatchDynamic to (activePalette == ColorPalette.DYNAMIC),
-            swatchCustom to (activePalette == ColorPalette.CUSTOM),
-            swatchOlive to (activePalette == ColorPalette.OLIVE),
-            swatchTeal to (activePalette == ColorPalette.TEAL),
-            swatchSlate to (activePalette == ColorPalette.SLATE),
-            swatchAmber to (activePalette == ColorPalette.AMBER),
-            swatchCrimson to (activePalette == ColorPalette.CRIMSON)
-        )
-
-        val accentStrokeColor = ContextCompat.getColor(this, R.color.md_theme_light_primary)
-        for ((card, isSelected) in swatches) {
-            card.strokeColor = if (isSelected) accentStrokeColor else Color.TRANSPARENT
         }
     }
 
@@ -350,57 +195,221 @@ class DayProgressWidgetDetailActivity : AppCompatActivity() {
         } else {
             getString(R.string.day_progress_dst_inactive)
         }
+        tvStatSolarValue.text = "${info.sunriseFormatted} • ${info.sunsetFormatted}"
+        tvStatDaylightValue.text = info.daylightDurationText
     }
 
-    private fun renderWidgetPreview() {
-        flPreviewHost.removeAllViews()
+    private fun getEffectiveColors(info: DayProgressInfo): Pair<DayProgressPreferences.DayProgressThemeColors, DayProgressInfo> {
+        val transparency = DayProgressPreferences.getTransparency(this)
+        val alphaInt = ((transparency.coerceIn(0, 100) / 100f) * 255).toInt()
 
+        fun applyAlpha(color: Int): Int {
+            return Color.argb(
+                ((Color.alpha(color) / 255f) * (alphaInt / 255f) * 255).toInt().coerceIn(0, 255),
+                Color.red(color),
+                Color.green(color),
+                Color.blue(color)
+            )
+        }
+
+        val season = SeasonTimePaletteResolver.getSeason()
+        val allPhases = DaySolarTimePhase.values()
+        val phase = if (simulatedPhaseIndex in 0..4) {
+            allPhases[simulatedPhaseIndex]
+        } else {
+            SeasonTimePaletteResolver.getSolarPhase(System.currentTimeMillis(), info.sunriseMillis, info.sunsetMillis)
+        }
+
+        val seasonal = SeasonTimePaletteResolver.getSeasonalSolarPalette(season, phase)
+        val colors = DayProgressPreferences.DayProgressThemeColors(
+            bgColor = applyAlpha(seasonal.cardBgColor),
+            pillBgColor = applyAlpha(seasonal.pillBgColor),
+            chipBgColor = applyAlpha(seasonal.chipBgColor),
+            textColor = seasonal.textColor,
+            subTextColor = seasonal.subTextColor,
+            progressStartColor = seasonal.progressStartColor,
+            progressEndColor = seasonal.progressEndColor,
+            accentColor = seasonal.accentColor
+        )
+
+        val effectiveInfo = if (simulatedPhaseIndex in 0..4) {
+            val simProgress: Float
+            val phaseTitleRes: Int
+            val phaseIcon: Int
+            when (phase) {
+                DaySolarTimePhase.DAWN -> {
+                    simProgress = 0.22f
+                    phaseTitleRes = R.string.day_phase_dawn
+                    phaseIcon = R.drawable.ic_sunrise
+                }
+                DaySolarTimePhase.DAYLIGHT -> {
+                    simProgress = 0.50f
+                    phaseTitleRes = R.string.day_phase_daylight
+                    phaseIcon = R.drawable.ic_weather_sunny
+                }
+                DaySolarTimePhase.SUNSET -> {
+                    simProgress = 0.74f
+                    phaseTitleRes = R.string.day_phase_dusk
+                    phaseIcon = R.drawable.ic_sunset
+                }
+                DaySolarTimePhase.EVENING -> {
+                    simProgress = 0.86f
+                    phaseTitleRes = R.string.day_phase_night
+                    phaseIcon = R.drawable.ic_moon
+                }
+                DaySolarTimePhase.MIDNIGHT -> {
+                    simProgress = 0.04f
+                    phaseTitleRes = R.string.day_phase_night
+                    phaseIcon = R.drawable.ic_moon
+                }
+            }
+            info.copy(
+                progress = simProgress,
+                percentage = (simProgress * 100).toInt(),
+                phaseTitle = getString(phaseTitleRes),
+                phaseIconResId = phaseIcon,
+                isDaylight = (phase == DaySolarTimePhase.DAWN || phase == DaySolarTimePhase.DAYLIGHT || phase == DaySolarTimePhase.SUNSET)
+            )
+        } else {
+            info
+        }
+
+        return Pair(colors, effectiveInfo)
+    }
+
+    private fun renderWidgetPreview(animate: Boolean = false) {
         val appWidgetManager = AppWidgetManager.getInstance(this)
         val density = resources.displayMetrics.density
 
-        val (targetWidthDp, targetHeightDp) = if (activeWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
-            val options = appWidgetManager.getAppWidgetOptions(activeWidgetId)
-            val minW = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0)
-            val minH = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0)
-            if (minW > 0 && minH > 0) Pair(minW, minH) else Pair(320, 68)
+        val effectiveWidgetId = if (activeWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+            activeWidgetId
         } else {
-            Pair(320, 68)
+            val ids = appWidgetManager.getAppWidgetIds(ComponentName(this, DayProgressWidgetProvider::class.java))
+            ids.lastOrNull() ?: AppWidgetManager.INVALID_APPWIDGET_ID
         }
+
+        val isLandscape = resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE
+
+        val (targetWidthDp, targetHeightDp) = if (effectiveWidgetId != AppWidgetManager.INVALID_APPWIDGET_ID) {
+            val options = appWidgetManager.getAppWidgetOptions(effectiveWidgetId)
+            val minW = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 0)
+            val maxW = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, 0)
+            val minH = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 0)
+            val maxH = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, 0)
+
+            val w = if (isLandscape) {
+                if (maxW > 0) maxW else minW.takeIf { it > 0 } ?: 320
+            } else {
+                if (minW > 0) minW else maxW.takeIf { it > 0 } ?: 320
+            }
+
+            val h = if (isLandscape) {
+                if (minH > 0) minH else maxH.takeIf { it > 0 } ?: 138
+            } else {
+                if (maxH > 0) maxH else minH.takeIf { it > 0 } ?: 138
+            }
+            Pair(w, h)
+        } else {
+            Pair(320, 138)
+        }
+
+        val rawInfo = DayProgressRepository.getDayProgress(this)
+        val (colors, info) = getEffectiveColors(rawInfo)
 
         val rv = if (targetHeightDp < 95) {
-            val info = DayProgressRepository.getDayProgress(this)
-            val colors = DayProgressPreferences.resolveColors(this)
-            DayProgressWidgetProvider.buildRowRemoteViews(this, targetWidthDp, targetHeightDp, info, colors, activeWidgetId)
+            DayProgressWidgetProvider.buildRowRemoteViews(this, targetWidthDp, targetHeightDp, info, colors, effectiveWidgetId)
         } else if (targetWidthDp <= 150 && targetHeightDp <= 150) {
-            val info = DayProgressRepository.getDayProgress(this)
-            val colors = DayProgressPreferences.resolveColors(this)
-            DayProgressWidgetProvider.buildCompactRemoteViews(this, targetWidthDp, targetHeightDp, info, colors, activeWidgetId)
+            DayProgressWidgetProvider.buildCompactRemoteViews(this, targetWidthDp, targetHeightDp, info, colors, effectiveWidgetId)
         } else if (targetHeightDp < 180) {
-            val info = DayProgressRepository.getDayProgress(this)
-            val colors = DayProgressPreferences.resolveColors(this)
-            DayProgressWidgetProvider.buildCardRemoteViews(this, targetWidthDp, targetHeightDp, info, colors, activeWidgetId)
+            DayProgressWidgetProvider.buildCardRemoteViews(this, targetWidthDp, targetHeightDp, info, colors, effectiveWidgetId)
         } else {
-            val info = DayProgressRepository.getDayProgress(this)
-            val colors = DayProgressPreferences.resolveColors(this)
-            DayProgressWidgetProvider.buildTallRemoteViews(this, targetWidthDp, targetHeightDp, info, colors, activeWidgetId)
+            DayProgressWidgetProvider.buildTallRemoteViews(this, targetWidthDp, targetHeightDp, info, colors, effectiveWidgetId)
         }
+
+        val containerLp = containerDayProgressPreview.layoutParams ?: ViewGroup.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        )
+        containerLp.height = (targetHeightDp * density).toInt()
+        if (targetWidthDp in 1..220) {
+            containerLp.width = (targetWidthDp * density).toInt()
+        } else {
+            containerLp.width = ViewGroup.LayoutParams.MATCH_PARENT
+        }
+        containerDayProgressPreview.layoutParams = containerLp
 
         try {
-            val previewView = rv.apply(applicationContext, flPreviewHost)
-            val lp = FrameLayout.LayoutParams(
+            val hostLp = FrameLayout.LayoutParams(
                 FrameLayout.LayoutParams.MATCH_PARENT,
-                (targetHeightDp * density).toInt().coerceAtLeast((64 * density).toInt())
+                FrameLayout.LayoutParams.MATCH_PARENT
             )
-            flPreviewHost.addView(previewView, lp)
+            val newView = rv.apply(applicationContext, flPreviewHost)
+
+            val oldColors = lastColors
+            val oldView = if (flPreviewHost.childCount > 0) flPreviewHost.getChildAt(flPreviewHost.childCount - 1) else null
+
+            if (animate && oldView != null && oldColors != null) {
+                colorAnimator?.cancel()
+                newView.alpha = 0f
+                flPreviewHost.addView(newView, hostLp)
+
+                val evaluator = ArgbEvaluator()
+                val fromBg = oldColors.bgColor
+                val toBg = colors.bgColor
+                val fromPill = oldColors.pillBgColor
+                val toPill = colors.pillBgColor
+
+                colorAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
+                    duration = 380L
+                    interpolator = DecelerateInterpolator(1.4f)
+                    addUpdateListener { va ->
+                        val f = va.animatedValue as Float
+                        newView.alpha = f
+                        oldView.alpha = 1f - f
+
+                        val currentBg = evaluator.evaluate(f, fromBg, toBg) as Int
+                        val currentPill = evaluator.evaluate(f, fromPill, toPill) as Int
+
+                        newView.findViewById<ImageView>(R.id.widget_day_progress_bg)?.apply {
+                            setColorFilter(currentBg)
+                            imageAlpha = Color.alpha(currentBg)
+                        }
+                        newView.findViewById<ImageView>(R.id.iv_card_bg)?.apply {
+                            setColorFilter(currentPill)
+                            imageAlpha = Color.alpha(currentPill)
+                        }
+                        newView.findViewById<ImageView>(R.id.iv_tall_bg)?.apply {
+                            setColorFilter(currentPill)
+                            imageAlpha = Color.alpha(currentPill)
+                        }
+                        newView.findViewById<ImageView>(R.id.iv_row_card_bg)?.apply {
+                            setColorFilter(currentPill)
+                            imageAlpha = Color.alpha(currentPill)
+                        }
+                    }
+                    addListener(object : AnimatorListenerAdapter() {
+                        override fun onAnimationEnd(animation: Animator) {
+                            flPreviewHost.removeView(oldView)
+                            newView.alpha = 1f
+                            cardPreview.refreshBlur()
+                        }
+                    })
+                    start()
+                }
+            } else {
+                flPreviewHost.removeAllViews()
+                flPreviewHost.addView(newView, hostLp)
+                flPreviewHost.post { cardPreview.refreshBlur() }
+            }
+            lastColors = colors
         } catch (e: Exception) {
             val fallbackTv = TextView(this).apply {
-                text = "64% • Day Progress"
+                text = "${info.percentage}% • Day Progress"
                 setTextColor(Color.WHITE)
             }
+            flPreviewHost.removeAllViews()
             flPreviewHost.addView(fallbackTv)
         }
-
-        flPreviewHost.post { cardPreview.refreshBlur() }
     }
 
     private fun setupBackNavigation() {
@@ -422,11 +431,12 @@ class DayProgressWidgetDetailActivity : AppCompatActivity() {
         super.onResume()
         refreshAllBlur()
         updateDayStats()
-        renderWidgetPreview()
+        renderWidgetPreview(animate = false)
     }
 
     override fun onPause() {
         super.onPause()
+        colorAnimator?.cancel()
         SharedAmbientBackgroundHolder.saveSnapshot(ambientBgView.getOrbsSnapshot())
     }
 }

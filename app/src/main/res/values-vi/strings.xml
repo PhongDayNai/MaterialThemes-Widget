@@ -352,4 +352,17 @@
     <string name="day_progress_pin_widget">Thêm widget vào màn hình chính</string>
     <string name="format_day_progress_date_short">d \'thg\' M</string>
     <string name="format_day_progress_date_full">%1$s, %2$s</string>
+    <string name="day_phase_dawn">Bình minh</string>
+    <string name="day_phase_daylight">Ban ngày</string>
+    <string name="day_phase_dusk">Hoàng hôn</string>
+    <string name="day_phase_night">Ban đêm</string>
+    <string name="day_progress_sunrise_label">Bình minh</string>
+    <string name="day_progress_sunset_label">Hoàng hôn</string>
+    <string name="day_progress_remaining_format">Còn %1$d giờ %2$d phút</string>
+    <string name="day_progress_remaining_short">Còn %1$dh %2$dm</string>
+    <string name="day_progress_daylight_duration">%1$d giờ %2$d phút nắng</string>
+    <string name="day_progress_passed_label">Đã qua</string>
+    <string name="day_progress_stat_solar">Bình minh &amp; Hoàng hôn</string>
+    <string name="day_progress_stat_daylight">Thời lượng ban ngày</string>
+    <string name="day_progress_transparency_desc">Tùy chỉnh độ trong suốt nền tiện ích trên màn hình chính</string>
 </resources>

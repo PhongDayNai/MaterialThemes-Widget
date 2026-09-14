@@ -353,4 +353,17 @@
     <string name="day_progress_pin_widget">Add Widget to Home Screen</string>
     <string name="format_day_progress_date_short">MMM d</string>
     <string name="format_day_progress_date_full">%1$s, %2$s</string>
+    <string name="day_phase_dawn">Dawn</string>
+    <string name="day_phase_daylight">Daylight</string>
+    <string name="day_phase_dusk">Dusk</string>
+    <string name="day_phase_night">Night</string>
+    <string name="day_progress_sunrise_label">Sunrise</string>
+    <string name="day_progress_sunset_label">Sunset</string>
+    <string name="day_progress_remaining_format">%1$dh %2$dm left</string>
+    <string name="day_progress_remaining_short">Left: %1$dh %2$dm</string>
+    <string name="day_progress_daylight_duration">%1$dh %2$dm daylight</string>
+    <string name="day_progress_passed_label">Passed</string>
+    <string name="day_progress_stat_solar">Sunrise &amp; Sunset</string>
+    <string name="day_progress_stat_daylight">Daylight duration</string>
+    <string name="day_progress_transparency_desc">Adjust widget background transparency on home screen</string>
 </resources>
