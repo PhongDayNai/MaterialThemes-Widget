@@ -1,0 +1,552 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_battery_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent"
+    android:clipChildren="false"
+    android:clipToPadding="false"
+    android:padding="0dp">
+
+    <!-- Outer Widget Background Card -->
+    <ImageView
+        android:id="@+id/widget_battery_bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@null"
+        android:scaleType="fitXY"
+        android:src="@drawable/bg_battery_card" />
+
+    <!-- 1. SINGLE DEVICE COMPACT ROW (Uses margins on child, always has inner pill card) -->
+    <FrameLayout
+        android:id="@+id/container_single_device"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginStart="6dp"
+        android:layout_marginEnd="6dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginBottom="4dp">
+
+        <!-- Inner Pill Background (Always visible!) -->
+        <ImageView
+            android:id="@+id/iv_row_card_bg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@null"
+            android:scaleType="fitXY"
+            android:src="@drawable/bg_battery_row_pill" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="10dp">
+
+            <!-- Device Icon Badge Container -->
+            <FrameLayout
+                android:layout_width="32dp"
+                android:layout_height="32dp"
+                android:layout_gravity="center_vertical">
+
+                <ImageView
+                    android:id="@+id/iv_row_icon_badge_bg"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:contentDescription="@null"
+                    android:src="@drawable/bg_battery_bolt_circle" />
+
+                <ImageView
+                    android:id="@+id/iv_row_device_icon"
+                    android:layout_width="18dp"
+                    android:layout_height="18dp"
+                    android:layout_gravity="center"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_phone_android" />
+
+                <!-- Corner Charging Indicator Badge with Breathing Pulse Animation -->
+                <ViewFlipper
+                    android:id="@+id/flipper_row_charging"
+                    android:layout_width="13dp"
+                    android:layout_height="13dp"
+                    android:layout_gravity="bottom|end"
+                    android:autoStart="true"
+                    android:flipInterval="750"
+                    android:inAnimation="@android:anim/fade_in"
+                    android:outAnimation="@android:anim/fade_out"
+                    android:visibility="gone">
+
+                    <ImageView
+                        android:id="@+id/iv_row_bolt_1"
+                        android:layout_width="9dp"
+                        android:layout_height="9dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_bolt" />
+
+                    <ImageView
+                        android:id="@+id/iv_row_bolt_2"
+                        android:layout_width="13dp"
+                        android:layout_height="13dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_bolt" />
+                </ViewFlipper>
+            </FrameLayout>
+
+            <!-- Middle Column: Device Name & Responsive Progress Bar (Adapts smoothly from 2x1 to 4x1) -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tv_row_device_name"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:singleLine="true"
+                    android:textColor="#FFFFFF"
+                    android:textSize="13sp"
+                    android:textStyle="bold" />
+
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="6dp"
+                    android:layout_marginTop="3dp">
+
+                    <ImageView
+                        android:id="@+id/iv_row_progress_track"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@null"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/progress_track_battery" />
+
+                    <ImageView
+                        android:id="@+id/iv_row_progress_fill"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@null"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/progress_fill_battery" />
+                </FrameLayout>
+
+                <!-- Hidden subtitle placeholder so Kotlin bindings succeed without occupying vertical space -->
+                <TextView
+                    android:id="@+id/tv_row_device_status"
+                    android:layout_width="wrap_content"
+                    android:layout_height="0dp"
+                    android:visibility="gone" />
+            </LinearLayout>
+
+            <!-- Right: Battery Percentage (Never clipped!) -->
+            <TextView
+                android:id="@+id/tv_row_device_pct"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center_vertical"
+                android:includeFontPadding="false"
+                android:textColor="#FFFFFF"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <!-- Hidden flipper placeholder for Kotlin code compatibility -->
+            <ViewFlipper
+                android:id="@+id/flipper_row_pct_charging"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:visibility="gone">
+
+                <ImageView
+                    android:id="@+id/iv_row_pct_bolt_1"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_bolt" />
+
+                <ImageView
+                    android:id="@+id/iv_row_pct_bolt_2"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:contentDescription="@null"
+                    android:src="@drawable/ic_bolt" />
+            </ViewFlipper>
+        </LinearLayout>
+    </FrameLayout>
+
+    <!-- 2. MULTI-DEVICE COMPACT ROW (Side-by-side columns, uses margins) -->
+    <LinearLayout
+        android:id="@+id/container_multi_devices"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="6dp"
+        android:layout_marginBottom="6dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:visibility="gone">
+
+        <!-- Column 1: Phone -->
+        <FrameLayout
+            android:id="@+id/col_device_1"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="4dp"
+            android:layout_weight="1">
+
+            <ImageView
+                android:id="@+id/iv_col_1_bg"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@null"
+                android:scaleType="fitXY"
+                android:src="@drawable/bg_battery_row_pill" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp">
+
+                <FrameLayout
+                    android:layout_width="26dp"
+                    android:layout_height="26dp">
+
+                    <ImageView
+                        android:id="@+id/iv_col_1_icon"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_phone_android" />
+
+                    <ViewFlipper
+                        android:id="@+id/flipper_col_1_charging"
+                        android:layout_width="13dp"
+                        android:layout_height="13dp"
+                        android:layout_gravity="bottom|end"
+                        android:autoStart="true"
+                        android:flipInterval="750"
+                        android:inAnimation="@android:anim/fade_in"
+                        android:outAnimation="@android:anim/fade_out"
+                        android:visibility="gone">
+
+                        <ImageView
+                            android:id="@+id/iv_col_1_bolt_1"
+                            android:layout_width="9dp"
+                            android:layout_height="9dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_bolt" />
+
+                        <ImageView
+                            android:id="@+id/iv_col_1_bolt_2"
+                            android:layout_width="13dp"
+                            android:layout_height="13dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_bolt" />
+                    </ViewFlipper>
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tv_col_1_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:singleLine="true"
+                        android:textColor="#FFFFFF"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="6dp"
+                        android:layout_marginTop="3dp">
+
+                        <ImageView
+                            android:id="@+id/iv_col_1_progress_track"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:contentDescription="@null"
+                            android:scaleType="fitXY"
+                            android:src="@drawable/progress_track_battery" />
+
+                        <ImageView
+                            android:id="@+id/iv_col_1_progress_fill"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:contentDescription="@null"
+                            android:scaleType="fitXY"
+                            android:src="@drawable/progress_fill_battery" />
+                    </FrameLayout>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tv_col_1_pct"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <!-- Column 2: Accessory 1 -->
+        <FrameLayout
+            android:id="@+id/col_device_2"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="4dp"
+            android:layout_weight="1">
+
+            <ImageView
+                android:id="@+id/iv_col_2_bg"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@null"
+                android:scaleType="fitXY"
+                android:src="@drawable/bg_battery_row_pill" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp">
+
+                <FrameLayout
+                    android:layout_width="26dp"
+                    android:layout_height="26dp">
+
+                    <ImageView
+                        android:id="@+id/iv_col_2_icon"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_headphones" />
+
+                    <ViewFlipper
+                        android:id="@+id/flipper_col_2_charging"
+                        android:layout_width="13dp"
+                        android:layout_height="13dp"
+                        android:layout_gravity="bottom|end"
+                        android:autoStart="true"
+                        android:flipInterval="750"
+                        android:inAnimation="@android:anim/fade_in"
+                        android:outAnimation="@android:anim/fade_out"
+                        android:visibility="gone">
+
+                        <ImageView
+                            android:id="@+id/iv_col_2_bolt_1"
+                            android:layout_width="9dp"
+                            android:layout_height="9dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_bolt" />
+
+                        <ImageView
+                            android:id="@+id/iv_col_2_bolt_2"
+                            android:layout_width="13dp"
+                            android:layout_height="13dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_bolt" />
+                    </ViewFlipper>
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tv_col_2_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:singleLine="true"
+                        android:textColor="#FFFFFF"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="6dp"
+                        android:layout_marginTop="3dp">
+
+                        <ImageView
+                            android:id="@+id/iv_col_2_progress_track"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:contentDescription="@null"
+                            android:scaleType="fitXY"
+                            android:src="@drawable/progress_track_battery" />
+
+                        <ImageView
+                            android:id="@+id/iv_col_2_progress_fill"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:contentDescription="@null"
+                            android:scaleType="fitXY"
+                            android:src="@drawable/progress_fill_battery" />
+                    </FrameLayout>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tv_col_2_pct"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <!-- Column 3: Accessory 2 (Optional) -->
+        <FrameLayout
+            android:id="@+id/col_device_3"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="4dp"
+            android:layout_weight="1"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/iv_col_3_bg"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@null"
+                android:scaleType="fitXY"
+                android:src="@drawable/bg_battery_row_pill" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:layout_marginStart="8dp"
+                android:layout_marginEnd="8dp">
+
+                <FrameLayout
+                    android:layout_width="26dp"
+                    android:layout_height="26dp">
+
+                    <ImageView
+                        android:id="@+id/iv_col_3_icon"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_watch" />
+
+                    <ViewFlipper
+                        android:id="@+id/flipper_col_3_charging"
+                        android:layout_width="13dp"
+                        android:layout_height="13dp"
+                        android:layout_gravity="bottom|end"
+                        android:autoStart="true"
+                        android:flipInterval="750"
+                        android:inAnimation="@android:anim/fade_in"
+                        android:outAnimation="@android:anim/fade_out"
+                        android:visibility="gone">
+
+                        <ImageView
+                            android:id="@+id/iv_col_3_bolt_1"
+                            android:layout_width="9dp"
+                            android:layout_height="9dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_bolt" />
+
+                        <ImageView
+                            android:id="@+id/iv_col_3_bolt_2"
+                            android:layout_width="13dp"
+                            android:layout_height="13dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_bolt" />
+                    </ViewFlipper>
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tv_col_3_name"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:singleLine="true"
+                        android:textColor="#FFFFFF"
+                        android:textSize="12sp"
+                        android:textStyle="bold" />
+
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="6dp"
+                        android:layout_marginTop="3dp">
+
+                        <ImageView
+                            android:id="@+id/iv_col_3_progress_track"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:contentDescription="@null"
+                            android:scaleType="fitXY"
+                            android:src="@drawable/progress_track_battery" />
+
+                        <ImageView
+                            android:id="@+id/iv_col_3_progress_fill"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:contentDescription="@null"
+                            android:scaleType="fitXY"
+                            android:src="@drawable/progress_fill_battery" />
+                    </FrameLayout>
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/tv_col_3_pct"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FFFFFF"
+                    android:textSize="14sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </FrameLayout>
+    </LinearLayout>
+</FrameLayout>

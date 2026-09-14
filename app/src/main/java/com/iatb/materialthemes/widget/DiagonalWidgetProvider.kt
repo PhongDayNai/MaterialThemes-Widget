@@ -35,6 +35,9 @@ class DiagonalWidgetProvider : AppWidgetProvider() {
             Intent.ACTION_CONFIGURATION_CHANGED -> {
                 com.iatb.materialthemes.data.DynamicThemeExtractor.invalidateCache()
                 updateAllWidgets(context)
+                OrganicWidgetProvider.updateAllWidgets(context)
+                ScallopWidgetProvider.updateAllWidgets(context)
+                BatteryWidgetProvider.updateAllWidgets(context)
                 WidgetUpdateScheduler.scheduleNextMinuteTick(context)
             }
         }

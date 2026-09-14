@@ -22,5 +22,6 @@ object WidgetAnimationManager {
         DiagonalWidgetProvider.updateAllWidgets(context, animProgress)
         OrganicWidgetProvider.updateAllWidgets(context, animProgress)
         ScallopWidgetProvider.updateAllWidgets(context, animProgress)
+        BatteryWidgetProvider.updateAllWidgets(context)
     }
 }

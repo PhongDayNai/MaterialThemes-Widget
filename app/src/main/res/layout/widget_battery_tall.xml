@@ -1,0 +1,548 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_battery_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent">
+
+    <!-- Card Background -->
+    <ImageView
+        android:id="@+id/widget_battery_bg"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@null"
+        android:scaleType="fitXY"
+        android:src="@drawable/bg_battery_card" />
+
+    <!-- Multi-Device Vertical Stack -->
+    <LinearLayout
+        android:id="@+id/tall_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="8dp"
+        android:orientation="vertical">
+
+        <!-- Row 1 -->
+        <FrameLayout
+            android:id="@+id/tall_row_1"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginBottom="4dp"
+            android:layout_weight="1">
+
+            <ImageView
+                android:id="@+id/iv_tall_row_bg_1"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@null"
+                android:scaleType="fitXY"
+                android:src="@drawable/bg_battery_row_pill" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp">
+
+                <FrameLayout
+                    android:layout_width="28dp"
+                    android:layout_height="28dp">
+
+                    <ImageView
+                        android:id="@+id/iv_tall_row_icon_1"
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_phone_android" />
+
+                    <ViewFlipper
+                        android:id="@+id/flipper_tall_row_charging_1"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:layout_gravity="bottom|end"
+                        android:autoStart="true"
+                        android:flipInterval="750"
+                        android:inAnimation="@android:anim/fade_in"
+                        android:outAnimation="@android:anim/fade_out"
+                        android:visibility="gone">
+
+                        <ImageView
+                            android:id="@+id/iv_tall_row_bolt_1_a"
+                            android:layout_width="10dp"
+                            android:layout_height="10dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_bolt" />
+
+                        <ImageView
+                            android:id="@+id/iv_tall_row_bolt_1_b"
+                            android:layout_width="14dp"
+                            android:layout_height="14dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_bolt" />
+                    </ViewFlipper>
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginEnd="12dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tv_tall_row_name_1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:singleLine="true"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_tall_row_status_1"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:singleLine="true"
+                        android:textColor="#B3FFFFFF"
+                        android:textSize="11sp" />
+                </LinearLayout>
+
+                <FrameLayout
+                    android:layout_width="72dp"
+                    android:layout_height="12dp"
+                    android:layout_marginEnd="10dp">
+
+                    <ImageView
+                        android:id="@+id/iv_tall_row_progress_track_1"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@null"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/progress_track_battery" />
+
+                    <ImageView
+                        android:id="@+id/iv_tall_row_progress_fill_1"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@null"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/progress_fill_battery" />
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/tv_tall_row_pct_1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <!-- Row 2 -->
+        <FrameLayout
+            android:id="@+id/tall_row_2"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp"
+            android:layout_weight="1">
+
+            <ImageView
+                android:id="@+id/iv_tall_row_bg_2"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@null"
+                android:scaleType="fitXY"
+                android:src="@drawable/bg_battery_row_pill" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp">
+
+                <FrameLayout
+                    android:layout_width="28dp"
+                    android:layout_height="28dp">
+
+                    <ImageView
+                        android:id="@+id/iv_tall_row_icon_2"
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_headphones" />
+
+                    <ViewFlipper
+                        android:id="@+id/flipper_tall_row_charging_2"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:layout_gravity="bottom|end"
+                        android:autoStart="true"
+                        android:flipInterval="750"
+                        android:inAnimation="@android:anim/fade_in"
+                        android:outAnimation="@android:anim/fade_out"
+                        android:visibility="gone">
+
+                        <ImageView
+                            android:id="@+id/iv_tall_row_bolt_2_a"
+                            android:layout_width="10dp"
+                            android:layout_height="10dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_bolt" />
+
+                        <ImageView
+                            android:id="@+id/iv_tall_row_bolt_2_b"
+                            android:layout_width="14dp"
+                            android:layout_height="14dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_bolt" />
+                    </ViewFlipper>
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginEnd="12dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tv_tall_row_name_2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:singleLine="true"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_tall_row_status_2"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:singleLine="true"
+                        android:textColor="#B3FFFFFF"
+                        android:textSize="11sp" />
+                </LinearLayout>
+
+                <FrameLayout
+                    android:layout_width="72dp"
+                    android:layout_height="12dp"
+                    android:layout_marginEnd="10dp">
+
+                    <ImageView
+                        android:id="@+id/iv_tall_row_progress_track_2"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@null"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/progress_track_battery" />
+
+                    <ImageView
+                        android:id="@+id/iv_tall_row_progress_fill_2"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@null"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/progress_fill_battery" />
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/tv_tall_row_pct_2"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <!-- Row 3 -->
+        <FrameLayout
+            android:id="@+id/tall_row_3"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="4dp"
+            android:layout_marginBottom="4dp"
+            android:layout_weight="1"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/iv_tall_row_bg_3"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@null"
+                android:scaleType="fitXY"
+                android:src="@drawable/bg_battery_row_pill" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp">
+
+                <FrameLayout
+                    android:layout_width="28dp"
+                    android:layout_height="28dp">
+
+                    <ImageView
+                        android:id="@+id/iv_tall_row_icon_3"
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_watch" />
+
+                    <ViewFlipper
+                        android:id="@+id/flipper_tall_row_charging_3"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:layout_gravity="bottom|end"
+                        android:autoStart="true"
+                        android:flipInterval="750"
+                        android:inAnimation="@android:anim/fade_in"
+                        android:outAnimation="@android:anim/fade_out"
+                        android:visibility="gone">
+
+                        <ImageView
+                            android:id="@+id/iv_tall_row_bolt_3_a"
+                            android:layout_width="10dp"
+                            android:layout_height="10dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_bolt" />
+
+                        <ImageView
+                            android:id="@+id/iv_tall_row_bolt_3_b"
+                            android:layout_width="14dp"
+                            android:layout_height="14dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_bolt" />
+                    </ViewFlipper>
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginEnd="12dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tv_tall_row_name_3"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:singleLine="true"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_tall_row_status_3"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:singleLine="true"
+                        android:textColor="#B3FFFFFF"
+                        android:textSize="11sp" />
+                </LinearLayout>
+
+                <FrameLayout
+                    android:layout_width="72dp"
+                    android:layout_height="12dp"
+                    android:layout_marginEnd="10dp">
+
+                    <ImageView
+                        android:id="@+id/iv_tall_row_progress_track_3"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@null"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/progress_track_battery" />
+
+                    <ImageView
+                        android:id="@+id/iv_tall_row_progress_fill_3"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@null"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/progress_fill_battery" />
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/tv_tall_row_pct_3"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </FrameLayout>
+
+        <!-- Row 4 -->
+        <FrameLayout
+            android:id="@+id/tall_row_4"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="4dp"
+            android:layout_weight="1"
+            android:visibility="gone">
+
+            <ImageView
+                android:id="@+id/iv_tall_row_bg_4"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:contentDescription="@null"
+                android:scaleType="fitXY"
+                android:src="@drawable/bg_battery_row_pill" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal"
+                android:paddingStart="14dp"
+                android:paddingEnd="14dp">
+
+                <FrameLayout
+                    android:layout_width="28dp"
+                    android:layout_height="28dp">
+
+                    <ImageView
+                        android:id="@+id/iv_tall_row_icon_4"
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:layout_gravity="center"
+                        android:contentDescription="@null"
+                        android:src="@drawable/ic_bluetooth" />
+
+                    <ViewFlipper
+                        android:id="@+id/flipper_tall_row_charging_4"
+                        android:layout_width="14dp"
+                        android:layout_height="14dp"
+                        android:layout_gravity="bottom|end"
+                        android:autoStart="true"
+                        android:flipInterval="750"
+                        android:inAnimation="@android:anim/fade_in"
+                        android:outAnimation="@android:anim/fade_out"
+                        android:visibility="gone">
+
+                        <ImageView
+                            android:id="@+id/iv_tall_row_bolt_4_a"
+                            android:layout_width="10dp"
+                            android:layout_height="10dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_bolt" />
+
+                        <ImageView
+                            android:id="@+id/iv_tall_row_bolt_4_b"
+                            android:layout_width="14dp"
+                            android:layout_height="14dp"
+                            android:layout_gravity="center"
+                            android:contentDescription="@null"
+                            android:src="@drawable/ic_bolt" />
+                    </ViewFlipper>
+                </FrameLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="12dp"
+                    android:layout_marginEnd="12dp"
+                    android:layout_weight="1"
+                    android:gravity="center_vertical"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/tv_tall_row_name_4"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:singleLine="true"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tv_tall_row_status_4"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:ellipsize="end"
+                        android:maxLines="1"
+                        android:singleLine="true"
+                        android:textColor="#B3FFFFFF"
+                        android:textSize="11sp" />
+                </LinearLayout>
+
+                <FrameLayout
+                    android:layout_width="72dp"
+                    android:layout_height="12dp"
+                    android:layout_marginEnd="10dp">
+
+                    <ImageView
+                        android:id="@+id/iv_tall_row_progress_track_4"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@null"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/progress_track_battery" />
+
+                    <ImageView
+                        android:id="@+id/iv_tall_row_progress_fill_4"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:contentDescription="@null"
+                        android:scaleType="fitXY"
+                        android:src="@drawable/progress_fill_battery" />
+                </FrameLayout>
+
+                <TextView
+                    android:id="@+id/tv_tall_row_pct_4"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:textStyle="bold" />
+            </LinearLayout>
+        </FrameLayout>
+    </LinearLayout>
+</FrameLayout>
