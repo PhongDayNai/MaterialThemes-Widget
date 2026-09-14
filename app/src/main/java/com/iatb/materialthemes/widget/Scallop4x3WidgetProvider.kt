@@ -47,6 +47,7 @@ class Scallop4x3WidgetProvider : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
+        ActiveWidgetManager.recordProviderUpdate(context, Scallop4x3WidgetProvider::class.java, appWidgetIds)
         for (appWidgetId in appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId)
         }
@@ -59,6 +60,7 @@ class Scallop4x3WidgetProvider : AppWidgetProvider() {
         appWidgetId: Int,
         newOptions: Bundle?
     ) {
+        ActiveWidgetManager.recordOptionsChanged(context, Scallop4x3WidgetProvider::class.java, appWidgetId, newOptions)
         updateAppWidget(context, appWidgetManager, appWidgetId)
     }
 
@@ -90,59 +92,25 @@ class Scallop4x3WidgetProvider : AppWidgetProvider() {
         ): RemoteViews {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 val viewMapping = mapOf(
-                    SizeF(110f, 110f) to createRenderedView(context, WidgetSize.SIZE_2X2, animProgress),
-                    SizeF(205f, 110f) to createRenderedView(context, WidgetSize.SIZE_3X2, animProgress),
-                    SizeF(292f, 110f) to createRenderedView(context, WidgetSize.SIZE_4X2, animProgress),
-                    SizeF(205f, 250f) to createRenderedView(context, WidgetSize.SIZE_3X3, animProgress),
-                    SizeF(292f, 250f) to createRenderedView(context, WidgetSize.SIZE_4X3, animProgress)
+                    SizeF(110f, 110f) to ScallopWidgetProvider.createPreviewRemoteViews(context, WidgetSize.SIZE_2X2, animProgress, appWidgetId),
+                    SizeF(205f, 110f) to ScallopWidgetProvider.createPreviewRemoteViews(context, WidgetSize.SIZE_3X2, animProgress, appWidgetId),
+                    SizeF(270f, 110f) to ScallopWidgetProvider.createPreviewRemoteViews(context, WidgetSize.SIZE_4X2, animProgress, appWidgetId),
+                    SizeF(110f, 250f) to ScallopWidgetProvider.createPreviewRemoteViews(context, WidgetSize.SIZE_2X3, animProgress, appWidgetId),
+                    SizeF(205f, 250f) to ScallopWidgetProvider.createPreviewRemoteViews(context, WidgetSize.SIZE_3X3, animProgress, appWidgetId),
+                    SizeF(270f, 250f) to ScallopWidgetProvider.createPreviewRemoteViews(context, WidgetSize.SIZE_4X3, animProgress, appWidgetId),
+                    SizeF(110f, 340f) to ScallopWidgetProvider.createPreviewRemoteViews(context, WidgetSize.SIZE_2X4, animProgress, appWidgetId)
                 )
                 return RemoteViews(viewMapping)
             }
 
-            val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
-            val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 270)
-            val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 180)
-            val size = if (minWidth >= 292) WidgetSize.SIZE_4X3 else WidgetSize.SIZE_3X3
-            return createRenderedView(context, size, animProgress)
-        }
-
-        private fun createRenderedView(
-            context: Context,
-            size: WidgetSize,
-            animProgress: Float = 1.0f
-        ): RemoteViews {
-            val layoutId = WidgetClickRouter.getContainerLayoutId(size)
-            val views = RemoteViews(context.packageName, layoutId)
-            val (wDp, hDp) = when (size) {
-                WidgetSize.SIZE_3X3 -> 300 to 300
-                WidgetSize.SIZE_4X3 -> 400 to 300
-                else -> 400 to 300
+            val options = try {
+                appWidgetManager.getAppWidgetOptions(appWidgetId)
+            } catch (_: Exception) {
+                null
             }
-
-            val density = context.resources.displayMetrics.density
-            val bitmap = ShapeWidgetCanvasRenderer.render(
-                context = context,
-                category = WidgetCategory.SCALLOP,
-                size = size,
-                widthPx = (wDp * density).toInt(),
-                heightPx = (hDp * density).toInt(),
-                palette = WidgetPreferences.getColorPalette(context),
-                transparency = WidgetPreferences.getTransparency(context),
-                animProgress = animProgress
-            )
-
-            views.setImageViewBitmap(R.id.iv_canvas_render, bitmap)
-
-            val weather = WeatherRepository.getWeatherData(context)
-            WidgetClickRouter.bindClickZones(
-                views = views,
-                context = context,
-                category = WidgetCategory.SCALLOP,
-                size = size,
-                locationName = weather.locationName
-            )
-
-            return views
+            val size = WidgetPreferences.getWidgetSavedSize(context, appWidgetId)
+                ?: ActiveWidgetManager.resolveWidgetSize(context, options, WidgetSize.SIZE_4X3)
+            return ScallopWidgetProvider.createPreviewRemoteViews(context, size, animProgress, appWidgetId)
         }
     }
 }

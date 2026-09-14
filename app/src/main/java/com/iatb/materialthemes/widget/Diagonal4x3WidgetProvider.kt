@@ -46,6 +46,7 @@ class Diagonal4x3WidgetProvider : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
+        ActiveWidgetManager.recordProviderUpdate(context, Diagonal4x3WidgetProvider::class.java, appWidgetIds)
         for (appWidgetId in appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId)
         }
@@ -58,6 +59,7 @@ class Diagonal4x3WidgetProvider : AppWidgetProvider() {
         appWidgetId: Int,
         newOptions: Bundle?
     ) {
+        ActiveWidgetManager.recordOptionsChanged(context, Diagonal4x3WidgetProvider::class.java, appWidgetId, newOptions)
         updateAppWidget(context, appWidgetManager, appWidgetId)
     }
 
@@ -96,39 +98,25 @@ class Diagonal4x3WidgetProvider : AppWidgetProvider() {
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 val viewMapping = mapOf(
-                    SizeF(110f, 110f) to createRenderedView(context, WidgetSize.SIZE_2X2, angle, palette, mode, transparency, animProgress),
-                    SizeF(205f, 110f) to createRenderedView(context, WidgetSize.SIZE_3X2, angle, palette, mode, transparency, animProgress),
-                    SizeF(292f, 110f) to createRenderedView(context, WidgetSize.SIZE_4X2, angle, palette, mode, transparency, animProgress),
-                    SizeF(110f, 250f) to createRenderedView(context, WidgetSize.SIZE_2X3, angle, palette, mode, transparency, animProgress),
-                    SizeF(110f, 350f) to createRenderedView(context, WidgetSize.SIZE_2X4, angle, palette, mode, transparency, animProgress),
-                    SizeF(205f, 250f) to createRenderedView(context, WidgetSize.SIZE_3X3, angle, palette, mode, transparency, animProgress),
-                    SizeF(292f, 250f) to createRenderedView(context, WidgetSize.SIZE_4X3, angle, palette, mode, transparency, animProgress)
+                    SizeF(110f, 110f) to createRenderedView(context, WidgetSize.SIZE_2X2, angle, palette, mode, transparency, animProgress, appWidgetId),
+                    SizeF(205f, 110f) to createRenderedView(context, WidgetSize.SIZE_3X2, angle, palette, mode, transparency, animProgress, appWidgetId),
+                    SizeF(270f, 110f) to createRenderedView(context, WidgetSize.SIZE_4X2, angle, palette, mode, transparency, animProgress, appWidgetId),
+                    SizeF(110f, 250f) to createRenderedView(context, WidgetSize.SIZE_2X3, angle, palette, mode, transparency, animProgress, appWidgetId),
+                    SizeF(205f, 250f) to createRenderedView(context, WidgetSize.SIZE_3X3, angle, palette, mode, transparency, animProgress, appWidgetId),
+                    SizeF(270f, 250f) to createRenderedView(context, WidgetSize.SIZE_4X3, angle, palette, mode, transparency, animProgress, appWidgetId),
+                    SizeF(110f, 340f) to createRenderedView(context, WidgetSize.SIZE_2X4, angle, palette, mode, transparency, animProgress, appWidgetId)
                 )
                 return RemoteViews(viewMapping)
             }
 
-            val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
-            val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 270)
-            val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 180)
-            val size = resolveWidgetSize(minWidth, minHeight)
-            return createRenderedView(context, size, angle, palette, mode, transparency, animProgress)
-        }
-
-        private fun resolveWidgetSize(minWidth: Int, minHeight: Int): WidgetSize {
-            return if (minHeight >= 250) {
-                when {
-                    minWidth >= 292 -> WidgetSize.SIZE_4X3
-                    minWidth >= 205 -> WidgetSize.SIZE_3X3
-                    minHeight >= 350 -> WidgetSize.SIZE_2X4
-                    else -> WidgetSize.SIZE_2X3
-                }
-            } else {
-                when {
-                    minWidth >= 292 -> WidgetSize.SIZE_4X2
-                    minWidth >= 205 -> WidgetSize.SIZE_3X2
-                    else -> WidgetSize.SIZE_2X2
-                }
+            val options = try {
+                appWidgetManager.getAppWidgetOptions(appWidgetId)
+            } catch (_: Exception) {
+                null
             }
+            val size = WidgetPreferences.getWidgetSavedSize(context, appWidgetId)
+                ?: ActiveWidgetManager.resolveWidgetSize(context, options, WidgetSize.SIZE_4X3)
+            return createRenderedView(context, size, angle, palette, mode, transparency, animProgress, appWidgetId)
         }
 
         private fun createRenderedView(
@@ -138,9 +126,10 @@ class Diagonal4x3WidgetProvider : AppWidgetProvider() {
             palette: ColorPalette,
             mode: WidgetContentMode,
             transparency: Int = WidgetPreferences.getTransparency(context),
-            animProgress: Float = 1.0f
+            animProgress: Float = 1.0f,
+            appWidgetId: Int = AppWidgetManager.INVALID_APPWIDGET_ID
         ): RemoteViews {
-            return DiagonalWidgetProvider.createPreviewRemoteViews(context, size, angle, palette, mode, transparency, animProgress)
+            return DiagonalWidgetProvider.createPreviewRemoteViews(context, size, angle, palette, mode, transparency, animProgress, appWidgetId)
         }
     }
 }

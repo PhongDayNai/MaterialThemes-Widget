@@ -56,6 +56,7 @@ class DiagonalWidgetProvider : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
+        ActiveWidgetManager.recordProviderUpdate(context, DiagonalWidgetProvider::class.java, appWidgetIds)
         for (appWidgetId in appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId)
         }
@@ -68,6 +69,7 @@ class DiagonalWidgetProvider : AppWidgetProvider() {
         appWidgetId: Int,
         newOptions: Bundle?
     ) {
+        ActiveWidgetManager.recordOptionsChanged(context, DiagonalWidgetProvider::class.java, appWidgetId, newOptions)
         updateAppWidget(context, appWidgetManager, appWidgetId)
     }
 
@@ -79,9 +81,10 @@ class DiagonalWidgetProvider : AppWidgetProvider() {
             palette: ColorPalette,
             mode: WidgetContentMode,
             transparency: Int = WidgetPreferences.getTransparency(context),
-            animProgress: Float = 1.0f
+            animProgress: Float = 1.0f,
+            appWidgetId: Int = AppWidgetManager.INVALID_APPWIDGET_ID
         ): RemoteViews {
-            return createRenderedView(context, size, angle, palette, mode, transparency, animProgress)
+            return createRenderedView(context, size, angle, palette, mode, transparency, animProgress, appWidgetId)
         }
 
         fun updateAllWidgets(context: Context, animProgress: Float = 1.0f) {
@@ -118,39 +121,25 @@ class DiagonalWidgetProvider : AppWidgetProvider() {
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 val viewMapping = mapOf(
-                    SizeF(110f, 110f) to createRenderedView(context, WidgetSize.SIZE_2X2, angle, palette, mode, transparency, animProgress),
-                    SizeF(205f, 110f) to createRenderedView(context, WidgetSize.SIZE_3X2, angle, palette, mode, transparency, animProgress),
-                    SizeF(292f, 110f) to createRenderedView(context, WidgetSize.SIZE_4X2, angle, palette, mode, transparency, animProgress),
-                    SizeF(110f, 250f) to createRenderedView(context, WidgetSize.SIZE_2X3, angle, palette, mode, transparency, animProgress),
-                    SizeF(110f, 350f) to createRenderedView(context, WidgetSize.SIZE_2X4, angle, palette, mode, transparency, animProgress),
-                    SizeF(205f, 250f) to createRenderedView(context, WidgetSize.SIZE_3X3, angle, palette, mode, transparency, animProgress),
-                    SizeF(292f, 250f) to createRenderedView(context, WidgetSize.SIZE_4X3, angle, palette, mode, transparency, animProgress)
+                    SizeF(110f, 110f) to createRenderedView(context, WidgetSize.SIZE_2X2, angle, palette, mode, transparency, animProgress, appWidgetId),
+                    SizeF(205f, 110f) to createRenderedView(context, WidgetSize.SIZE_3X2, angle, palette, mode, transparency, animProgress, appWidgetId),
+                    SizeF(270f, 110f) to createRenderedView(context, WidgetSize.SIZE_4X2, angle, palette, mode, transparency, animProgress, appWidgetId),
+                    SizeF(110f, 250f) to createRenderedView(context, WidgetSize.SIZE_2X3, angle, palette, mode, transparency, animProgress, appWidgetId),
+                    SizeF(205f, 250f) to createRenderedView(context, WidgetSize.SIZE_3X3, angle, palette, mode, transparency, animProgress, appWidgetId),
+                    SizeF(270f, 250f) to createRenderedView(context, WidgetSize.SIZE_4X3, angle, palette, mode, transparency, animProgress, appWidgetId),
+                    SizeF(110f, 340f) to createRenderedView(context, WidgetSize.SIZE_2X4, angle, palette, mode, transparency, animProgress, appWidgetId)
                 )
                 return RemoteViews(viewMapping)
             }
 
             val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
-            val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 110)
-            val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 110)
-            val size = resolveWidgetSize(minWidth, minHeight)
-            return createRenderedView(context, size, angle, palette, mode, transparency, animProgress)
+            val size = WidgetPreferences.getWidgetSavedSize(context, appWidgetId)
+                ?: ActiveWidgetManager.resolveWidgetSize(context, options, WidgetSize.SIZE_2X2)
+            return createRenderedView(context, size, angle, palette, mode, transparency, animProgress, appWidgetId)
         }
 
         private fun resolveWidgetSize(minWidth: Int, minHeight: Int): WidgetSize {
-            return if (minHeight >= 250) {
-                when {
-                    minWidth >= 292 -> WidgetSize.SIZE_4X3
-                    minWidth >= 205 -> WidgetSize.SIZE_3X3
-                    minHeight >= 350 -> WidgetSize.SIZE_2X4
-                    else -> WidgetSize.SIZE_2X3
-                }
-            } else {
-                when {
-                    minWidth >= 292 -> WidgetSize.SIZE_4X2
-                    minWidth >= 205 -> WidgetSize.SIZE_3X2
-                    else -> WidgetSize.SIZE_2X2
-                }
-            }
+            return ActiveWidgetManager.resolveWidgetSizeFromDimensions(minWidth, minHeight)
         }
 
         private fun createRenderedView(
@@ -160,7 +149,8 @@ class DiagonalWidgetProvider : AppWidgetProvider() {
             palette: ColorPalette,
             mode: WidgetContentMode,
             transparency: Int = WidgetPreferences.getTransparency(context),
-            animProgress: Float = 1.0f
+            animProgress: Float = 1.0f,
+            appWidgetId: Int = AppWidgetManager.INVALID_APPWIDGET_ID
         ): RemoteViews {
             val layoutId = WidgetClickRouter.getContainerLayoutId(size)
             val views = RemoteViews(context.packageName, layoutId)
@@ -198,7 +188,8 @@ class DiagonalWidgetProvider : AppWidgetProvider() {
                 category = WidgetCategory.DIAGONAL,
                 size = size,
                 mode = mode,
-                locationName = weather.locationName
+                locationName = weather.locationName,
+                appWidgetId = appWidgetId
             )
 
             return views

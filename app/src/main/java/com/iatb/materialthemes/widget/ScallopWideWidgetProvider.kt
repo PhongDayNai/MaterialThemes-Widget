@@ -15,6 +15,7 @@ import com.iatb.materialthemes.R
 import com.iatb.materialthemes.WidgetCategory
 import com.iatb.materialthemes.WidgetSize
 import com.iatb.materialthemes.data.WeatherRepository
+import com.iatb.materialthemes.data.WidgetPreferences
 import com.iatb.materialthemes.render.ShapeWidgetCanvasRenderer
 
 class ScallopWideWidgetProvider : AppWidgetProvider() {
@@ -48,6 +49,7 @@ class ScallopWideWidgetProvider : AppWidgetProvider() {
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
+        ActiveWidgetManager.recordProviderUpdate(context, ScallopWideWidgetProvider::class.java, appWidgetIds)
         for (appWidgetId in appWidgetIds) {
             updateAppWidget(context, appWidgetManager, appWidgetId)
         }
@@ -60,6 +62,7 @@ class ScallopWideWidgetProvider : AppWidgetProvider() {
         appWidgetId: Int,
         newOptions: Bundle?
     ) {
+        ActiveWidgetManager.recordOptionsChanged(context, ScallopWideWidgetProvider::class.java, appWidgetId, newOptions)
         updateAppWidget(context, appWidgetManager, appWidgetId)
     }
 
@@ -91,72 +94,25 @@ class ScallopWideWidgetProvider : AppWidgetProvider() {
         ): RemoteViews {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 val viewMapping = mapOf(
-                    SizeF(110f, 110f) to createRenderedView(context, WidgetSize.SIZE_2X2, animProgress),
-                    SizeF(205f, 110f) to createRenderedView(context, WidgetSize.SIZE_3X2, animProgress),
-                    SizeF(292f, 110f) to createRenderedView(context, WidgetSize.SIZE_4X2, animProgress),
-                    SizeF(205f, 250f) to createRenderedView(context, WidgetSize.SIZE_3X3, animProgress),
-                    SizeF(292f, 250f) to createRenderedView(context, WidgetSize.SIZE_4X3, animProgress)
+                    SizeF(110f, 110f) to ScallopWidgetProvider.createPreviewRemoteViews(context, WidgetSize.SIZE_2X2, animProgress, appWidgetId),
+                    SizeF(205f, 110f) to ScallopWidgetProvider.createPreviewRemoteViews(context, WidgetSize.SIZE_3X2, animProgress, appWidgetId),
+                    SizeF(270f, 110f) to ScallopWidgetProvider.createPreviewRemoteViews(context, WidgetSize.SIZE_4X2, animProgress, appWidgetId),
+                    SizeF(110f, 250f) to ScallopWidgetProvider.createPreviewRemoteViews(context, WidgetSize.SIZE_2X3, animProgress, appWidgetId),
+                    SizeF(205f, 250f) to ScallopWidgetProvider.createPreviewRemoteViews(context, WidgetSize.SIZE_3X3, animProgress, appWidgetId),
+                    SizeF(270f, 250f) to ScallopWidgetProvider.createPreviewRemoteViews(context, WidgetSize.SIZE_4X3, animProgress, appWidgetId),
+                    SizeF(110f, 340f) to ScallopWidgetProvider.createPreviewRemoteViews(context, WidgetSize.SIZE_2X4, animProgress, appWidgetId)
                 )
                 return RemoteViews(viewMapping)
             }
 
-            val options = appWidgetManager.getAppWidgetOptions(appWidgetId)
-            val minWidth = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, 200)
-            val minHeight = options.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, 110)
-            val layoutSize = resolveLayout(minWidth, minHeight)
-            return createRenderedView(context, layoutSize, animProgress)
-        }
-
-        private fun resolveLayout(minWidth: Int, minHeight: Int): WidgetSize {
-            return if (minHeight >= 250) {
-                if (minWidth >= 292) WidgetSize.SIZE_4X3 else WidgetSize.SIZE_3X3
-            } else {
-                when {
-                    minWidth >= 292 -> WidgetSize.SIZE_4X2
-                    minWidth >= 205 -> WidgetSize.SIZE_3X2
-                    else -> WidgetSize.SIZE_2X2
-                }
+            val options = try {
+                appWidgetManager.getAppWidgetOptions(appWidgetId)
+            } catch (_: Exception) {
+                null
             }
-        }
-
-        private fun createRenderedView(
-            context: Context,
-            size: WidgetSize,
-            animProgress: Float = 1.0f
-        ): RemoteViews {
-            val layoutId = WidgetClickRouter.getContainerLayoutId(size)
-            val views = RemoteViews(context.packageName, layoutId)
-            val (wDp, hDp) = when (size) {
-                WidgetSize.SIZE_2X2 -> 200 to 200
-                WidgetSize.SIZE_3X2 -> 300 to 200
-                WidgetSize.SIZE_4X2 -> 400 to 200
-                WidgetSize.SIZE_3X3 -> 300 to 300
-                WidgetSize.SIZE_4X3 -> 400 to 300
-                else -> 200 to 200
-            }
-
-            val density = context.resources.displayMetrics.density
-            val bitmap = ShapeWidgetCanvasRenderer.render(
-                context = context,
-                category = WidgetCategory.SCALLOP,
-                size = size,
-                widthPx = (wDp * density).toInt(),
-                heightPx = (hDp * density).toInt(),
-                animProgress = animProgress
-            )
-
-            views.setImageViewBitmap(R.id.iv_canvas_render, bitmap)
-
-            val weather = WeatherRepository.getWeatherData(context)
-            WidgetClickRouter.bindClickZones(
-                views = views,
-                context = context,
-                category = WidgetCategory.SCALLOP,
-                size = size,
-                locationName = weather.locationName
-            )
-
-            return views
+            val size = WidgetPreferences.getWidgetSavedSize(context, appWidgetId)
+                ?: ActiveWidgetManager.resolveWidgetSize(context, options, WidgetSize.SIZE_4X2)
+            return ScallopWidgetProvider.createPreviewRemoteViews(context, size, animProgress, appWidgetId)
         }
     }
 }

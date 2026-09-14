@@ -338,7 +338,7 @@ object ShapeWidgetCanvasRenderer {
         val rootGroup = view as? ViewGroup ?: return
 
         when (size) {
-            WidgetSize.SIZE_2X2 -> {
+            WidgetSize.SIZE_2X2, WidgetSize.SIZE_2X3, WidgetSize.SIZE_2X4 -> {
                 val block1 = rootGroup.getChildAt(0)
                 block1?.background?.mutate()?.setTint(resolved.bgColor)
             }
