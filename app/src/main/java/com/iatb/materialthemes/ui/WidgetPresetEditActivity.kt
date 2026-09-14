@@ -96,13 +96,6 @@ class WidgetPresetEditActivity : AppCompatActivity() {
     private lateinit var detailContainerContent: View
     private lateinit var detailContainerTransparency: View
 
-    // Shapes
-    private lateinit var cardShapeDiagonal: MaterialCardView
-    private lateinit var cardShapeOrganic: MaterialCardView
-    private lateinit var cardShapeScallop: MaterialCardView
-    private lateinit var ivIconShapeDiagonal: ImageView
-    private lateinit var ivIconShapeOrganic: ImageView
-    private lateinit var ivIconShapeScallop: ImageView
 
     // Swatches
     private lateinit var swatchDynamic: MaterialCardView
@@ -310,17 +303,8 @@ class WidgetPresetEditActivity : AppCompatActivity() {
         detailContainerContent = findViewById(R.id.detail_container_content)
         detailContainerTransparency = findViewById(R.id.detail_container_transparency)
 
-        findViewById<View>(R.id.section_shapes)?.visibility = View.GONE
         btnToolSize.visibility = View.GONE
         detailContainerSize.visibility = View.GONE
-
-        // Shapes
-        cardShapeDiagonal = findViewById(R.id.card_shape_diagonal)
-        cardShapeOrganic = findViewById(R.id.card_shape_organic)
-        cardShapeScallop = findViewById(R.id.card_shape_scallop)
-        ivIconShapeDiagonal = findViewById(R.id.iv_icon_shape_diagonal)
-        ivIconShapeOrganic = findViewById(R.id.iv_icon_shape_organic)
-        ivIconShapeScallop = findViewById(R.id.iv_icon_shape_scallop)
 
         // Swatches
         swatchDynamic = findViewById(R.id.swatch_dynamic)
@@ -380,7 +364,6 @@ class WidgetPresetEditActivity : AppCompatActivity() {
         // Apply press-scale effect
         val interactiveViews = listOf(
             btnBack, btnSavePreset, btnBackToTools,
-            cardShapeDiagonal, cardShapeOrganic, cardShapeScallop,
             btnToolPalette, btnToolSize, btnToolAngle, btnToolContent, btnToolTransparency,
             swatchDynamic, swatchCustomPicker, swatchOlive, swatchTeal, swatchSlate, swatchAmber, swatchCrimson,
             cardSize2x2, cardSize4x2, cardSize3x3, cardSize4x3, cardSize3x2, cardSize2x3, cardSize2x4,
@@ -412,19 +395,6 @@ class WidgetPresetEditActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
-        // Shapes
-        cardShapeDiagonal.setOnClickListener {
-            animateSelectionPop(cardShapeDiagonal)
-            viewModel.setCategory(WidgetCategory.DIAGONAL)
-        }
-        cardShapeOrganic.setOnClickListener {
-            animateSelectionPop(cardShapeOrganic)
-            viewModel.setCategory(WidgetCategory.ORGANIC)
-        }
-        cardShapeScallop.setOnClickListener {
-            animateSelectionPop(cardShapeScallop)
-            viewModel.setCategory(WidgetCategory.SCALLOP)
-        }
 
         // Tools
         btnToolPalette.setOnClickListener {
@@ -655,7 +625,6 @@ class WidgetPresetEditActivity : AppCompatActivity() {
 
     private fun observeViewModel() {
         viewModel.category.observe(this) { cat ->
-            updateShapeCardsUi(cat)
             updateToolAvailability(cat, animate = true)
             updatePreview(animate = true)
         }
@@ -686,33 +655,6 @@ class WidgetPresetEditActivity : AppCompatActivity() {
         }
     }
 
-    private fun updateShapeCardsUi(category: WidgetCategory) {
-        val primaryColor = getThemeColor(androidx.appcompat.R.attr.colorPrimary, 0xFF006874.toInt())
-        val outlineColor = getThemeColor(com.google.android.material.R.attr.colorOutline, 0xFF6F797A.toInt())
-        val surfaceVariant = getThemeColor(com.google.android.material.R.attr.colorSurfaceVariant, 0xFFDBE4E6.toInt())
-        val surfaceColor = getThemeColor(com.google.android.material.R.attr.colorSurface, 0xFFF8FDFF.toInt())
-        val density = resources.displayMetrics.density
-
-        val shapes = listOf(
-            Triple(cardShapeDiagonal, ivIconShapeDiagonal, category == WidgetCategory.DIAGONAL),
-            Triple(cardShapeOrganic, ivIconShapeOrganic, category == WidgetCategory.ORGANIC),
-            Triple(cardShapeScallop, ivIconShapeScallop, category == WidgetCategory.SCALLOP)
-        )
-
-        for ((card, icon, isSelected) in shapes) {
-            if (isSelected) {
-                card.strokeColor = primaryColor
-                card.strokeWidth = (2 * density).toInt()
-                card.setCardBackgroundColor(surfaceVariant)
-                icon.setColorFilter(primaryColor)
-            } else {
-                card.strokeColor = outlineColor
-                card.strokeWidth = (1 * density).toInt()
-                card.setCardBackgroundColor(surfaceColor)
-                icon.setColorFilter(getThemeColor(com.google.android.material.R.attr.colorOnSurface))
-            }
-        }
-    }
 
     private fun updatePaletteUi(palette: ColorPalette) {
         val primaryColor = getThemeColor(androidx.appcompat.R.attr.colorPrimary, 0xFF006874.toInt())
