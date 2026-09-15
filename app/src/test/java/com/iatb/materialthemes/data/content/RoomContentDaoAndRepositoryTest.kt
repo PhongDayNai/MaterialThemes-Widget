@@ -300,4 +300,108 @@ class RoomContentDaoAndRepositoryTest {
         assertEquals("custom_vi", dbViFallback.id)
         assertEquals("vi", dbViFallback.language)
     }
+
+    @Test
+    fun contentSelector_withRealRoomDatabase_selectsAndPrioritizesUnshown() = runBlocking {
+        val q1 = ContentEntity(
+            id = "room_q1",
+            type = ContentType.QUOTE,
+            text = "Quote 1",
+            author = "Author 1",
+            language = "en",
+            source = "test",
+            contentHash = "h1",
+            enabled = true,
+            createdAt = 1000L,
+            lastShownAt = 5000L,
+            shownCount = 1
+        )
+        val q2 = ContentEntity(
+            id = "room_q2",
+            type = ContentType.QUOTE,
+            text = "Quote 2 Unshown",
+            author = "Author 2",
+            language = "en",
+            source = "test",
+            contentHash = "h2",
+            enabled = true,
+            createdAt = 1000L,
+            lastShownAt = null,
+            shownCount = 0
+        )
+        contentDao.insertAll(listOf(q1, q2))
+
+        val selector = com.iatb.materialthemes.data.content.selector.ContentSelector(repository)
+        val selected = selector.selectNextContent(
+            type = ContentType.QUOTE,
+            selectedLanguages = listOf("en"),
+            currentContentId = null
+        )
+        assertEquals("Must pick unshown item from Room database", "room_q2", selected.id)
+
+        val nextSelected = selector.selectNextContent(
+            type = ContentType.QUOTE,
+            selectedLanguages = listOf("en"),
+            currentContentId = "room_q2"
+        )
+        assertEquals("Must exclude current item", "room_q1", nextSelected.id)
+    }
+
+    @Test
+    fun widgetStateManager_withRealRoomDatabase_createsAndRefreshesState() = runBlocking {
+        val qEn = ContentEntity(
+            id = "room_state_en",
+            type = ContentType.QUOTE,
+            text = "State Quote EN",
+            author = "Author EN",
+            language = "en",
+            source = "test",
+            contentHash = "hse",
+            enabled = true,
+            createdAt = 1000L,
+            lastShownAt = null,
+            shownCount = 0
+        )
+        val qVi = ContentEntity(
+            id = "room_state_vi",
+            type = ContentType.QUOTE,
+            text = "State Quote VI",
+            author = "Author VI",
+            language = "vi",
+            source = "test",
+            contentHash = "hsv",
+            enabled = true,
+            createdAt = 1000L,
+            lastShownAt = null,
+            shownCount = 0
+        )
+        contentDao.insertAll(listOf(qEn, qVi))
+
+        val selector = com.iatb.materialthemes.data.content.selector.ContentSelector(repository)
+        val stateManager = com.iatb.materialthemes.data.content.state.WidgetStateManager(repository, selector)
+
+        val state = stateManager.createInitialState(
+            widgetId = 999,
+            type = ContentType.QUOTE,
+            systemLocale = java.util.Locale.US
+        )
+        assertEquals("en", state.languageFilter)
+        assertEquals("room_state_en", state.contentId)
+
+        // Verify persisted in Room DB
+        val persisted = widgetStateDao.getState(999)
+        assertNotNull(persisted)
+        assertEquals("room_state_en", persisted?.contentId)
+
+        // Update language filter to vi
+        val updated = stateManager.updateLanguageFilter(999, listOf("vi"))
+        assertNotNull(updated)
+        assertEquals("vi", updated?.first?.languageFilter)
+        assertEquals("room_state_vi", updated?.first?.contentId)
+
+        // Verify persisted updated state in Room DB
+        val persistedUpdated = widgetStateDao.getState(999)
+        assertEquals("room_state_vi", persistedUpdated?.contentId)
+        assertEquals("vi", persistedUpdated?.languageFilter)
+    }
 }
