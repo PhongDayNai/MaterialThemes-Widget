@@ -365,4 +365,9 @@
     <string name="day_progress_stat_solar">Bình minh &amp; Hoàng hôn</string>
     <string name="day_progress_stat_daylight">Thời lượng ban ngày</string>
     <string name="day_progress_transparency_desc">Tùy chỉnh độ trong suốt nền tiện ích trên màn hình chính</string>
+
+    <!-- Utility Fallback Content -->
+    <string name="utility_fallback_quote_text">"Cách duy nhất để tạo nên sự nghiệp vĩ đại là yêu lấy việc bạn làm."</string>
+    <string name="utility_fallback_quote_author">Steve Jobs</string>
+    <string name="utility_fallback_thought_text">Điều gì khiến bạn cảm thấy biết ơn nhất trong ngày hôm nay?</string>
 </resources>

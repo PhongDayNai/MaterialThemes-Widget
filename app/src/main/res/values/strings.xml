@@ -366,4 +366,9 @@
     <string name="day_progress_stat_solar">Sunrise &amp; Sunset</string>
     <string name="day_progress_stat_daylight">Daylight duration</string>
     <string name="day_progress_transparency_desc">Adjust widget background transparency on home screen</string>
+
+    <!-- Utility Fallback Content -->
+    <string name="utility_fallback_quote_text">"The only way to do great work is to love what you do."</string>
+    <string name="utility_fallback_quote_author">Steve Jobs</string>
+    <string name="utility_fallback_thought_text">What is one thing you are grateful for today?</string>
 </resources>
