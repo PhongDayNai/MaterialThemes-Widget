@@ -6,9 +6,7 @@ import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
-import android.util.SizeF
 import android.widget.RemoteViews
 import com.iatb.materialthemes.MainActivity
 import com.iatb.materialthemes.R
@@ -68,9 +66,13 @@ class ScallopWidgetProvider : AppWidgetProvider() {
 
     companion object {
         fun updateAllWidgets(context: Context, animProgress: Float = 1.0f) {
-            val appWidgetManager = AppWidgetManager.getInstance(context)
+            val appWidgetManager = AppWidgetManager.getInstance(context) ?: return
             val component = ComponentName(context, ScallopWidgetProvider::class.java)
-            val ids = appWidgetManager.getAppWidgetIds(component)
+            val ids = try {
+                appWidgetManager.getAppWidgetIds(component)
+            } catch (_: Exception) {
+                IntArray(0)
+            }
             for (id in ids) {
                 updateAppWidget(context, appWidgetManager, id, animProgress)
             }
@@ -82,8 +84,12 @@ class ScallopWidgetProvider : AppWidgetProvider() {
             appWidgetId: Int,
             animProgress: Float = 1.0f
         ) {
-            val remoteViews = buildRemoteViews(context, appWidgetManager, appWidgetId, animProgress)
-            appWidgetManager.updateAppWidget(appWidgetId, remoteViews)
+            try {
+                val remoteViews = buildRemoteViews(context, appWidgetManager, appWidgetId, animProgress)
+                appWidgetManager.updateAppWidget(appWidgetId, remoteViews)
+            } catch (e: Exception) {
+                android.util.Log.e("ScallopWidgetProvider", "Error updating widget $appWidgetId", e)
+            }
         }
 
         fun buildRemoteViews(
@@ -92,19 +98,6 @@ class ScallopWidgetProvider : AppWidgetProvider() {
             appWidgetId: Int,
             animProgress: Float = 1.0f
         ): RemoteViews {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                val viewMapping = mapOf(
-                    SizeF(110f, 110f) to createPreviewRemoteViews(context, WidgetSize.SIZE_2X2, animProgress, appWidgetId),
-                    SizeF(205f, 110f) to createPreviewRemoteViews(context, WidgetSize.SIZE_3X2, animProgress, appWidgetId),
-                    SizeF(270f, 110f) to createPreviewRemoteViews(context, WidgetSize.SIZE_4X2, animProgress, appWidgetId),
-                    SizeF(110f, 250f) to createPreviewRemoteViews(context, WidgetSize.SIZE_2X3, animProgress, appWidgetId),
-                    SizeF(205f, 250f) to createPreviewRemoteViews(context, WidgetSize.SIZE_3X3, animProgress, appWidgetId),
-                    SizeF(270f, 250f) to createPreviewRemoteViews(context, WidgetSize.SIZE_4X3, animProgress, appWidgetId),
-                    SizeF(110f, 340f) to createPreviewRemoteViews(context, WidgetSize.SIZE_2X4, animProgress, appWidgetId)
-                )
-                return RemoteViews(viewMapping)
-            }
-
             val options = try {
                 appWidgetManager.getAppWidgetOptions(appWidgetId)
             } catch (_: Exception) {

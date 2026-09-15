@@ -136,8 +136,12 @@ class BatteryWidgetProvider : AppWidgetProvider() {
             forceCharging: Boolean? = null,
             batteryIntent: Intent? = null
         ) {
-            val remoteViews = buildRemoteViews(context, appWidgetManager, appWidgetId, forceCharging, batteryIntent)
-            appWidgetManager.updateAppWidget(appWidgetId, remoteViews)
+            try {
+                val remoteViews = buildRemoteViews(context, appWidgetManager, appWidgetId, forceCharging, batteryIntent)
+                appWidgetManager.updateAppWidget(appWidgetId, remoteViews)
+            } catch (e: Exception) {
+                android.util.Log.e("BatteryWidget", "Error updating widget $appWidgetId", e)
+            }
         }
 
         fun buildRemoteViews(

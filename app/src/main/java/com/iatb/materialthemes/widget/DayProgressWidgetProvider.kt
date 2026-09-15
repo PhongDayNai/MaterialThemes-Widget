@@ -92,8 +92,12 @@ class DayProgressWidgetProvider : AppWidgetProvider() {
             appWidgetManager: AppWidgetManager,
             appWidgetId: Int
         ) {
-            val remoteViews = buildRemoteViews(context, appWidgetManager, appWidgetId)
-            appWidgetManager.updateAppWidget(appWidgetId, remoteViews)
+            try {
+                val remoteViews = buildRemoteViews(context, appWidgetManager, appWidgetId)
+                appWidgetManager.updateAppWidget(appWidgetId, remoteViews)
+            } catch (e: Exception) {
+                android.util.Log.e("DayProgressWidget", "Error updating widget $appWidgetId", e)
+            }
         }
 
         fun buildRemoteViews(
