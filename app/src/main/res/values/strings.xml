@@ -371,4 +371,15 @@
     <string name="utility_fallback_quote_text">"The only way to do great work is to love what you do."</string>
     <string name="utility_fallback_quote_author">Steve Jobs</string>
     <string name="utility_fallback_thought_text">What is one thing you are grateful for today?</string>
+
+    <!-- Quote & Thought Utility Widgets -->
+    <string name="quote_widget_name">Quote Widget</string>
+    <string name="quote_widget_description">Display inspiring quotes with author attribution.</string>
+    <string name="quote_detail_title">Daily Quotes</string>
+    <string name="quote_refresh_button">Get New Quote</string>
+
+    <string name="thought_widget_name">Thought Widget</string>
+    <string name="thought_widget_description">Reflective prompts and questions for mindfulness.</string>
+    <string name="thought_detail_title">Mindful Thoughts</string>
+    <string name="thought_refresh_button">Get New Thought</string>
 </resources>

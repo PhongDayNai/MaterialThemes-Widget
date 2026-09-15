@@ -116,6 +116,16 @@
             android:exported="true"
             android:theme="@style/Theme.MaterialThemes" />
 
+        <activity
+            android:name=".ui.QuoteWidgetDetailActivity"
+            android:exported="true"
+            android:theme="@style/Theme.MaterialThemes" />
+
+        <activity
+            android:name=".ui.ThoughtWidgetDetailActivity"
+            android:exported="true"
+            android:theme="@style/Theme.MaterialThemes" />
+
         <!-- Widget Quick Configure Bottom Sheet Activity -->
         <activity
             android:name=".widget.WidgetConfigureActivity"
@@ -232,6 +242,42 @@
             <meta-data
                 android:name="android.appwidget.provider"
                 android:resource="@xml/day_progress_widget_info" />
+        </receiver>
+
+        <!-- Quote Widget Provider -->
+        <receiver
+            android:name=".widget.QuoteWidgetProvider"
+            android:exported="true"
+            android:label="@string/quote_widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.intent.action.USER_PRESENT" />
+                <action android:name="android.intent.action.WALLPAPER_CHANGED" />
+                <action android:name="android.intent.action.CONFIGURATION_CHANGED" />
+                <action android:name="com.iatb.materialthemes.action.UPDATE_QUOTE_WIDGET" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/quote_widget_info" />
+        </receiver>
+
+        <!-- Thought Widget Provider -->
+        <receiver
+            android:name=".widget.ThoughtWidgetProvider"
+            android:exported="true"
+            android:label="@string/thought_widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="android.intent.action.USER_PRESENT" />
+                <action android:name="android.intent.action.WALLPAPER_CHANGED" />
+                <action android:name="android.intent.action.CONFIGURATION_CHANGED" />
+                <action android:name="com.iatb.materialthemes.action.UPDATE_THOUGHT_WIDGET" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/thought_widget_info" />
         </receiver>
     </application>
 

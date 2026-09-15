@@ -370,4 +370,15 @@
     <string name="utility_fallback_quote_text">"Cách duy nhất để tạo nên sự nghiệp vĩ đại là yêu lấy việc bạn làm."</string>
     <string name="utility_fallback_quote_author">Steve Jobs</string>
     <string name="utility_fallback_thought_text">Điều gì khiến bạn cảm thấy biết ơn nhất trong ngày hôm nay?</string>
+
+    <!-- Quote & Thought Utility Widgets -->
+    <string name="quote_widget_name">Tiện ích Trích dẫn</string>
+    <string name="quote_widget_description">Hiển thị các câu danh ngôn truyền cảm hứng kèm tác giả.</string>
+    <string name="quote_detail_title">Trích dẫn mỗi ngày</string>
+    <string name="quote_refresh_button">Đổi trích dẫn mới</string>
+
+    <string name="thought_widget_name">Tiện ích Chiêm nghiệm</string>
+    <string name="thought_widget_description">Gợi ý câu hỏi suy ngẫm giúp bạn sống chậm lại và chánh niệm.</string>
+    <string name="thought_detail_title">Chiêm nghiệm cuộc sống</string>
+    <string name="thought_refresh_button">Đổi chiêm nghiệm mới</string>
 </resources>
